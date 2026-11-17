@@ -2672,6 +2672,8 @@
         const maxW = cells * 32 - 8, maxH = d.type === 'wall' ? 48 : 56;
         let k = d.name === 'Fairy-Light Sign' ? 1.1 : 0.85;
         k = Math.min(k, maxW / Math.max(1, aw), maxH / Math.max(1, ah));
+        // 2.27 floor: small props (the flamingo) stay readable, but never past their footprint caps
+        if (Math.max(aw, ah) * k < 36) k = Math.min(36 / Math.max(aw, ah), maxW / Math.max(1, aw), maxH / Math.max(1, ah));
         const w = Math.max(8, Math.round(aw * k)), h = Math.max(8, Math.round(ah * k));
         const c = document.createElement('canvas'); c.width = w; c.height = h;
         const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.drawImage(big, x0, y0, x1 - x0 + 1, y1 - y0 + 1, 0, 0, w, h);
