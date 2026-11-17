@@ -1966,7 +1966,7 @@
   // 2.0's relic slots, for carrying placed relics across.
   const OLD_SLOTS = { yardA: [18, 20], yardB: [7, 25], loungeF: [9, 12], loungeW: [16, 1], studyF: [7, 14], studyW: [4, 8], bedW: [17, 1], gymF: [7, 12], gymW: [1, 8] };
 
-  const relicW = (d) => (Math.max(14, Math.min(56, Math.round(d.w * 0.62))) > 32 ? 2 : 1);
+  const relicW = (d) => (d.name === 'Fairy-Light Sign' || Math.max(14, Math.min(56, Math.round(d.w * 0.62))) > 32 ? 2 : 1);
   // The catalogue entry for a placed thing (relics come from DECOR).
   function furnOf(it) {
     if (!it) return null;
