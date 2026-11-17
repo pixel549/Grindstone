@@ -2666,11 +2666,12 @@
         } catch (e) { x0 = 0; y0 = 0; x1 = big.width - 1; y1 = big.height - 1; }
         if (x1 < x0) { res(null); return; }
         const aw = (x1 - x0 + 1) / Z, ah = (y1 - y0 + 1) / Z;   // in the drawing's own units
-        let k = 0.85;
-        // 2.28: small decorative pieces need a stronger minimum scale to read clearly at house scale.
-        if (Math.max(aw, ah) * k < 46) k = 46 / Math.max(aw, ah);
-        if (ah * k > 72) k = 72 / ah;
-        if (aw * k > 90) k = 90 / aw;
+        // Fit the artwork to its actual house footprint. A one-cell prop gets 28px of width;
+        // two-cell pieces get 56px. The GRIND sign is deliberately a two-cell wall decoration.
+        const cells = d.name === 'Fairy-Light Sign' || Math.max(14, Math.min(56, Math.round(d.w * 0.62))) > 32 ? 2 : 1;
+        const maxW = cells * 32 - 8, maxH = d.type === 'wall' ? 48 : 56;
+        let k = d.name === 'Fairy-Light Sign' ? 1.1 : 0.85;
+        k = Math.min(k, maxW / Math.max(1, aw), maxH / Math.max(1, ah));
         const w = Math.max(8, Math.round(aw * k)), h = Math.max(8, Math.round(ah * k));
         const c = document.createElement('canvas'); c.width = w; c.height = h;
         const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.drawImage(big, x0, y0, x1 - x0 + 1, y1 - y0 + 1, 0, 0, w, h);
