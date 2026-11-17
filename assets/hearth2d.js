@@ -199,16 +199,18 @@
           this.spots[sk] = { k: sk, kind: it.k, item: it.id, cell: [ux, uy], inside: !!u.in, dir: dir, anim: u.a, frame: u.f, seat: seat, seatSy: u.front ? ay + 0.3 : null, ax: ax, ay: ay, icon: u.i, leisure: u.l || 0, swim: !!u.swim, perch: !!u.perch, room: roomOfCell(ux, uy) ? roomOfCell(ux, uy).id : null, sit: u.a === 'sit' };
         }
       });
-      // fences round the plot
-      const yt = Math.max(0, this.tier('yard'));
-      const fenceK = ['fence.broken', 'fence.wood', 'fence.picket', 'fence.picket', 'fence.gold', 'fence.golden'][yt];
-      // with more land bought the fence runs right round it, and the one between the plot and the side lot comes down
-      const FX = land ? land.x1 + 1 : 24, FY = land ? land.y1 + 1 : 26;
-      for (let x = 0; x <= FX; x++) add({ s: fenceK, ax: px(x), ay: FY * T + 28, fence: true });
-      for (let y = 1; y <= FY; y++) {
-        add({ s: fenceK, ax: 4, ay: y * T + 28, side: true, fence: true });
-        if (land) add({ s: fenceK, ax: FX * T + 4, ay: y * T + 28, side: true, fence: true });
-        else if (!lot || y < 19 || y > 22) add({ s: fenceK, ax: 24 * T + 28, ay: y * T + 28, side: true, fence: true });
+      // The estate boundary remains part of the build geometry, but its fence can be hidden
+      // so individual picket segments can be stored and repositioned like other yard props.
+      if (!H.fenceOff) {
+        const yt = Math.max(0, this.tier('yard'));
+        const fenceK = ['fence.broken', 'fence.wood', 'fence.picket', 'fence.picket', 'fence.gold', 'fence.golden'][yt];
+        const FX = land ? land.x1 + 1 : 24, FY = land ? land.y1 + 1 : 26;
+        for (let x = 0; x <= FX; x++) add({ s: fenceK, ax: px(x), ay: FY * T + 28, fence: true });
+        for (let y = 1; y <= FY; y++) {
+          add({ s: fenceK, ax: 4, ay: y * T + 28, side: true, fence: true });
+          if (land) add({ s: fenceK, ax: FX * T + 4, ay: y * T + 28, side: true, fence: true });
+          else if (!lot || y < 19 || y > 22) add({ s: fenceK, ax: 24 * T + 28, ay: y * T + 28, side: true, fence: true });
+        }
       }
       // the lawn: open grass in the plot
       const blocked = new Uint8Array(WT * HT);
