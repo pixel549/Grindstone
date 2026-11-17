@@ -362,12 +362,12 @@
       if (!this._fc[ck]) this._fc[ck] = root.Recolor.tile(this.atlas, F.s, r[2], r[3], r[0], r[1]);
       return { im: this._fc[ck], x: 0, y: 0, r: r };
     }
-    _drawSpr(g, k, x, y, flip) {
+    _drawSpr(g, k, x, y, flip, scale) {
       const S = this._src(k);
       if (!S) return null;
-      const r = S.r;
-      if (flip) { g.save(); g.translate(x + r[2], y); g.scale(-1, 1); g.drawImage(S.im, S.x, S.y, r[2], r[3], 0, 0, r[2], r[3]); g.restore(); }
-      else g.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, r[2], r[3]);
+      const r = S.r, z = scale || 1, w = Math.round(r[2] * z), h = Math.round(r[3] * z);
+      if (flip) { g.save(); g.translate(x + w, y); g.scale(-1, 1); g.drawImage(S.im, S.x, S.y, r[2], r[3], 0, 0, w, h); g.restore(); }
+      else g.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, w, h);
       return r;
     }
     _tile(g, k, x0, y0, x1, y1) {
@@ -424,6 +424,21 @@
         for (let x = r.x0; x <= r.x1; x++) if (!geom.isDoor(x, r.y1)) band(x * T, (r.y1 + 1) * T - 16, T, 16, 7);
       });
       this.staticDirty = false;
+    }
+    // The wall's dark cap and lower divider sit above wall-mounted props, not behind them.
+    _drawWallTrim(g) {
+      const H = this._house(), geom = this.geom;
+      const top = '#2b2733', edge = '#4a4452';
+      H.rooms.forEach((r) => {
+        for (let x = r.x0; x <= r.x1; x++) {
+          if (geom.isDoor(x, r.y0)) continue;
+          g.fillStyle = top; g.fillRect(x * T, r.y0 * T - 2, T, 10);
+          g.fillStyle = edge; g.fillRect(x * T, r.y0 * T - 2, T, 1);
+          // Keep the dark divider/shadow at the bottom of the wall face visible over props.
+          g.fillStyle = 'rgba(20,14,24,0.22)';
+          g.fillRect(x * T, (r.y0 + 2) * T, T, 5);
+        }
+      });
     }
 
     // ---------------------------------------------------------------- the hero's little life
@@ -1085,16 +1100,19 @@
       if (ob.relic) { this._relic(g, ob); return; }
       const r = this.spr[ob.s];
       if (!r) return;
-      const x = Math.round(ob.ax - r[2] / 2), y = Math.round(ob.ay - r[3]);
+      // Windows are inset into the 32×64 wall panel instead of filling its entire width and height.
+      const scale = ob.s === 'window' ? 0.8 : 1;
+      const w = Math.round(r[2] * scale), h = Math.round(r[3] * scale);
+      const x = Math.round(ob.ax - w / 2), y = Math.round(ob.ay - h);
       if (ob.ghost) g.globalAlpha = 0.32;
-      if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
-      else this._drawSpr(g, ob.s, x, y, ob.flip);
+      if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y, ob.flip, scale); g.restore(); }
+      else this._drawSpr(g, ob.s, x, y, ob.flip, scale);
       g.globalAlpha = 1;
       if (ob.ghost) return;
-      if (flashOn && this.flash && ob.item && (ob.est === this.flash.k || ob.k === this.flash.k || this._find(this.flash.k) === ob)) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.35; this._drawSpr(g, ob.s, x, y, ob.flip); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+      if (flashOn && this.flash && ob.item && (ob.est === this.flash.k || ob.k === this.flash.k || this._find(this.flash.k) === ob)) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.35; this._drawSpr(g, ob.s, x, y, ob.flip, scale); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
       if (ob.fire) { const fi = Math.floor(this.t * 7) % 3, fr = this.spr['fire.' + fi]; if (fr) this._drawSpr(g, 'fire.' + fi, Math.round(ob.ax - fr[2] / 2), Math.round(ob.ay - 30)); }
       if (ob.flies) for (let f = 0; f < 4; f++) { const a = this.t * 3 + f * 1.7; g.fillStyle = '#1a1a1a'; g.fillRect(Math.round(ob.ax + Math.cos(a) * 10), Math.round(ob.ay - 22 + Math.sin(a * 1.3) * 6), 1, 1); }
-      if (ob.s && /\.5(\.b|\.f)?$/.test(ob.s) && Math.sin(this.t * 3 + ob.ax) > 0.6) { g.fillStyle = '#ffffff'; const sx = x + ((ob.ax * 7 + Math.floor(this.t)) % Math.max(1, r[2])), sy = y + ((ob.ay * 3 + Math.floor(this.t * 1.3)) % Math.max(1, r[3])); g.fillRect(sx, sy, 1, 1); g.fillRect(sx - 1, sy, 3, 1); g.fillRect(sx, sy - 1, 1, 3); }
+      if (ob.s && /\.5(\.b|\.f)?$/.test(ob.s) && Math.sin(this.t * 3 + ob.ax) > 0.6) { g.fillStyle = '#ffffff'; const sx = x + ((ob.ax * 7 + Math.floor(this.t)) % Math.max(1, w)), sy = y + ((ob.ay * 3 + Math.floor(this.t * 1.3)) % Math.max(1, h)); g.fillRect(sx, sy, 1, 1); g.fillRect(sx - 1, sy, 3, 1); g.fillRect(sx, sy - 1, 1, 3); }
     }
     render(g, W, H, k, cx, cy, o) {
       o = o || {};
@@ -1138,6 +1156,8 @@
           } else this._drawObj(g, it.ob, flashOn);
         } else this._drawObj(g, it.ob, flashOn);
       }
+      // Restore the wall's dark horizontal trim after furniture and wall props have been drawn.
+      this._drawWallTrim(g);
       this._drawNightmare(g);   // 2.27
       // sparks
       this.fx = this.fx.filter((f) => (f.t += 1 / 30) < f.life);

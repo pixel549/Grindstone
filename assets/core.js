@@ -1804,7 +1804,7 @@
     ctable: { n: 'Coffee table', i: '🫖', c: 'core', at: 'in', w: 2, h: 1, est: 'ctable', dy: -12, tap: 'ctable' },
     renojob: { n: 'The restoration', i: '🔨', c: 'core', at: 'in', w: 2, h: 1, s: 'ladder', dy: 4, tap: 'reno', feat: 'reno', reno: 1, use: { x: 1, y: 1, d: 'up', a: 'slash', i: '🔨', l: 0.5 } },
     torch: { n: 'Wall torch', i: '🕯️', c: 'wall', at: 'wall', w: 1, s: 'torch', dy: -20, light: 30, g: 20, free: { reno: 0, n: 2 } },
-    window: { n: 'Window', i: '🪟', c: 'wall', at: 'wall', w: 1, s: 'window', dy: 0, g: 30, free: { reno: 0, n: 2 } },
+    window: { n: 'Window', i: '🪟', c: 'wall', at: 'wall', w: 1, s: 'window', dy: -8, g: 30, free: { reno: 0, n: 2 } },
     // the bedroom
     bed: { n: 'Bed', i: '🛏️', c: 'core', at: 'in', w: 3, h: 4, est: 'bed', dy: -8, tap: 'bed', use: { x: 0, y: 2, in: 1, d: 'down', a: 'sit', f: 2, seat: [0, 2], i: '💤', l: 1 } },
     wardrobe: { n: 'Wardrobe', i: '🚪', c: 'core', at: 'in', w: 2, h: 1, est: 'wardrobe', dy: 2, tap: 'wardrobe', use: { x: 1, y: 1, d: 'up', a: 'idle', i: '👕', l: 0.3 } },
@@ -1966,7 +1966,7 @@
   // 2.0's relic slots, for carrying placed relics across.
   const OLD_SLOTS = { yardA: [18, 20], yardB: [7, 25], loungeF: [9, 12], loungeW: [16, 1], studyF: [7, 14], studyW: [4, 8], bedW: [17, 1], gymF: [7, 12], gymW: [1, 8] };
 
-  const relicW = (d) => (Math.max(14, Math.min(56, Math.round(d.w * 0.62))) > 32 ? 2 : 1);
+  const relicW = (d) => (d.name === 'Fairy-Light Sign' || Math.max(14, Math.min(56, Math.round(d.w * 0.62))) > 32 ? 2 : 1);
   // The catalogue entry for a placed thing (relics come from DECOR).
   function furnOf(it) {
     if (!it) return null;
