@@ -1820,6 +1820,7 @@
     mirror: { n: 'Mirror', i: '🪞', c: 'furn', at: 'in', w: 1, h: 1, s: 'mirror', g: 40, free: { reno: 0, n: 1 } },
     // the yard
     line: { n: 'Washing line', i: '👕', c: 'core', at: 'out', w: 4, h: 1, s: 'line', dy: -8, tap: 'laundry', feat: 'laundry', use: { x: 2, y: 1, d: 'up', a: 'spellcast', i: '👕', l: 0.4 } },
+    fencebit: { n: 'Picket fence segment', i: '🚧', c: 'out', at: 'out', w: 1, h: 1, s: 'fence.picket', g: 5, free: { yard: 2, n: 60 } },
     aviary: { n: 'Aviary', i: '🦜', c: 'core', at: 'out', w: 4, h: 3, est: 'aviary', dy: -2, tap: 'aviary', feat: 'birds', cage: 1, use: { x: 4, y: 1, d: 'left', a: 'thrust', i: '🦜', l: 1.4 } },
     tree: { n: 'Tree', i: '🌳', c: 'out', at: 'out', w: 2, h: 1, s: 'tree.*', dy: -12, g: 30, free: { reno: 0, n: 2 } },
     bush: { n: 'Shrub', i: '🌿', c: 'out', at: 'out', w: 1, h: 1, s: 'bush.*', g: 10 },
@@ -2020,7 +2021,7 @@
   // What the renderer needs: the layout, with each thing marked real or waiting.
   function houseView(s) {
     const live = houseLive(s);
-    return { rooms: s.house.rooms, doors: s.house.doors, items: s.house.items.map((it) => Object.assign({}, it, { live: !!live[it.id] })) };
+    return { rooms: s.house.rooms, doors: s.house.doors, items: s.house.items.map((it) => Object.assign({}, it, { live: !!live[it.id] })), fenceOff: !!s.house.fenceOff };
   }
   // ---------- geometry ----------
   function houseGeom(house, land) {
@@ -2166,6 +2167,7 @@
     s.houseV = 2;
     H.bought = H.bought && typeof H.bought === 'object' ? H.bought : {};
     Object.keys(H.bought).forEach((k) => { if (!FURN[k] || !FURN[k].g) delete H.bought[k]; else H.bought[k] = Math.max(0, Math.min(40, H.bought[k] | 0)); });
+    H.fenceOff = !!H.fenceOff;
     H.seq = H.seq | 0;
     const ids = {};
     H.rooms = (Array.isArray(H.rooms) ? H.rooms : []).filter((r) => r && typeof r === 'object').map((r, i) => ({
@@ -2188,6 +2190,7 @@
       const o = { id: it.id | 0, k: it.k, x: it.x | 0, y: it.y | 0 };
       if (it.k === 'relic') o.r = it.r;
       if (it.flip) o.flip = 1;
+      if (it.turn) o.turn = 1;
       if (!o.id || seenId[o.id]) o.id = houseSeq(H);
       if (o.id > H.seq) H.seq = o.id;
       if (FURN[o.k] && FURN[o.k].c === 'core' && H.items.some((t) => t.k === o.k)) return;
