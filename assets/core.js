@@ -1820,6 +1820,7 @@
     mirror: { n: 'Mirror', i: '🪞', c: 'furn', at: 'in', w: 1, h: 1, s: 'mirror', g: 40, free: { reno: 0, n: 1 } },
     // the yard
     line: { n: 'Washing line', i: '👕', c: 'core', at: 'out', w: 4, h: 1, s: 'line', dy: -8, tap: 'laundry', feat: 'laundry', use: { x: 2, y: 1, d: 'up', a: 'spellcast', i: '👕', l: 0.4 } },
+    fencebit: { n: 'Picket fence segment', i: '🚧', c: 'out', at: 'out', w: 1, h: 1, s: 'fence.picket', g: 5, free: { reno: 0, n: 60 } },
     aviary: { n: 'Aviary', i: '🦜', c: 'core', at: 'out', w: 4, h: 3, est: 'aviary', dy: -2, tap: 'aviary', feat: 'birds', cage: 1, use: { x: 4, y: 1, d: 'left', a: 'thrust', i: '🦜', l: 1.4 } },
     tree: { n: 'Tree', i: '🌳', c: 'out', at: 'out', w: 2, h: 1, s: 'tree.*', dy: -12, g: 30, free: { reno: 0, n: 2 } },
     bush: { n: 'Shrub', i: '🌿', c: 'out', at: 'out', w: 1, h: 1, s: 'bush.*', g: 10 },
@@ -2166,6 +2167,7 @@
     s.houseV = 2;
     H.bought = H.bought && typeof H.bought === 'object' ? H.bought : {};
     Object.keys(H.bought).forEach((k) => { if (!FURN[k] || !FURN[k].g) delete H.bought[k]; else H.bought[k] = Math.max(0, Math.min(40, H.bought[k] | 0)); });
+    H.fenceOff = !!H.fenceOff;
     H.seq = H.seq | 0;
     const ids = {};
     H.rooms = (Array.isArray(H.rooms) ? H.rooms : []).filter((r) => r && typeof r === 'object').map((r, i) => ({
