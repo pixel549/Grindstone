@@ -2190,6 +2190,7 @@
       const o = { id: it.id | 0, k: it.k, x: it.x | 0, y: it.y | 0 };
       if (it.k === 'relic') o.r = it.r;
       if (it.flip) o.flip = 1;
+      if (it.turn) o.turn = 1;
       if (!o.id || seenId[o.id]) o.id = houseSeq(H);
       if (o.id > H.seq) H.seq = o.id;
       if (FURN[o.k] && FURN[o.k].c === 'core' && H.items.some((t) => t.k === o.k)) return;
