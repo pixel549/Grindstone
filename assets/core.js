@@ -2021,7 +2021,7 @@
   // What the renderer needs: the layout, with each thing marked real or waiting.
   function houseView(s) {
     const live = houseLive(s);
-    return { rooms: s.house.rooms, doors: s.house.doors, items: s.house.items.map((it) => Object.assign({}, it, { live: !!live[it.id] })) };
+    return { rooms: s.house.rooms, doors: s.house.doors, items: s.house.items.map((it) => Object.assign({}, it, { live: !!live[it.id] })), fenceOff: !!s.house.fenceOff };
   }
   // ---------- geometry ----------
   function houseGeom(house, land) {
