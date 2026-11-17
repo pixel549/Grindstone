@@ -1,0 +1,82 @@
+GRINDSTONE — NEXT UP
+====================
+Roadmap started: 17 November 2026
+Baseline: main @ 2.27.0 (versionCode 55)
+Working branch for this file: roadmap/initial-nextup
+
+This is the working priority list. Keep it current as work is completed, reprioritised or discovered.
+Do not treat an item as complete until it has been implemented and tested. Keep each development task on its own branch.
+
+1. CHARACTER / SPRITE REWORK — FIRST PRIORITY
+---------------------------------------------
+[ ] Audit the current character art pipeline before replacing anything:
+    - assets/art.js (procedural hero rig and equipment rendering)
+    - assets/lpchero.js and tools2d/bake_hero.py (LPC-based child/hero sprites)
+    - assets/2d/hero/ (body parts, clothing, hair, armour and animation frames)
+    - companion, NPC, enemy and town sprite assets.
+[ ] Identify the most visibly dated, inconsistent or placeholder-looking sprites.
+[ ] Establish a consistent art direction, scale, outlines, palette, lighting and animation-frame alignment.
+[ ] Rework the highest-impact sprites first; preserve transparent backgrounds, anchors, filenames and expected frame dimensions.
+[ ] Check every equipment/body combination and key animation (idle, walk, hurt, attack, emote, sit/jump where supported).
+[ ] Verify that sprite changes render correctly in the house, character creator/paper doll, town, companions and dungeon.
+[ ] Keep a before/after gallery or screenshots so visual regressions are obvious.
+
+Acceptance: no missing layers, clipping, misaligned frames, broken recolouring or regressions to existing character customisation. The new art should feel like one coherent game rather than a mixture of asset styles.
+
+2. HOME-SCREEN CHARACTER WIDGET — REVISIT PROPERLY
+--------------------------------------------------
+[ ] Revisit the animated hearth widget, which is currently shelved/disabled after freezing on the A54.
+[ ] Do not bring back a continuously looping animation as the solution.
+[ ] Aim for a live-feeling snapshot of what the character is doing at home: choose a believable activity/pose from current household state when the widget is refreshed/opened.
+[ ] Make the result vary naturally between visits without flicker or arbitrary rapid changes.
+[ ] Keep capture work bounded and avoid expensive background rendering; use a cached still/short state update if that is more reliable.
+[ ] Test on the A54-class device and verify refresh behaviour after app open, app close, device restart and stale cache.
+[ ] Keep the existing quest-list widget working independently.
+
+Acceptance: the widget never freezes the launcher or drains battery, does not play a repetitive loop, and shows a plausible current activity when checked.
+
+3. APK BUILD AND UPDATE RELIABILITY
+-----------------------------------
+[ ] Make the release build repeatable and document the exact build prerequisites.
+[ ] Protect the signing identity: retain and back up the existing release keystore securely; never generate a new key for an update build.
+[ ] Confirm package ID remains dev.jake.grindstone and increment versionCode for every installable release.
+[ ] Verify APK alignment and signatures, minimum Android version, ABI/device compatibility and installation over the previous release.
+[ ] Test both upgrade installation (preserving save data) and clean installation; confirm backup/restore still works.
+[ ] Keep signing passwords/keystore material out of source control and remove insecure default release-signing assumptions from the build workflow.
+
+Acceptance: a release APK installs over the existing app without uninstalling, keeps the user's save, and has a verified signature from the same signing key.
+
+4. REGRESSION TESTING AND RELEASE GATES
+--------------------------------------
+[ ] Run the complete test/run.sh suite after each meaningful change; fix failures rather than dismissing them.
+[ ] Add focused tests for every new widget, sprite pipeline or UI behaviour.
+[ ] Check the latest 2.27.0 systems remain intact: Oracle/provider handling, people and pets, calendar deeds, reminders, town interactions, companions, dungeon and New Game+.
+[ ] Test touch interaction on Android, not only desktop/browser automation.
+[ ] Record test results and device checks in the release notes.
+
+Acceptance: all automated suites pass, plus a short real-device smoke test of the changed features and a fresh APK install/upgrade check.
+
+5. GAMEPLAY / CONTENT POLISH
+----------------------------
+[ ] Play through a representative full progression path and note pacing, difficulty spikes, rewards and dead ends.
+[ ] Check dungeon variety, boss mechanics, companion usefulness, equipment progression and gold sinks.
+[ ] Review tutorial/discovery flow for systems added across versions 2.20–2.27; avoid adding more systems until existing ones are easy to understand.
+[ ] Fix concrete balance or usability problems found during playtesting before adding large new features.
+
+Acceptance: changes are supported by a reproducible playtest or a specific usability issue, not just feature creep.
+
+WORKING ORDER
+-------------
+1. Start with the character/sprite audit and first visual rework.
+2. Keep the widget as the next major visual/technical task, but design around a refreshed character state rather than a looping clip.
+3. Stabilise the APK signing/build/update process before distributing further updates.
+4. Run regression and device testing for every release.
+5. Return to broad gameplay expansion once the visual and release foundations are dependable.
+
+NOTES
+-----
+- Current app version in AndroidManifest.xml: 2.27.0 / versionCode 55.
+- Current application ID: dev.jake.grindstone.
+- The animated hearth widget is explicitly disabled in AndroidManifest.xml and WIDGET_ON is false in assets/app.js. Its previous freeze is recorded in BUGREPORT.md.
+- build.sh currently creates a keystore if one is missing and has a default password. Treat this as a release-process issue: an existing signing key must be preserved, and secrets must not be committed.
+- The repository includes a substantial browser/logic test suite under test/ and a test/run.sh runner. Use the existing tests as the baseline; extend them when changing behaviour.
