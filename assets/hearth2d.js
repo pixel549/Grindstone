@@ -173,7 +173,7 @@
             }
           }
         }
-        const ob = { s: key, relic: f.relic, ax: ax, ay: ay, sw: sw, sh: sh, id: f.tap || null, item: it.id, k: it.k, flip: flip, flat: !!f.flat, ghost: ghost, wall: f.at === 'wall', f: f, room: room ? room.id : null, est: f.est };
+        const ob = { s: key, relic: f.relic, ax: ax, ay: ay, sw: sw, sh: sh, id: f.tap || null, item: it.id, k: it.k, flip: flip, turn: !!it.turn, flat: !!f.flat, ghost: ghost, wall: f.at === 'wall', f: f, room: room ? room.id : null, est: f.est };
         if (f.flatBelow) ob.flat = this.tier(f.est) < (f.est === 'garden' ? 3 : 9);
         if (f.at === 'wall') walls.push(ob); else add(ob);
         this.objById[it.id] = ob;
@@ -199,16 +199,18 @@
           this.spots[sk] = { k: sk, kind: it.k, item: it.id, cell: [ux, uy], inside: !!u.in, dir: dir, anim: u.a, frame: u.f, seat: seat, seatSy: u.front ? ay + 0.3 : null, ax: ax, ay: ay, icon: u.i, leisure: u.l || 0, swim: !!u.swim, perch: !!u.perch, room: roomOfCell(ux, uy) ? roomOfCell(ux, uy).id : null, sit: u.a === 'sit' };
         }
       });
-      // fences round the plot
-      const yt = Math.max(0, this.tier('yard'));
-      const fenceK = ['fence.broken', 'fence.wood', 'fence.picket', 'fence.picket', 'fence.gold', 'fence.golden'][yt];
-      // with more land bought the fence runs right round it, and the one between the plot and the side lot comes down
-      const FX = land ? land.x1 + 1 : 24, FY = land ? land.y1 + 1 : 26;
-      for (let x = 0; x <= FX; x++) add({ s: fenceK, ax: px(x), ay: FY * T + 28, fence: true });
-      for (let y = 1; y <= FY; y++) {
-        add({ s: fenceK, ax: 4, ay: y * T + 28, side: true, fence: true });
-        if (land) add({ s: fenceK, ax: FX * T + 4, ay: y * T + 28, side: true, fence: true });
-        else if (!lot || y < 19 || y > 22) add({ s: fenceK, ax: 24 * T + 28, ay: y * T + 28, side: true, fence: true });
+      // The estate boundary remains part of the build geometry, but its fence can be hidden
+      // so individual picket segments can be stored and repositioned like other yard props.
+      if (!H.fenceOff) {
+        const yt = Math.max(0, this.tier('yard'));
+        const fenceK = ['fence.broken', 'fence.wood', 'fence.picket', 'fence.picket', 'fence.gold', 'fence.golden'][yt];
+        const FX = land ? land.x1 + 1 : 24, FY = land ? land.y1 + 1 : 26;
+        for (let x = 0; x <= FX; x++) add({ s: fenceK, ax: px(x), ay: FY * T + 28, fence: true });
+        for (let y = 1; y <= FY; y++) {
+          add({ s: fenceK, ax: 4, ay: y * T + 28, side: true, fence: true });
+          if (land) add({ s: fenceK, ax: FX * T + 4, ay: y * T + 28, side: true, fence: true });
+          else if (!lot || y < 19 || y > 22) add({ s: fenceK, ax: 24 * T + 28, ay: y * T + 28, side: true, fence: true });
+        }
       }
       // the lawn: open grass in the plot
       const blocked = new Uint8Array(WT * HT);
@@ -362,9 +364,24 @@
       if (!this._fc[ck]) this._fc[ck] = root.Recolor.tile(this.atlas, F.s, r[2], r[3], r[0], r[1]);
       return { im: this._fc[ck], x: 0, y: 0, r: r };
     }
+    _outlineSpr(k, S) {
+      this._outlineCache = this._outlineCache || {};
+      if (!this._outlineCache[k]) {
+        const r = S.r, c = document.createElement('canvas');
+        c.width = r[2] + 2; c.height = r[3] + 2;
+        const q = c.getContext('2d'); q.imageSmoothingEnabled = false;
+        [[0, 1], [2, 1], [1, 0], [1, 2]].forEach(([x, y]) => q.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, r[2], r[3]));
+        q.globalCompositeOperation = 'source-in'; q.fillStyle = 'rgb(36,26,32)'; q.fillRect(0, 0, c.width, c.height);
+        q.globalCompositeOperation = 'source-over'; q.drawImage(S.im, S.x, S.y, r[2], r[3], 1, 1, r[2], r[3]);
+        this._outlineCache[k] = { im: c, x: 0, y: 0, r: [0, 0, c.width, c.height] };
+      }
+      return this._outlineCache[k];
+    }
     _drawSpr(g, k, x, y, flip) {
-      const S = this._src(k);
+      let S = this._src(k);
       if (!S) return null;
+      const addOutline = k === 'x.rugbear' || k === 'x.rugblue';
+      if (addOutline) { S = this._outlineSpr(k, S); x -= 1; y -= 1; }
       const r = S.r;
       if (flip) { g.save(); g.translate(x + r[2], y); g.scale(-1, 1); g.drawImage(S.im, S.x, S.y, r[2], r[3], 0, 0, r[2], r[3]); g.restore(); }
       else g.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, r[2], r[3]);
@@ -1087,7 +1104,8 @@
       if (!r) return;
       const x = Math.round(ob.ax - r[2] / 2), y = Math.round(ob.ay - r[3]);
       if (ob.ghost) g.globalAlpha = 0.32;
-      if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
+      if (ob.turn) { g.save(); g.translate(ob.ax, ob.ay); g.rotate(Math.PI / 2); this._drawSpr(g, ob.s, -r[2] / 2, -r[3], ob.flip); g.restore(); }
+      else if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
       else this._drawSpr(g, ob.s, x, y, ob.flip);
       g.globalAlpha = 1;
       if (ob.ghost) return;
