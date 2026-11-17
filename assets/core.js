@@ -1820,7 +1820,7 @@
     mirror: { n: 'Mirror', i: '🪞', c: 'furn', at: 'in', w: 1, h: 1, s: 'mirror', g: 40, free: { reno: 0, n: 1 } },
     // the yard
     line: { n: 'Washing line', i: '👕', c: 'core', at: 'out', w: 4, h: 1, s: 'line', dy: -8, tap: 'laundry', feat: 'laundry', use: { x: 2, y: 1, d: 'up', a: 'spellcast', i: '👕', l: 0.4 } },
-    fencebit: { n: 'Picket fence segment', i: '🚧', c: 'out', at: 'out', w: 1, h: 1, s: 'fence.picket', g: 5, free: { reno: 0, n: 60 } },
+    fencebit: { n: 'Picket fence segment', i: '🚧', c: 'out', at: 'out', w: 1, h: 1, s: 'fence.picket', g: 5, free: { yard: 2, n: 60 } },
     aviary: { n: 'Aviary', i: '🦜', c: 'core', at: 'out', w: 4, h: 3, est: 'aviary', dy: -2, tap: 'aviary', feat: 'birds', cage: 1, use: { x: 4, y: 1, d: 'left', a: 'thrust', i: '🦜', l: 1.4 } },
     tree: { n: 'Tree', i: '🌳', c: 'out', at: 'out', w: 2, h: 1, s: 'tree.*', dy: -12, g: 30, free: { reno: 0, n: 2 } },
     bush: { n: 'Shrub', i: '🌿', c: 'out', at: 'out', w: 1, h: 1, s: 'bush.*', g: 10 },
