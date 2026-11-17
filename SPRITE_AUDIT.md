@@ -10,7 +10,7 @@
 
 - `assets/lpchero.js` is the active LPC compositor. It reads `assets/2d/hero/index.json`, loads the layered PNG sheets, applies the LPC palettes and assembles the hero, children and people/NPCs.
 - `assets/hearth2d.js` uses those LPC sheets for the people moving around the house. `assets/app.js` uses `LPC.dress()` / `LPC.build()` for the character creator, the hero portrait, and people/NPC portraits.
-- `assets/art.js` is a separate procedural SVG rig. In the current app it remains the synchronous silhouette/loading fallback and supplies several vector UI illustrations. `assets/home.js` also retains an older side-on scene that uses the SVG rig. It is not the active 2D Hearth character pipeline.
+- `assets/art.js` is a separate procedural SVG rig. In the current app it remains the synchronous silhouette/loading fallback and supplies several vector UI illustrations. `assets/home.js` retains legacy side-on scene code that uses the SVG rig; the current app still uses `Home.decorSvg()` for relic illustrations, but that older scene is not the active 2D Hearth.
 
 **Implication:** the main character art is not one pipeline from end to end. The LPC sprite is the real in-game character, but the fallback and legacy renderer have a visibly different vector/chibi treatment. A broad replacement of the LPC sheets is not justified by this audit. The better first target is to make the fallback and preview states visually consistent with the LPC character, then review specific high-visibility equipment combinations.
 
