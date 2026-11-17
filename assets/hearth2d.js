@@ -364,9 +364,24 @@
       if (!this._fc[ck]) this._fc[ck] = root.Recolor.tile(this.atlas, F.s, r[2], r[3], r[0], r[1]);
       return { im: this._fc[ck], x: 0, y: 0, r: r };
     }
+    _outlineSpr(k, S) {
+      this._outlineCache = this._outlineCache || {};
+      if (!this._outlineCache[k]) {
+        const r = S.r, c = document.createElement('canvas');
+        c.width = r[2] + 2; c.height = r[3] + 2;
+        const q = c.getContext('2d'); q.imageSmoothingEnabled = false;
+        [[0, 1], [2, 1], [1, 0], [1, 2]].forEach(([x, y]) => q.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, r[2], r[3]));
+        q.globalCompositeOperation = 'source-in'; q.fillStyle = 'rgb(36,26,32)'; q.fillRect(0, 0, c.width, c.height);
+        q.globalCompositeOperation = 'source-over'; q.drawImage(S.im, S.x, S.y, r[2], r[3], 1, 1, r[2], r[3]);
+        this._outlineCache[k] = { im: c, x: 0, y: 0, r: [0, 0, c.width, c.height] };
+      }
+      return this._outlineCache[k];
+    }
     _drawSpr(g, k, x, y, flip) {
-      const S = this._src(k);
+      let S = this._src(k);
       if (!S) return null;
+      const addOutline = k === 'x.rugbear' || k === 'x.rugblue';
+      if (addOutline) { S = this._outlineSpr(k, S); x -= 1; y -= 1; }
       const r = S.r;
       if (flip) { g.save(); g.translate(x + r[2], y); g.scale(-1, 1); g.drawImage(S.im, S.x, S.y, r[2], r[3], 0, 0, r[2], r[3]); g.restore(); }
       else g.drawImage(S.im, S.x, S.y, r[2], r[3], x, y, r[2], r[3]);
