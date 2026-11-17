@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Grindstone</string>
+    <string name="widget_name">Grindstone hearth</string>
+    <string name="widget_desc">A close-up of your hero at home, and the three things that matter most right now.</string>
+    <string name="widget_list_name">Grindstone quests</string>
+    <string name="widget_list_desc">Your level, XP and today\'s quests. Tap a quest to complete it.</string>
+</resources>

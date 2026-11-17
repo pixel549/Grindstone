@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/wi_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="47dp"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp">
+
+            <FrameLayout
+                android:id="@+id/wi_bar"
+                android:layout_width="3dp"
+                android:layout_height="22dp"
+                android:background="#FFD4A84A" />
+
+            <TextView
+                android:id="@+id/wi_icon"
+                android:layout_width="34dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="•"
+                android:textSize="21sp" />
+
+            <TextView
+                android:id="@+id/wi_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Quest"
+                android:textColor="@color/text"
+                android:fontFamily="@font/jersey15"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/wi_xp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="10dp"
+                android:text="+10"
+                android:textColor="@color/gold"
+                android:textSize="13.5sp" />
+
+            <ImageView
+                android:id="@+id/wi_check"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/check_ring"
+                 />
+        </LinearLayout>

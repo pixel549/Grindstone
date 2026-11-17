@@ -1,0 +1,182 @@
+[
+ {
+  "key": "ordinary|healer",
+  "effort": "Ordinary",
+  "companion": "Healer",
+  "v25": "w/c 9 Nov",
+  "pct25": 100,
+  "v24": "w/c 9 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "ordinary|scout",
+  "effort": "Ordinary",
+  "companion": "Scout",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "ordinary|fighter",
+  "effort": "Ordinary",
+  "companion": "Sparring partner",
+  "v25": "w/c 30 Nov",
+  "pct25": 100,
+  "v24": "w/c 30 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "ordinary|mage",
+  "effort": "Ordinary",
+  "companion": "Mage",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "strong|healer",
+  "effort": "Strong",
+  "companion": "Healer",
+  "v25": "w/c 9 Nov",
+  "pct25": 100,
+  "v24": "w/c 9 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "strong|scout",
+  "effort": "Strong",
+  "companion": "Scout",
+  "v25": "w/c 23 Nov",
+  "pct25": 100,
+  "v24": "w/c 23 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "strong|fighter",
+  "effort": "Strong",
+  "companion": "Sparring partner",
+  "v25": "w/c 30 Nov",
+  "pct25": 100,
+  "v24": "w/c 30 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "strong|mage",
+  "effort": "Strong",
+  "companion": "Mage",
+  "v25": "w/c 7 Dec",
+  "pct25": 100,
+  "v24": "w/c 7 Dec",
+  "pct24": 100
+ },
+ {
+  "key": "lapsed|healer",
+  "effort": "Lapsed",
+  "companion": "Healer",
+  "v25": "Not in 6 weeks",
+  "pct25": 9,
+  "v24": "Not in 6 weeks",
+  "pct24": 5
+ },
+ {
+  "key": "lapsed|scout",
+  "effort": "Lapsed",
+  "companion": "Scout",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "lapsed|fighter",
+  "effort": "Lapsed",
+  "companion": "Sparring partner",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "lapsed|mage",
+  "effort": "Lapsed",
+  "companion": "Mage",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "slip|healer",
+  "effort": "Ordinary, one bad week",
+  "companion": "Healer",
+  "v25": "w/c 9 Nov",
+  "pct25": 100,
+  "v24": "w/c 9 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "slip|scout",
+  "effort": "Ordinary, one bad week",
+  "companion": "Scout",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "slip|fighter",
+  "effort": "Ordinary, one bad week",
+  "companion": "Sparring partner",
+  "v25": "w/c 7 Dec",
+  "pct25": 100,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "slip|mage",
+  "effort": "Ordinary, one bad week",
+  "companion": "Mage",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "asLogged|healer",
+  "effort": "Your logged pace",
+  "companion": "Healer",
+  "v25": "w/c 9 Nov",
+  "pct25": 100,
+  "v24": "w/c 9 Nov",
+  "pct24": 100
+ },
+ {
+  "key": "asLogged|scout",
+  "effort": "Your logged pace",
+  "companion": "Scout",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "asLogged|fighter",
+  "effort": "Your logged pace",
+  "companion": "Sparring partner",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ },
+ {
+  "key": "asLogged|mage",
+  "effort": "Your logged pace",
+  "companion": "Mage",
+  "v25": "Not in 6 weeks",
+  "pct25": 0,
+  "v24": "Not in 6 weeks",
+  "pct24": 0
+ }
+]

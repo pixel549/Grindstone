@@ -1,0 +1,15 @@
+# Signing key: never commit. Anyone with it can sign updates to the app.
+*.jks
+*.keystore
+# Build outputs (the APK goes in a GitHub Release instead)
+build/
+*.apk
+# Personal data, never commit
+tools/sim/data/
+# Test output
+test/s[0-9]*/
+test/story/
+test/out/
+*.log
+__pycache__/
+node_modules/

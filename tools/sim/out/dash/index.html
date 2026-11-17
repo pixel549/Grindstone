@@ -1,0 +1,226 @@
+<meta name="dash-one-writer">
+<style>
+  .gx { font-family: var(--font-anthropic-sans); color: var(--color-fg); max-width: 1100px; margin-inline: auto; }
+  .gx h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+  .gx h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-xl) 0 var(--cds-gap-sm); }
+  .gx h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0 0 var(--cds-gap-xs); }
+  .gx p, .gx li { font-size: var(--cds-font-size-body); line-height: 1.5; }
+  .gx .gx-take { color: var(--color-fg-muted); margin-top: 0; }
+  .gx .gx-note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 0 0 var(--cds-gap-sm); }
+  .gx b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .gx-chart { position: relative; min-height: 230px; }
+  .gx-chart svg text { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .gx-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .gx-tip .gx-tip-h { color: var(--cds-text-secondary); }
+  .gx-wrap { overflow-x: auto; }
+  .gx table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .gx th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: bottom; }
+  .gx td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .gx td.gx-num, .gx th.gx-num { text-align: right; }
+  .gx .gx-ok { color: var(--color-ok); } .gx .gx-warn { color: var(--color-warn); } .gx .gx-bad { color: var(--color-bad); }
+  .gx-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); margin: 0 0 var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .gx-legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .gx details { margin-top: var(--cds-gap-xl); }
+  .gx summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
+  .gx ol { padding-left: 1.2em; }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+<div class="gx">
+  <h1 id="top">Grindstone 2.5: what a week is worth</h1>
+  <p class="gx-take">An ordinary week now clears about <b data-draw="ord25" data-source="targets" data-field="v25" data-where="measure=Ordinary%20week">—</b> dungeons, against <b data-draw="ord24" data-source="targets" data-field="v24" data-where="measure=Ordinary%20week">—</b> under 2.4, where one lucky clear could chain into a dozen and effort barely mattered. At the pace you actually logged last week, only the healer turns up within six weeks.</p>
+
+  <h2 id="data">What there was to go on</h2>
+  <p class="gx-note">One real week of deeds, and your real roster. Everything after 8 Nov is projected onto that roster.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="sources" data-row-key="source">
+      <thead><tr><th data-field="source">Source</th><th data-field="what">What's in it</th><th data-field="span">Covers</th><th data-field="used">Used</th></tr></thead>
+      <tbody data-draw="sourcesBody"></tbody>
+    </table>
+  </div>
+
+  <h2 id="weeks">Week by week on your roster</h2>
+  <p class="gx-note">Dungeons cleared each week (average of 200 runs), 2 Nov to 13 Dec. The first week is your logged one; the rest follow your Findmyshift roster, with sessions only where a shift leaves a free window. Same scale on both.</p>
+  <div class="gx-legend" data-draw="legend" data-source="weeks"></div>
+  <div class="gx-grid">
+    <div class="gx-card"><h3>2.5</h3><p class="gx-note">Steadier, and effort shows</p><div class="gx-chart" data-draw="weeks25" data-source="weeks"></div></div>
+    <div class="gx-card"><h3>2.4 numbers</h3><p class="gx-note">The cascade: big weeks regardless of effort, then a wall</p><div class="gx-chart" data-draw="weeks24" data-source="weeks"></div></div>
+  </div>
+
+  <h2 id="targets">Targets</h2>
+  <p class="gx-note">Dungeons cleared per week over 12 weeks (100 runs for 2.5, 40 for 2.4), after the first week. These were my proposed targets; say if you'd rather different ones.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="targets" data-row-key="measure">
+      <thead><tr><th data-field="measure">Measure</th><th data-field="target" class="gx-num">Target</th><th data-field="v25" class="gx-num">2.5</th><th data-field="v24" class="gx-num">2.4</th><th data-field="met">Met?</th></tr></thead>
+      <tbody data-draw="targetsBody"></tbody>
+    </table>
+  </div>
+  <p class="gx-note">Lapsed weeks still clear about a third of an ordinary one because the birds and meals keep the XP coming. A strong week is worth about a quarter more than an ordinary one, not more, because stats grow with the square root of XP; changing that moves the whole game's pacing, so I left it for you to decide.</p>
+
+  <h2 id="companions">When companions arrive</h2>
+  <p class="gx-note">The week each one moves in, in at least half of the 200 runs. Your logged pace (one strength and one cardio session a week, no study) only meets the healer's calling.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="arrivals" data-row-key="effort,companion">
+      <thead><tr><th data-field="effort">Effort</th><th data-field="companion">Companion</th><th data-field="v25">2.5</th><th data-field="pct25" class="gx-num">% of runs</th><th data-field="v24">2.4</th><th data-field="pct24" class="gx-num">% of runs</th></tr></thead>
+      <tbody data-draw="arrivalsBody"></tbody>
+    </table>
+  </div>
+
+  <h2 id="grace">Missed weeks</h2>
+  <div class="gx-card">
+    <p>Each calling now carries one <b>emergency skip</b>. Miss a week and it covers it: the run waits a week instead of starting over, and the skip comes back when the run is done. The first deed of the kind after a missed week gives a short buff that lasts twice as long.</p>
+    <p>In the run with one bad week (w/c 23 Nov), the sparring partner moved in <b data-draw="slip25" data-source="arrivals" data-field="v25" data-where="effort=Ordinary%2C%20one%20bad%20week&amp;companion=Sparring%20partner">—</b>. Under 2.4's rule: <b data-draw="slip24" data-source="arrivals" data-field="v24" data-where="effort=Ordinary%2C%20one%20bad%20week&amp;companion=Sparring%20partner">—</b>.</p>
+    <p class="gx-note">Why: missing one opportunity didn't materially affect habit formation (Lally et al. 2010, Eur J Soc Psychol 40:998). Goals with a costly "emergency reserve" beat easy and hard goals for persistence, including after a failed week (Sharif &amp; Shu 2017, JMR 54:495; 2021, OBHDP 163:17). Broken streaks cut later engagement, less so when they can be repaired (Silverman &amp; Barasch 2023, JCR 49:1095). And of 54 interventions in a gym megastudy of over 60,000 people, a small bonus for coming back after a missed workout did best (Milkman et al. 2021, Nature 600:478).</p>
+  </div>
+
+  <h2 id="choices">Choices in the dungeon</h2>
+  <p class="gx-note">Each choice made every way, everything else fixed, for 600 (2.4) and 1,000 (2.5) heroes at the dungeon they're stuck on and the one they only just clear. "Best or tied": how often that answer did at least as well as any other. "Worst": how often it was the worst answer, among the cases where the choice changed the outcome. The chest is judged over two attempts in 2.5, because a stashed find now comes home after a fall.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="choicesTable" data-row-key="choice,answer">
+      <thead><tr><th data-field="choice">Choice</th><th data-field="answer">Answer</th><th data-field="bt24" class="gx-num">2.4 best or tied</th><th data-field="wm24" class="gx-num">2.4 worst</th><th data-field="bt25" class="gx-num">2.5 best or tied</th><th data-field="wm25" class="gx-num">2.5 worst</th></tr></thead>
+      <tbody data-draw="choicesBody"></tbody>
+    </table>
+  </div>
+  <p class="gx-note">Changed: the left fork's fight now guards a flask as well as more gold; a stashed find survives a fall while a worn one is lost; half of fountains are tainted (−30% HP against +35%); "never drink" (always worst) became "below 50%"; a weapon art saved for a boss hits three times as hard. Weapon arts and the fountain still lean one way (right about 94–96% of the time) but each loses in real cases, so I left them as choices.</p>
+
+  <h2 id="checks">Does the crawl show what happened?</h2>
+  <p class="gx-note">Fights are now blow by blow in whole numbers, and the crawl plays only those blows. These checks run on every build.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="checks" data-row-key="test">
+      <thead><tr><th data-field="test">Test</th><th data-field="what">What it checks</th><th data-field="runs" class="gx-num">Runs</th><th data-field="checked">Covered</th><th data-field="checks" class="gx-num">Checks</th><th data-field="failures" class="gx-num">Failures</th></tr></thead>
+      <tbody data-draw="checksBody"></tbody>
+    </table>
+  </div>
+
+  <h2 id="frames">Frame cost</h2>
+  <p class="gx-note">Time to draw one frame of the crawl, in Chrome here at a phone-sized screen, with its CPU slowed. Chrome's own tools treat 4× on a fast desktop as a mid-range phone; this machine is slower than that, so 4× here is on the cautious side. Drawing the darkness at a quarter of the resolution did most of the saving.</p>
+  <div class="gx-card gx-wrap">
+    <table data-source="perf" data-row-key="phase,cpu">
+      <thead><tr><th data-field="phase">Build</th><th data-field="cpu">CPU slowed</th><th data-field="workMedian" class="gx-num">Median ms</th><th data-field="workP95" class="gx-num">Slowest 5% ms</th><th data-field="fps" class="gx-num">Frames/s here</th></tr></thead>
+      <tbody data-draw="perfBody"></tbody>
+    </table>
+  </div>
+  <div class="gx-card" style="margin-top: var(--cds-gap-md)">
+    <h3>Profiling it on your A54</h3>
+    <ol>
+      <li>On the phone: Settings → About phone → Software information, tap Build number seven times. Then Developer options → USB debugging on.</li>
+      <li>Install 2.5, plug the phone into your PC and allow the computer when the phone asks.</li>
+      <li>On the PC, open Chrome at chrome://inspect, tick Discover USB devices, start a delve on the phone, and click inspect under the Grindstone WebView.</li>
+      <li>Performance tab → record while the crawl plays a fight → stop. Frames over the budget show red. In the Console, Crawl.stats() gives the draw cost and frame gaps of the last 600 frames.</li>
+      <li>Turn USB debugging off afterwards: Grindstone only opens to DevTools while it's on.</li>
+    </ol>
+    <p class="gx-note">What to expect: the A54's screen runs at 120 Hz, so the budget is 8.3 ms a frame (16.7 ms at 60 Hz). The crawl's own work is under 2 ms a frame in the middle of the range here, so walking should hold 120; the slowest frames in busy fights may drop to 60. I couldn't confirm the WebView ticks at 120 rather than 60 on your phone: Crawl.stats() will say (a gap near 8 ms is 120).</p>
+  </div>
+
+  <h2 id="adherence">Before and after, in six weeks</h2>
+  <div class="gx-card">
+    <p>Hearth → household → <b>Before and after 2.5</b> shows days a week at each habit, for the six whole weeks before 2.5 first ran and the six after. Six weeks from today is the week of 21 December. The before side will be thin, since the app only started keeping records the week before. School holidays start mid-December too, so not every change will be down to the app. From an export, tools/sim/adherence.js gives the same table.</p>
+  </div>
+
+  <details>
+    <summary>Method and what's left out</summary>
+    <p><b>The model player.</b> Opens every chest, puts half his gold into coffers, wears the best kit on paper, tries each companion and keeps the best run, pushes on while runs clear, and runs once each evening.</p>
+    <p><b>Effort levels.</b> Ordinary: 2 strength, 2 endurance, 2 study, looking after yourself 6 days. Strong: 3, 3, 4, 7. Lapsed: 0, 1, 0, 3. Your logged pace: 1, 1, 0, 7. Chores and feeding the birds run alongside each.</p>
+    <p><b>Left out.</b> Chores, birds and study before 8 Nov (no app backup to read), anything after 17 Dec on the real roster (the 12-week targets repeat the roster), and how the hero looked or what he wore before.</p>
+  </details>
+</div>
+<script>
+  const fmt2 = d3.format('.2~f');
+  const cell = (tr, v, num, cls) => { const td = tr.insertCell(); td.textContent = v == null ? '—' : (num && typeof v === 'number' ? fmt2(v) : String(v)); if (num) td.className = 'gx-num'; if (cls) td.classList.add(cls); return td; };
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' ? d.data : null; };
+  const keyOf = (...parts) => parts.map((p) => encodeURIComponent(p)).join(',');
+  const one = (id, where, field) => (el) => { const r = rowsOf(id); if (!r) { el.textContent = '—'; return; } const [k, v] = where; const row = r.find((x) => String(x[k]) === v); el.textContent = row ? (typeof row[field] === 'number' ? fmt2(row[field]) : row[field]) : '—'; };
+
+  dash.draw('ord25', one('targets', ['measure', 'Ordinary week'], 'v25'));
+  dash.draw('ord24', one('targets', ['measure', 'Ordinary week'], 'v24'));
+  const slip = (field) => (el) => { const r = rowsOf('arrivals'); if (!r) { el.textContent = '—'; return; } const row = r.find((x) => x.effort === 'Ordinary, one bad week' && x.companion === 'Sparring partner'); el.textContent = row ? row[field] : '—'; };
+  dash.draw('slip25', slip('v25'));
+  dash.draw('slip24', slip('v24'));
+
+  dash.draw('sourcesBody', (tb) => { tb.replaceChildren(); (rowsOf('sources') || []).forEach((r) => { const tr = tb.insertRow(); ['source', 'what', 'span', 'used'].forEach((k) => cell(tr, r[k])); }); });
+  dash.draw('targetsBody', (tb) => {
+    tb.replaceChildren();
+    (rowsOf('targets') || []).forEach((r) => { const tr = tb.insertRow(); cell(tr, r.measure); cell(tr, r.target, true); cell(tr, r.v25, true); cell(tr, r.v24, true); cell(tr, r.met, false, /^Yes/.test(r.met) ? 'gx-ok' : /^No/.test(r.met) ? 'gx-bad' : 'gx-warn'); });
+  });
+  dash.draw('arrivalsBody', (tb) => {
+    tb.replaceChildren();
+    (rowsOf('arrivals') || []).forEach((r) => { const tr = tb.insertRow(); tr.dataset.key = keyOf(r.effort, r.companion); cell(tr, r.effort); cell(tr, r.companion); cell(tr, r.v25); cell(tr, r.pct25, true); cell(tr, r.v24); cell(tr, r.pct24, true); });
+  });
+  dash.calc('choicesTable', {
+    inputs: ['decisions'], title: 'Choices, 2.4 against 2.5', description: 'Each answer with its 2.4 and 2.5 audit numbers side by side.',
+    fn: (decisions) => {
+      const out = [], at = {};
+      decisions.forEach((d) => {
+        const k = d.choice + '|' + d.answer;
+        if (!at[k]) { at[k] = { choice: d.choice, answer: d.answer, bt24: null, wm24: null, bt25: null, wm25: null }; out.push(at[k]); }
+        if (d.phase === '2.4') { at[k].bt24 = d.bestOrTied; at[k].wm24 = d.worstWhenMattered; } else { at[k].bt25 = d.bestOrTied; at[k].wm25 = d.worstWhenMattered; }
+      });
+      return out;
+    },
+  });
+  dash.draw('choicesBody', (tb) => {
+    tb.replaceChildren();
+    (rowsOf('choicesTable') || []).forEach((r) => {
+      const tr = tb.insertRow(); tr.dataset.key = keyOf(r.choice, r.answer);
+      cell(tr, r.choice); cell(tr, r.answer);
+      const pc = (v, worst) => { const td = cell(tr, v == null ? null : v + '%', true); if (v != null && worst && v <= 5) td.classList.add('gx-warn'); if (v != null && !worst && v >= 95) td.classList.add('gx-warn'); };
+      pc(r.bt24, false); pc(r.wm24, true); pc(r.bt25, false); pc(r.wm25, true);
+    });
+  });
+  dash.draw('checksBody', (tb) => {
+    tb.replaceChildren();
+    (rowsOf('checks') || []).forEach((r) => { const tr = tb.insertRow(); cell(tr, r.test); cell(tr, r.what); cell(tr, r.runs, true); cell(tr, r.checked); cell(tr, r.checks == null ? null : d3.format(',')(r.checks), true); cell(tr, r.failures, true, r.failures ? 'gx-bad' : 'gx-ok'); });
+  });
+  dash.draw('perfBody', (tb) => {
+    tb.replaceChildren();
+    (rowsOf('perf') || []).forEach((r) => { const tr = tb.insertRow(); tr.dataset.key = keyOf(r.phase, r.cpu); cell(tr, r.phase); cell(tr, r.cpu); cell(tr, r.workMedian, true); cell(tr, r.workP95, true); cell(tr, r.fps, true); });
+  });
+
+  // the week-by-week charts: one line per effort level, both versions on one scale
+  const EFFORTS = ['Strong', 'Ordinary', 'Ordinary, one bad week', 'Your logged pace', 'Lapsed'];
+  const colorOf = (e) => dash.colors[EFFORTS.indexOf(e) % dash.colors.length];
+  dash.draw('legend', (el) => {
+    el.replaceChildren();
+    if (!rowsOf('weeks')) { el.textContent = '—'; return; }
+    EFFORTS.forEach((e) => { const s = document.createElement('span'); const i = document.createElement('i'); i.style.background = colorOf(e); s.append(i, document.createTextNode(e)); el.append(s); });
+  });
+  const weekChart = (ver) => (el) => {
+    el.replaceChildren();
+    const rows = rowsOf('weeks');
+    if (!rows) { el.textContent = '—'; return; }
+    const W = Math.max(260, el.clientWidth), H = 220, m = { t: 10, r: 12, b: 26, l: 30 };
+    const mine = rows.filter((r) => r.version === ver);
+    const yMax = d3.max(rows, (r) => r.cleared) || 1;
+    const weeks = Array.from(new Set(mine.map((r) => r.week))).sort();
+    const x = d3.scalePoint(weeks, [m.l, W - m.r]).padding(0.2), y = d3.scaleLinear([0, yMax], [H - m.b, m.t]).nice();
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', m.l - 6).attr('y', (d) => y(d) + 4).attr('text-anchor', 'end').text((d) => d);
+    const fd = d3.utcFormat('%-d %b');
+    svg.append('g').selectAll('text').data(weeks).join('text').attr('x', (d) => x(d)).attr('y', H - 8).attr('text-anchor', 'middle').text((d) => fd(new Date(d + 'T00:00:00Z')));
+    const line = d3.line().x((r) => x(r.week)).y((r) => y(r.cleared));
+    EFFORTS.forEach((e) => {
+      const pts = mine.filter((r) => r.effort === e).sort((a, b) => (a.week < b.week ? -1 : 1));
+      svg.append('path').datum(pts).attr('d', line).attr('fill', 'none').attr('stroke', colorOf(e)).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    });
+    // tooltip: the week's values for every effort level
+    const tip = d3.select(el).append('div').attr('class', 'gx-tip').style('display', 'none');
+    const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--cds-chart-reference)').style('display', 'none');
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('mousemove', (ev) => {
+        const [px] = d3.pointer(ev), wk = weeks.reduce((b, w) => (Math.abs(x(w) - px) < Math.abs(x(b) - px) ? w : b), weeks[0]);
+        rule.style('display', null).attr('x1', x(wk)).attr('x2', x(wk));
+        tip.style('display', null).selectAll('*').remove();
+        tip.append('div').attr('class', 'gx-tip-h').text('w/c ' + fd(new Date(wk + 'T00:00:00Z')) + (mine.find((r) => r.week === wk && r.real === 'Logged') ? ' (logged)' : ''));
+        EFFORTS.forEach((e) => { const r = mine.find((q) => q.week === wk && q.effort === e); if (!r) return; const d = tip.append('div'); d.append('span').style('color', colorOf(e)).text('● '); d.append('span').text(e + ': ' + fmt2(r.cleared) + ' (depth ' + r.depth + ')'); });
+        const bw = el.clientWidth, tx = Math.min(Math.max(0, (x(wk) / W) * bw + 12), bw - 220);
+        tip.style('left', tx + 'px').style('top', '8px');
+      })
+      .on('mouseleave', () => { tip.style('display', 'none'); rule.style('display', 'none'); });
+  };
+  dash.draw('weeks25', weekChart('2.5'));
+  dash.draw('weeks24', weekChart('2.4'));
+</script>

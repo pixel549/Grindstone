@@ -1,0 +1,7 @@
+{
+  "name": "grindstone-3d-tools",
+  "private": true,
+  "type": "module",
+  "description": "Packs the KayKit models into assets/3d/*.glb",
+  "dependencies": { "@gltf-transform/core": "4.5.1", "@gltf-transform/extensions": "4.5.1", "@gltf-transform/functions": "4.5.1", "meshoptimizer": "^1.3.0" }
+}

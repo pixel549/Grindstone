@@ -1,0 +1,11 @@
+<!doctype html><html><head><link rel="stylesheet" href="../assets/style.css"><style>body{display:block;overflow:auto;padding:8px}.g{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.g div{font-size:10px;text-align:center;color:#aaa}</style></head><body><div class="g" id="g"></div>
+<script src="../assets/core.js"></script><script src="../assets/art.js"></script><script>
+const cases=[];
+const arts={weapon:['blade','axe','blunt','polearm','staff'],head:['hood','hat','helm','crown','mask'],body:['coat','armour','robe','light'],charm:['pendant','phial']};
+for (const slot in arts) for (const art of arts[slot]) for (const tier of [0,2,4]) cases.push({slot,art,tier});
+let html='';
+for (const c of cases){ const s={inv:[{id:1,slot:c.slot,art:c.art,tier:c.tier,bonus:{}}],eq:{weapon:null,head:null,body:null,charm:null}}; s.eq[c.slot]=1; html+=`<div>${Art.portrait(s)}${c.art} ${c.tier}</div>`; }
+const full={inv:[{id:1,slot:'weapon',art:'staff',tier:4,bonus:{}},{id:2,slot:'head',art:'hood',tier:3,bonus:{}},{id:3,slot:'body',art:'coat',tier:3,bonus:{}},{id:4,slot:'charm',art:'pendant',tier:4,bonus:{}}],eq:{weapon:1,head:2,body:3,charm:4}};
+html+=`<div>${Art.portrait(full)}full</div>`;
+document.getElementById('g').innerHTML=html;
+</script></body></html>

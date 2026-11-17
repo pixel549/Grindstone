@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=540,initial-scale=1">
+<style>html,body{margin:0;width:540px;height:240px;overflow:hidden;background:#0a0908}#h{position:absolute;inset:0}</style>
+</head><body><div id="h"></div>
+<script src="core.js"></script>
+<script src="lpchero.js"></script>
+<script src="hearth2d.js"></script>
+<script>
+// Background renderer for the home-screen widget (see WidgetCam.java). Reads the save, lets the hero pick
+// something to do, records a looping close-up (thought bubble and all), hands it back, and asks to be torn down. Never throws.
+(function () {
+  const N = window.Native;
+  const end = (why) => { try { N.log(String(why)); } catch (e) { /* nothing */ } try { N.done(); } catch (e) { /* nothing */ } };
+  try {
+    const raw = N.load();
+    if (!raw) return end('no save');
+    const t = G.today(), S = G.normalize(JSON.parse(raw), t);
+    const eq = (k) => (S.eq[k] != null ? S.inv.find((i) => i.id === S.eq[k]) || null : null);
+    const house = new House2D(document.getElementById('h'), {
+      base: '2d/', look: G.normLook(S.look), gear: { weapon: eq('weapon'), head: eq('head'), body: eq('body'), charm: eq('charm') },
+      state: G.houseLevels(S, t), mind: G.heroMind(S, t), house: G.houseView(S), npcs: S.npcs, estate: G.estateFor3D(S),
+      onError: (e) => end('load failed: ' + e),
+      onReady: () => {
+        house.setActive(false);
+        house.pickActivity();
+        house.captureClip({ w: 540, h: 240 }).then((clip) => {
+          if (clip) { clip.sig = G.widgetSig(S, t); N.frames(JSON.stringify(clip)); }
+          end(clip ? 'ok' : 'no clip');
+        }).catch((e) => end(e));
+      },
+    });
+  } catch (e) { end(e); }
+})();
+</script>
+</body></html>

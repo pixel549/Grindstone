@@ -1,0 +1,271 @@
+{
+ "heroes": 1000,
+ "cases": 2000,
+ "tune": {
+  "a": 0.75,
+  "b": 0.045,
+  "lootA": 3,
+  "lootB": 0.6,
+  "perType": 3,
+  "maxBuffs": 5,
+  "pick": "strong"
+ },
+ "res": {
+  "potion": {
+   "cases": 2000,
+   "opts": [
+    {
+     "label": "below 35%",
+     "clear": 1000,
+     "prog": 15160.423095723447,
+     "best": 1730,
+     "worst": 100,
+     "gold": 227720,
+     "clearPct": 50,
+     "bestPct": 86.5,
+     "worstPct": 10.9
+    },
+    {
+     "label": "below 50%",
+     "clear": 1009,
+     "prog": 15149.19425046975,
+     "best": 1748,
+     "worst": 79,
+     "gold": 230420,
+     "clearPct": 50.5,
+     "bestPct": 87.4,
+     "worstPct": 8.6
+    },
+    {
+     "label": "save for boss",
+     "clear": 916,
+     "prog": 12122.379326266973,
+     "best": 1152,
+     "worst": 814,
+     "gold": 200450,
+     "clearPct": 45.8,
+     "bestPct": 57.6,
+     "worstPct": 88.6
+    }
+   ],
+   "dom": null,
+   "byCtx": {
+    "stuck": {
+     "cases": 1000,
+     "clear": [
+      0,
+      16,
+      6
+     ]
+    },
+    "clearing": {
+     "cases": 1000,
+     "clear": [
+      1000,
+      993,
+      910
+     ]
+    }
+   },
+   "same": 1081,
+   "mattered": 919
+  },
+  "arts": {
+   "cases": 2000,
+   "opts": [
+    {
+     "label": "always",
+     "clear": 1000,
+     "prog": 15160.423095723447,
+     "best": 1872,
+     "worst": 104,
+     "gold": 227720,
+     "clearPct": 50,
+     "bestPct": 93.6,
+     "worstPct": 10
+    },
+    {
+     "label": "boss only",
+     "clear": 933,
+     "prog": 14796.593579061186,
+     "best": 1206,
+     "worst": 206,
+     "gold": 209190,
+     "clearPct": 46.7,
+     "bestPct": 60.3,
+     "worstPct": 19.8
+    },
+    {
+     "label": "never",
+     "clear": 854,
+     "prog": 14805.709336180073,
+     "best": 1018,
+     "worst": 922,
+     "gold": 194270,
+     "clearPct": 42.7,
+     "bestPct": 50.9,
+     "worstPct": 88.8
+    }
+   ],
+   "dom": null,
+   "byCtx": {
+    "stuck": {
+     "cases": 1000,
+     "clear": [
+      0,
+      14,
+      6
+     ]
+    },
+    "clearing": {
+     "cases": 1000,
+     "clear": [
+      1000,
+      919,
+      848
+     ]
+    }
+   },
+   "same": 962,
+   "mattered": 1038
+  },
+  "chest": {
+   "cases": 509,
+   "opts": [
+    {
+     "label": "put it on",
+     "clear": 312,
+     "prog": 3272.856097000946,
+     "best": 387,
+     "worst": 122,
+     "gold": 59180,
+     "clearPct": 61.3,
+     "bestPct": 76,
+     "worstPct": 33.3
+    },
+    {
+     "label": "stash it",
+     "clear": 341,
+     "prog": 3329.950783275942,
+     "best": 265,
+     "worst": 244,
+     "gold": 67025,
+     "clearPct": 67,
+     "bestPct": 52.1,
+     "worstPct": 66.7
+    }
+   ],
+   "dom": null,
+   "byCtx": {
+    "stuck": {
+     "cases": 224,
+     "clear": [
+      27,
+      58
+     ]
+    },
+    "clearing": {
+     "cases": 285,
+     "clear": [
+      285,
+      283
+     ]
+    }
+   },
+   "same": 143,
+   "mattered": 366
+  },
+  "fountain": {
+   "cases": 1261,
+   "opts": [
+    {
+     "label": "drink",
+     "clear": 607,
+     "prog": 10100.73474998098,
+     "best": 1208,
+     "worst": 53,
+     "gold": 157620,
+     "clearPct": 48.1,
+     "bestPct": 95.8,
+     "worstPct": 18.2
+    },
+    {
+     "label": "leave it",
+     "clear": 583,
+     "prog": 10085.11576863202,
+     "best": 1022,
+     "worst": 239,
+     "gold": 151060,
+     "clearPct": 46.2,
+     "bestPct": 81,
+     "worstPct": 81.8
+    }
+   ],
+   "dom": null,
+   "byCtx": {
+    "stuck": {
+     "cases": 656,
+     "clear": [
+      2,
+      4
+     ]
+    },
+    "clearing": {
+     "cases": 605,
+     "clear": [
+      605,
+      579
+     ]
+    }
+   },
+   "same": 969,
+   "mattered": 292
+  },
+  "fork": {
+   "cases": 1271,
+   "opts": [
+    {
+     "label": "left (fight, gold)",
+     "clear": 617,
+     "prog": 10070.203390149874,
+     "best": 1025,
+     "worst": 246,
+     "gold": 178480,
+     "clearPct": 48.5,
+     "bestPct": 80.6,
+     "worstPct": 52.3
+    },
+    {
+     "label": "right (trap)",
+     "clear": 596,
+     "prog": 10198.34272361335,
+     "best": 1047,
+     "worst": 224,
+     "gold": 110735,
+     "clearPct": 46.9,
+     "bestPct": 82.4,
+     "worstPct": 47.7
+    }
+   ],
+   "dom": null,
+   "byCtx": {
+    "stuck": {
+     "cases": 654,
+     "clear": [
+      0,
+      15
+     ]
+    },
+    "clearing": {
+     "cases": 617,
+     "clear": [
+      617,
+      581
+     ]
+    }
+   },
+   "same": 801,
+   "mattered": 470
+  }
+ }
+}

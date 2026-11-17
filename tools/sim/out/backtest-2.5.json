@@ -1,0 +1,3180 @@
+{
+ "runs": 200,
+ "start": "2026-11-02",
+ "end": "2026-12-13",
+ "rosterTo": "2026-12-17",
+ "tune": {
+  "base": 0.6,
+  "long": 0.3,
+  "short": 0.1,
+  "shortCap": 3,
+  "longDays": 5,
+  "grace": 1
+ },
+ "callings": {
+  "healer": {
+   "stat": "VIT",
+   "days": 6,
+   "weeks": 2,
+   "shortH": 12,
+   "title": "Healer",
+   "garb": "robe",
+   "hat": "none",
+   "what": "Look after yourself (vitality deeds: meals, water, stretching, the shop) on 6 days a week, 2 weeks running",
+   "arrive": "Two weeks of looking after yourself, and someone noticed.",
+   "short": "Fresh poultice",
+   "shortWhat": "any vitality deed",
+   "long": "Steady hands"
+  },
+  "scout": {
+   "stat": "END",
+   "days": 3,
+   "weeks": 3,
+   "shortH": 12,
+   "title": "Scout",
+   "garb": "work",
+   "hat": "hood",
+   "what": "Endurance (swims, runs, the beach) on 3 days a week, 3 weeks running",
+   "arrive": "Three weeks of getting out there. Someone kept pace.",
+   "short": "Light on her feet",
+   "shortWhat": "any endurance session",
+   "long": "Knows the ground"
+  },
+  "fighter": {
+   "stat": "STR",
+   "days": 2,
+   "weeks": 4,
+   "shortH": 24,
+   "title": "Sparring partner",
+   "garb": "armour",
+   "hat": "none",
+   "what": "Strength sessions on 2 days a week, 4 weeks running",
+   "arrive": "A month of lifting. Someone wants to spar.",
+   "short": "Warmed up",
+   "shortWhat": "any strength session",
+   "long": "Battle-hardened"
+  },
+  "mage": {
+   "stat": "INT",
+   "days": 4,
+   "weeks": 5,
+   "shortH": 24,
+   "title": "Mage",
+   "garb": "finery",
+   "hat": "hat",
+   "what": "Study or reading on 4 days a week, 5 weeks running",
+   "arrive": "Five weeks at the books. Someone came to see what you were reading.",
+   "short": "Fresh ink",
+   "shortWhat": "any study or reading",
+   "long": "Deep study"
+  }
+ },
+ "scen": {
+  "asLogged": {
+   "weeks": [
+    {
+     "w": "2026-11-02",
+     "real": true,
+     "load": {
+      "hours": 41,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 3,
+      "mean": 2.195
+     },
+     "depth": 2
+    },
+    {
+     "w": "2026-11-09",
+     "real": false,
+     "load": {
+      "hours": 37,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.995
+     },
+     "depth": 3
+    },
+    {
+     "w": "2026-11-16",
+     "real": false,
+     "load": {
+      "hours": 36,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 1,
+      "mean": 0.415
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-23",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 3,
+      "cap": 9
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.85
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-30",
+     "real": false,
+     "load": {
+      "hours": 43,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 1,
+      "mean": 0.41
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-12-07",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 2,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.415
+     },
+     "depth": 5
+    }
+   ],
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "medWeek": 2
+    },
+    "scout": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "fighter": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "mage": {
+     "pct": 0,
+     "medWeek": null
+    }
+   },
+   "longDays": {
+    "healer": 8,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   },
+   "stallMax": {
+    "med": 20,
+    "p90": 33
+   },
+   "example": [
+    {
+     "day": "2026-11-02",
+     "n": 1,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-03",
+     "n": 2,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-04",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-05",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-06",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-07",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-08",
+     "n": 3,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-09",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-10",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-11",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-12",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-13",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-14",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [
+      "healer"
+     ],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 4,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-15",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 4,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-16",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 4,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-17",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 4,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-18",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-19",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-20",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-21",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-22",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-23",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-24",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-25",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-26",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-27",
+     "n": 4,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-28",
+     "n": 5,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-29",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 6,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-30",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 6,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-01",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-02",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-03",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 7,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-04",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-05",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-06",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-07",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-08",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-09",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-10",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-11",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-12",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 8,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-13",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 8,
+     "buffs": 3
+    }
+   ]
+  },
+  "ordinary": {
+   "weeks": [
+    {
+     "w": "2026-11-02",
+     "real": true,
+     "load": {
+      "hours": 41,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 3,
+      "mean": 2.195
+     },
+     "depth": 2
+    },
+    {
+     "w": "2026-11-09",
+     "real": false,
+     "load": {
+      "hours": 37,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.65
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-16",
+     "real": false,
+     "load": {
+      "hours": 36,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.145
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-11-23",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 3,
+      "cap": 9
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.18
+     },
+     "depth": 6
+    },
+    {
+     "w": "2026-11-30",
+     "real": false,
+     "load": {
+      "hours": 43,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.565
+     },
+     "depth": 6
+    },
+    {
+     "w": "2026-12-07",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 2,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 4,
+      "mean": 1.495
+     },
+     "depth": 8
+    }
+   ],
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "medWeek": 2
+    },
+    "scout": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "fighter": {
+     "pct": 100,
+     "medWeek": 5
+    },
+    "mage": {
+     "pct": 0,
+     "medWeek": null
+    }
+   },
+   "longDays": {
+    "healer": 8,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   },
+   "stallMax": {
+    "med": 16,
+    "p90": 27
+   },
+   "example": [
+    {
+     "day": "2026-11-02",
+     "n": 1,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-03",
+     "n": 2,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-04",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-05",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-06",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-07",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-08",
+     "n": 3,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-09",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-10",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-11",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-12",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-13",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-14",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-15",
+     "n": 5,
+     "cleared": 2,
+     "arrived": [
+      "healer"
+     ],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-16",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-17",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-18",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-19",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-20",
+     "n": 6,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-21",
+     "n": 6,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-22",
+     "n": 7,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-23",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-24",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-25",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-26",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-27",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-28",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-29",
+     "n": 8,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-30",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-01",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-02",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-03",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [
+      "fighter"
+     ],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-04",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-05",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-06",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-07",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-08",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-09",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-10",
+     "n": 10,
+     "cleared": 2,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-11",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-12",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-13",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 10,
+     "buffs": 5
+    }
+   ]
+  },
+  "strong": {
+   "weeks": [
+    {
+     "w": "2026-11-02",
+     "real": true,
+     "load": {
+      "hours": 41,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 3,
+      "mean": 2.195
+     },
+     "depth": 2
+    },
+    {
+     "w": "2026-11-09",
+     "real": false,
+     "load": {
+      "hours": 37,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 4,
+      "mean": 2.505
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-16",
+     "real": false,
+     "load": {
+      "hours": 36,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.22
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-11-23",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 3,
+      "cap": 9
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 0,
+      "p90": 5,
+      "mean": 2.165
+     },
+     "depth": 8
+    },
+    {
+     "w": "2026-11-30",
+     "real": false,
+     "load": {
+      "hours": 43,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 5,
+      "mean": 1.975
+     },
+     "depth": 10
+    },
+    {
+     "w": "2026-12-07",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 2,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 4,
+      "mean": 1.185
+     },
+     "depth": 11
+    }
+   ],
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "medWeek": 2
+    },
+    "scout": {
+     "pct": 100,
+     "medWeek": 4
+    },
+    "fighter": {
+     "pct": 100,
+     "medWeek": 5
+    },
+    "mage": {
+     "pct": 100,
+     "medWeek": 6
+    }
+   },
+   "longDays": {
+    "healer": 8,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   },
+   "stallMax": {
+    "med": 14,
+    "p90": 20
+   },
+   "example": [
+    {
+     "day": "2026-11-02",
+     "n": 1,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-03",
+     "n": 2,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-04",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-05",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-06",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-07",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-08",
+     "n": 3,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-09",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-10",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-11",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-12",
+     "n": 5,
+     "cleared": 2,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-13",
+     "n": 6,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-14",
+     "n": 6,
+     "cleared": 0,
+     "arrived": [
+      "healer"
+     ],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-15",
+     "n": 7,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-16",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-17",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-18",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-19",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-20",
+     "n": 8,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-21",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-22",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-23",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-24",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-25",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-26",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-27",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-28",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-29",
+     "n": 10,
+     "cleared": 2,
+     "arrived": [
+      "scout"
+     ],
+     "here": [
+      "healer",
+      "scout"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-30",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-01",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 11,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-02",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 11,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-03",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 11,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-04",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [
+      "fighter"
+     ],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 11,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-05",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 11,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-06",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 12,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-07",
+     "n": 10,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 12,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-08",
+     "n": 11,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 12,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-09",
+     "n": 11,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 12,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-10",
+     "n": 11,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 12,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-11",
+     "n": 11,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter"
+     ],
+     "long": [],
+     "level": 13,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-12",
+     "n": 11,
+     "cleared": 0,
+     "arrived": [
+      "mage"
+     ],
+     "here": [
+      "healer",
+      "scout",
+      "fighter",
+      "mage"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 13,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-13",
+     "n": 11,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "scout",
+      "fighter",
+      "mage"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 13,
+     "buffs": 5
+    }
+   ]
+  },
+  "lapsed": {
+   "weeks": [
+    {
+     "w": "2026-11-02",
+     "real": true,
+     "load": {
+      "hours": 41,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 3,
+      "mean": 2.195
+     },
+     "depth": 2
+    },
+    {
+     "w": "2026-11-09",
+     "real": false,
+     "load": {
+      "hours": 37,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.7
+     },
+     "depth": 3
+    },
+    {
+     "w": "2026-11-16",
+     "real": false,
+     "load": {
+      "hours": 36,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 1,
+      "mean": 0.195
+     },
+     "depth": 3
+    },
+    {
+     "w": "2026-11-23",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 3,
+      "cap": 9
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 1,
+      "mean": 0.405
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-30",
+     "real": false,
+     "load": {
+      "hours": 43,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 2,
+      "mean": 0.37
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-12-07",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 2,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 1,
+      "mean": 0.355
+     },
+     "depth": 4
+    }
+   ],
+   "arrive": {
+    "healer": {
+     "pct": 9,
+     "medWeek": 2
+    },
+    "scout": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "fighter": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "mage": {
+     "pct": 0,
+     "medWeek": null
+    }
+   },
+   "longDays": {
+    "healer": 0,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   },
+   "stallMax": {
+    "med": 26,
+    "p90": 35
+   },
+   "example": [
+    {
+     "day": "2026-11-02",
+     "n": 1,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-03",
+     "n": 2,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-04",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-05",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-06",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-07",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-08",
+     "n": 3,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-09",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-10",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-11",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-12",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-13",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-14",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-15",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-16",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-17",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-18",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-19",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-20",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-21",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-22",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-23",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-24",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-25",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-26",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-27",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-28",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-29",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-30",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 5,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-01",
+     "n": 5,
+     "cleared": 2,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-02",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 2
+    },
+    {
+     "day": "2026-12-03",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-04",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 1
+    },
+    {
+     "day": "2026-12-05",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 2
+    },
+    {
+     "day": "2026-12-06",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 2
+    },
+    {
+     "day": "2026-12-07",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-08",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 1
+    },
+    {
+     "day": "2026-12-09",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-10",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 3
+    },
+    {
+     "day": "2026-12-11",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 6,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-12",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 7,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-13",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    }
+   ]
+  },
+  "slip": {
+   "weeks": [
+    {
+     "w": "2026-11-02",
+     "real": true,
+     "load": {
+      "hours": 41,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 1,
+      "p90": 3,
+      "mean": 2.195
+     },
+     "depth": 2
+    },
+    {
+     "w": "2026-11-09",
+     "real": false,
+     "load": {
+      "hours": 37,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 2,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.65
+     },
+     "depth": 4
+    },
+    {
+     "w": "2026-11-16",
+     "real": false,
+     "load": {
+      "hours": 36,
+      "hard": 3,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 3,
+      "mean": 1.145
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-11-23",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 3,
+      "cap": 9
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 0,
+      "mean": 0.085
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-11-30",
+     "real": false,
+     "load": {
+      "hours": 43,
+      "hard": 2,
+      "cap": 11
+     },
+     "cleared": {
+      "med": 0,
+      "p10": 0,
+      "p90": 3,
+      "mean": 0.805
+     },
+     "depth": 5
+    },
+    {
+     "w": "2026-12-07",
+     "real": false,
+     "load": {
+      "hours": 44,
+      "hard": 2,
+      "cap": 10
+     },
+     "cleared": {
+      "med": 1,
+      "p10": 0,
+      "p90": 4,
+      "mean": 1.475
+     },
+     "depth": 8
+    }
+   ],
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "medWeek": 2
+    },
+    "scout": {
+     "pct": 0,
+     "medWeek": null
+    },
+    "fighter": {
+     "pct": 100,
+     "medWeek": 6
+    },
+    "mage": {
+     "pct": 0,
+     "medWeek": null
+    }
+   },
+   "longDays": {
+    "healer": 6,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   },
+   "stallMax": {
+    "med": 21,
+    "p90": 29
+   },
+   "example": [
+    {
+     "day": "2026-11-02",
+     "n": 1,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-03",
+     "n": 2,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-04",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-05",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 1,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-06",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-07",
+     "n": 2,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-08",
+     "n": 3,
+     "cleared": 1,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 2,
+     "buffs": 2
+    },
+    {
+     "day": "2026-11-09",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-10",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 3,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-11",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-12",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-13",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-14",
+     "n": 3,
+     "cleared": 0,
+     "arrived": [],
+     "here": [],
+     "long": [],
+     "level": 4,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-15",
+     "n": 5,
+     "cleared": 2,
+     "arrived": [
+      "healer"
+     ],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-16",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-17",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 5,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-18",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-19",
+     "n": 5,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 4
+    },
+    {
+     "day": "2026-11-20",
+     "n": 6,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-21",
+     "n": 6,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 6,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-22",
+     "n": 7,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-23",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-24",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 1
+    },
+    {
+     "day": "2026-11-25",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-26",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-27",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-28",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-11-29",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 3
+    },
+    {
+     "day": "2026-11-30",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 7,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-01",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-02",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-03",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-04",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-05",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 8,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-06",
+     "n": 7,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-07",
+     "n": 8,
+     "cleared": 1,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-08",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-09",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-10",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [
+      "fighter"
+     ],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [
+      "healer"
+     ],
+     "level": 9,
+     "buffs": 4
+    },
+    {
+     "day": "2026-12-11",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-12",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    },
+    {
+     "day": "2026-12-13",
+     "n": 8,
+     "cleared": 0,
+     "arrived": [],
+     "here": [
+      "healer",
+      "fighter"
+     ],
+     "long": [],
+     "level": 10,
+     "buffs": 5
+    }
+   ]
+  }
+ }
+}

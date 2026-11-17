@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keep the Oracle's and the interpreter's API keys, and where home is, out of Google backups and device transfers. -->
+<data-extraction-rules>
+    <cloud-backup><exclude domain="sharedpref" path="oracle.xml" /><exclude domain="sharedpref" path="interp.xml" /><exclude domain="sharedpref" path="away.xml" /></cloud-backup>
+    <device-transfer><exclude domain="sharedpref" path="oracle.xml" /><exclude domain="sharedpref" path="interp.xml" /><exclude domain="sharedpref" path="away.xml" /></device-transfer>
+</data-extraction-rules>

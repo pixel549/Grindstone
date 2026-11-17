@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <LinearLayout
+        
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_emblem" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/jersey15"
+                    android:singleLine="true"
+                    android:text="Jake"
+                    android:textColor="@color/text"
+                    android:textSize="19sp" />
+
+                <TextView
+                    
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Seasoned Warden"
+                    android:textColor="@color/mute"
+                    android:fontFamily="@font/jersey15"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/lv_badge"
+                android:paddingStart="8dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="3dp"
+                android:text="LV 7"
+                android:textColor="@color/gold2"
+                android:textSize="13sp"
+                android:fontFamily="@font/jersey15"
+                android:letterSpacing="0.1" />
+        </LinearLayout>
+
+        <ProgressBar
+            
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="10dp"
+            android:max="100"
+            android:progress="62"
+            android:progressDrawable="@drawable/xp_bar" />
+
+        <TextView
+            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:singleLine="true"
+            android:text="212/320 XP     ◈ 486     ✦ 9"
+            android:textColor="@color/mute"
+            android:textSize="13.5sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+        <LinearLayout
+            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="47dp"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp">
+
+            <FrameLayout
+                
+                android:layout_width="3dp"
+                android:layout_height="22dp"
+                android:background="#FFC2A465" />
+
+            <TextView
+                
+                android:layout_width="34dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="🦜"
+                android:textSize="21sp" />
+
+            <TextView
+                
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Feed &amp; water Ruby and Kermit"
+                android:textColor="@color/text"
+                android:fontFamily="@font/jersey15"
+                android:textSize="17sp" />
+
+            <TextView
+                
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="10dp"
+                android:text="+10"
+                android:textColor="@color/gold"
+                android:textSize="13.5sp" />
+
+            <ImageView
+                
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/check_ring"
+                android:tint="#FFC2A465" />
+        </LinearLayout>
+        <LinearLayout
+            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="47dp"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp">
+
+            <FrameLayout
+                
+                android:layout_width="3dp"
+                android:layout_height="22dp"
+                android:background="#FF6F9AB0" />
+
+            <TextView
+                
+                android:layout_width="34dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="🏊"
+                android:textSize="21sp" />
+
+            <TextView
+                
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Swim session"
+                android:textColor="@color/text"
+                android:fontFamily="@font/jersey15"
+                android:textSize="17sp" />
+
+            <TextView
+                
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="10dp"
+                android:text="0/1   +35"
+                android:textColor="@color/gold"
+                android:textSize="13.5sp" />
+
+            <ImageView
+                
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/check_ring"
+                android:tint="#FF6F9AB0" />
+        </LinearLayout>
+        <LinearLayout
+            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/row_bg"
+            android:gravity="center_vertical"
+            android:minHeight="47dp"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp">
+
+            <FrameLayout
+                
+                android:layout_width="3dp"
+                android:layout_height="22dp"
+                android:background="#FF9A8AC8" />
+
+            <TextView
+                
+                android:layout_width="34dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="📚"
+                android:textSize="21sp" />
+
+            <TextView
+                
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Cert IV study block"
+                android:textColor="@color/text"
+                android:fontFamily="@font/jersey15"
+                android:textSize="17sp" />
+
+            <TextView
+                
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="10dp"
+                android:text="0/2   +20"
+                android:textColor="@color/gold"
+                android:textSize="13.5sp" />
+
+            <ImageView
+                
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/check_ring"
+                android:tint="#FF9A8AC8" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,34 @@
+[
+ {
+  "test": "test/events.js",
+  "what": "Every blow in the run adds up to the log and HP chains line to line",
+  "runs": 400,
+  "checked": "1,502 fights",
+  "checks": 56624,
+  "failures": 0
+ },
+ {
+  "test": "test/crawl_trace.js",
+  "what": "Numbers on screen add up to the log; HP over his head matches at every blow and beat; same seed plays back the same",
+  "runs": 24,
+  "checked": "289 beats, 93 fights, 1,503 numbers",
+  "checks": 902,
+  "failures": 0
+ },
+ {
+  "test": "UI suites (9)",
+  "what": "companion, delve, build, hearth, estate, hero, widget, herald, crawl screens",
+  "runs": 9,
+  "checked": "all screens",
+  "checks": null,
+  "failures": 0
+ },
+ {
+  "test": "Java CrossCheck",
+  "what": "Phone-side deed logic matches the page",
+  "runs": 40,
+  "checked": "9,777 ops",
+  "checks": 68795,
+  "failures": 0
+ }
+]

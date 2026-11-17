@@ -1,0 +1,26 @@
+[
+ {
+  "source": "Fitness Tracker (Drive)",
+  "what": "Meals logged every day; 1 run (3 Nov); 1 strength session (8 Nov)",
+  "span": "2\u20138 Nov 2026",
+  "used": "Yes: the one real week"
+ },
+ {
+  "source": "Findmyshift roster (calendar feed)",
+  "what": "95 shifts and days off",
+  "span": "12 Oct \u2013 17 Dec 2026",
+  "used": "Yes: where a session fits each day"
+ },
+ {
+  "source": "Grindstone calendar",
+  "what": "Not in your account",
+  "span": "\u2014",
+  "used": "No"
+ },
+ {
+  "source": "App backup in Drive",
+  "what": "None found",
+  "span": "\u2014",
+  "used": "No: export one to add chores, birds and study"
+ }
+]

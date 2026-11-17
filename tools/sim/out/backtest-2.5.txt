@@ -1,0 +1,55 @@
+
+== asLogged  (median of 200 runs)
+week        roster(h/hard/cap)  cleared(med p10-p90 mean)  depth
+2026-11-02*   41h 2 11        2 1-3 2.19            2
+2026-11-09    37h 3 10        1 0-2 0.99            3
+2026-11-16    36h 3 10        0 0-1 0.41            4
+2026-11-23    44h 3  9        0 0-2 0.85            4
+2026-11-30    43h 2 11        0 0-1 0.41            5
+2026-12-07    44h 2 10        0 0-2 0.41            5
+arrivals: healer 100% (wk 2), scout 0% (wk null), fighter 0% (wk null), mage 0% (wk null)
+long-buff days: healer 8, scout 0, fighter 0, mage 0   longest stall: 20d (p90 33)
+
+== ordinary  (median of 200 runs)
+week        roster(h/hard/cap)  cleared(med p10-p90 mean)  depth
+2026-11-02*   41h 2 11        2 1-3 2.19            2
+2026-11-09    37h 3 10        2 0-3 1.65            4
+2026-11-16    36h 3 10        1 0-3 1.15            5
+2026-11-23    44h 3  9        1 0-3 1.18            6
+2026-11-30    43h 2 11        0 0-2 0.56            6
+2026-12-07    44h 2 10        0 0-4 1.50            8
+arrivals: healer 100% (wk 2), scout 0% (wk null), fighter 100% (wk 5), mage 0% (wk null)
+long-buff days: healer 8, scout 0, fighter 0, mage 0   longest stall: 16d (p90 27)
+
+== strong  (median of 200 runs)
+week        roster(h/hard/cap)  cleared(med p10-p90 mean)  depth
+2026-11-02*   41h 2 11        2 1-3 2.19            2
+2026-11-09    37h 3 10        2 1-4 2.50            4
+2026-11-16    36h 3 10        1 0-3 1.22            5
+2026-11-23    44h 3  9        2 0-5 2.17            8
+2026-11-30    43h 2 11        1 0-5 1.98            10
+2026-12-07    44h 2 10        0 0-4 1.19            11
+arrivals: healer 100% (wk 2), scout 100% (wk 4), fighter 100% (wk 5), mage 100% (wk 6)
+long-buff days: healer 8, scout 0, fighter 0, mage 0   longest stall: 14d (p90 20)
+
+== lapsed  (median of 200 runs)
+week        roster(h/hard/cap)  cleared(med p10-p90 mean)  depth
+2026-11-02*   41h 2 11        2 1-3 2.19            2
+2026-11-09    37h 3 10        0 0-2 0.70            3
+2026-11-16    36h 3 10        0 0-1 0.20            3
+2026-11-23    44h 3  9        0 0-1 0.41            4
+2026-11-30    43h 2 11        0 0-2 0.37            4
+2026-12-07    44h 2 10        0 0-1 0.35            4
+arrivals: healer 9% (wk 2), scout 0% (wk null), fighter 0% (wk null), mage 0% (wk null)
+long-buff days: healer 0, scout 0, fighter 0, mage 0   longest stall: 26d (p90 35)
+
+== slip  (median of 200 runs)
+week        roster(h/hard/cap)  cleared(med p10-p90 mean)  depth
+2026-11-02*   41h 2 11        2 1-3 2.19            2
+2026-11-09    37h 3 10        2 0-3 1.65            4
+2026-11-16    36h 3 10        1 0-3 1.15            5
+2026-11-23    44h 3  9        0 0-0 0.09            5
+2026-11-30    43h 2 11        0 0-3 0.81            5
+2026-12-07    44h 2 10        1 0-4 1.48            8
+arrivals: healer 100% (wk 2), scout 0% (wk null), fighter 100% (wk 6), mage 0% (wk null)
+long-buff days: healer 6, scout 0, fighter 0, mage 0   longest stall: 21d (p90 29)

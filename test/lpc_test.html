@@ -1,0 +1,21 @@
+<!doctype html><html><body style="margin:0;background:#1a1612">
+<canvas id="c" width="1200" height="520"></canvas>
+<script src="core.js"></script><script src="lpchero.js"></script>
+<script>
+const looks = [
+  [{sex:'m',skin:'#f3d2b5',hair:'bald',hairColour:'#4a2f1f',beard:'beard',extra:'glasses',outfit:'#5a6e8a'}, {}],
+  [{sex:'f',skin:'#7a4a2e',hair:'buns',hairColour:'#a8382a',beard:'none',outfit:'#2f6b6b'}, {}],
+  [{sex:'m',skin:'#e3b48f',hair:'cropped',hairColour:'#1c1714',beard:'stubble',outfit:'#8a4a3a'}, {body:{base:'Gambeson',art:'light',tier:1}, head:{base:'Hood',art:'hood',tier:0}, weapon:{base:'Longsword',art:'blade',tier:1}}],
+  [{sex:'m',skin:'#c98e66',hair:'parted',hairColour:'#7b4a2a',beard:'trimmed',outfit:'#4f6b4a'}, {body:{base:'Cuirass',art:'armour',tier:3}, head:{base:'Helm',art:'helm',tier:3}, weapon:{base:'Greatsword',art:'blade',tier:3}, charm:{base:'Locket',art:'pendant',tier:3}}],
+  [{sex:'f',skin:'#f3d2b5',hair:'long',hairColour:'#e8d27a',beard:'none',outfit:'#6a5a8a'}, {body:{base:'Robes',art:'robe',tier:4}, head:{base:'Circlet',art:'crown',tier:4}, weapon:{base:'Lantern Staff',art:'staff',tier:4}}],
+  [{sex:'m',skin:'#a26a45',hair:'afro',hairColour:'#1c1714',beard:'none',outfit:'#9a6a2a'}, {body:{base:'Greatcoat',art:'coat',tier:2}, head:{base:'Tricorn',art:'hat',tier:2}, weapon:{base:'Mace',art:'blunt',tier:2}}],
+  [{sex:'m',skin:'#f3d2b5',hair:'bald',hairColour:'#4a2f1f',beard:'beard',extra:'glasses',outfit:'#5a6e8a'}, {body:{base:'Hauberk',art:'armour',tier:4}, head:{base:'Bascinet',art:'helm',tier:4}, weapon:{base:'Halberd',art:'polearm',tier:4}}],
+];
+const g = document.getElementById('c').getContext('2d'); g.imageSmoothingEnabled = false;
+LPC.init().then(() => Promise.all(looks.map(([lk, gear], i) => { const d = LPC.dress(lk, gear, { kit: true }); return LPC.build(d.spec, d.body, ['walk', 'sit', 'slash']).then((h) => {
+  g.drawImage(h.sheets.walk, 0, 128, 64, 64, i * 170, 0, 192, 192);
+  g.drawImage(h.sheets.walk, 0, 192, 64, 64, i * 170, 170, 128, 128);
+  g.drawImage(h.sheets.sit, 0, 128, 64, 64, i * 170, 300, 128, 128);
+  g.drawImage(h.sheets.slash, 128, 0, 64, 64, i * 170 + 60, 380, 128, 128);
+}); }))).then(() => { document.title = 'done'; }, (e) => { document.title = 'ERR ' + e; });
+</script></body></html>

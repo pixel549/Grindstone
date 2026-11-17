@@ -1,0 +1,58 @@
+[
+ {
+  "measure": "Ordinary week",
+  "target": "1.0",
+  "v25": 1.07,
+  "v24": 2.23,
+  "met": "Yes"
+ },
+ {
+  "measure": "Strong week",
+  "target": "1.35",
+  "v25": 1.34,
+  "v24": 2.44,
+  "met": "Yes"
+ },
+ {
+  "measure": "Strong \u00f7 ordinary",
+  "target": "1.35",
+  "v25": 1.25,
+  "v24": 1.09,
+  "met": "Short (1.25)"
+ },
+ {
+  "measure": "Lapsed week",
+  "target": "\u2264 0.15",
+  "v25": 0.34,
+  "v24": 0.61,
+  "met": "No"
+ },
+ {
+  "measure": "Heavy roster \u00f7 light (ordinary)",
+  "target": "\u2265 0.75",
+  "v25": 1.12,
+  "v24": 0.97,
+  "met": "Yes"
+ },
+ {
+  "measure": "Two weeks after a lapse",
+  "target": "\u2265 0.8",
+  "v25": 1.22,
+  "v24": 2.04,
+  "met": "Yes"
+ },
+ {
+  "measure": "Luck: depth spread at 12 wks",
+  "target": "\u2264 6",
+  "v25": 7,
+  "v24": 19,
+  "met": "Close (7)"
+ },
+ {
+  "measure": "Best week (p90)",
+  "target": "\u2264 5",
+  "v25": 8,
+  "v24": 23,
+  "met": "No"
+ }
+]

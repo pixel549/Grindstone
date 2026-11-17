@@ -1,0 +1,42 @@
+[
+ {
+  "key": "before|1x",
+  "phase": "Before tuning",
+  "cpu": "1\u00d7",
+  "workMedian": 4.0,
+  "workP95": 6.6,
+  "fps": 60
+ },
+ {
+  "key": "before|4x",
+  "phase": "Before tuning",
+  "cpu": "4\u00d7",
+  "workMedian": 10.8,
+  "workP95": 21.5,
+  "fps": 60
+ },
+ {
+  "key": "after|1x",
+  "phase": "2.5",
+  "cpu": "1\u00d7",
+  "workMedian": 0.6,
+  "workP95": 2.8,
+  "fps": 60
+ },
+ {
+  "key": "after|4x",
+  "phase": "2.5",
+  "cpu": "4\u00d7",
+  "workMedian": 1.6,
+  "workP95": 7.9,
+  "fps": 60
+ },
+ {
+  "key": "after|6x",
+  "phase": "2.5",
+  "cpu": "6\u00d7",
+  "workMedian": 3.3,
+  "workP95": 17.2,
+  "fps": 30
+ }
+]

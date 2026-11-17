@@ -1,0 +1,257 @@
+{
+ "cfg": {},
+ "score": 26.8,
+ "m": {
+  "ordinary": {
+   "steady": 1.07,
+   "weekly": [
+    2.32,
+    1.65,
+    0.95,
+    1.19,
+    0.49,
+    1.73,
+    1.55,
+    0.9,
+    0.57,
+    0.89,
+    1.12,
+    0.73
+   ],
+   "zeroWeeks": 61,
+   "depth": {
+    "p10": 11,
+    "med": 15,
+    "p90": 18
+   },
+   "lumpy": 8,
+   "heavy": 1.16,
+   "light": 1.04,
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "med": 2
+    },
+    "scout": {
+     "pct": 0,
+     "med": null
+    },
+    "fighter": {
+     "pct": 100,
+     "med": 5
+    },
+    "mage": {
+     "pct": 0,
+     "med": null
+    }
+   },
+   "longDays": {
+    "healer": 26,
+    "scout": 0,
+    "fighter": 6,
+    "mage": 0
+   }
+  },
+  "strong": {
+   "steady": 1.34,
+   "weekly": [
+    2.32,
+    2.24,
+    1.22,
+    2.01,
+    2.23,
+    1.17,
+    0.76,
+    1.8,
+    1.39,
+    1.02,
+    0.5,
+    0.4
+   ],
+   "zeroWeeks": 58,
+   "depth": {
+    "p10": 12,
+    "med": 18,
+    "p90": 19
+   },
+   "lumpy": 9,
+   "heavy": 1.06,
+   "light": 1.45,
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "med": 2
+    },
+    "scout": {
+     "pct": 100,
+     "med": 4
+    },
+    "fighter": {
+     "pct": 100,
+     "med": 5
+    },
+    "mage": {
+     "pct": 100,
+     "med": 6
+    }
+   },
+   "longDays": {
+    "healer": 26,
+    "scout": 12,
+    "fighter": 6,
+    "mage": 6
+   }
+  },
+  "lapsed": {
+   "steady": 0.34,
+   "weekly": [
+    2.32,
+    0.7,
+    0.26,
+    0.36,
+    0.3,
+    0.22,
+    0.4,
+    0.27,
+    0.11,
+    0.07,
+    0.21,
+    0.81
+   ],
+   "zeroWeeks": 79,
+   "depth": {
+    "p10": 4,
+    "med": 6,
+    "p90": 8
+   },
+   "lumpy": 4,
+   "heavy": 0.52,
+   "light": 0.27,
+   "arrive": {
+    "healer": {
+     "pct": 7,
+     "med": 3
+    },
+    "scout": {
+     "pct": 0,
+     "med": null
+    },
+    "fighter": {
+     "pct": 0,
+     "med": null
+    },
+    "mage": {
+     "pct": 0,
+     "med": null
+    }
+   },
+   "longDays": {
+    "healer": 0,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   }
+  },
+  "slip": {
+   "steady": 1.06,
+   "weekly": [
+    2.32,
+    1.65,
+    0.95,
+    1.19,
+    0.49,
+    0.37,
+    2.06,
+    1.31,
+    0.7,
+    0.66,
+    0.97,
+    1.3
+   ],
+   "zeroWeeks": 61,
+   "depth": {
+    "p10": 11,
+    "med": 15,
+    "p90": 18
+   },
+   "lumpy": 9,
+   "heavy": 1.52,
+   "light": 0.89,
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "med": 2
+    },
+    "scout": {
+     "pct": 0,
+     "med": null
+    },
+    "fighter": {
+     "pct": 100,
+     "med": 5
+    },
+    "mage": {
+     "pct": 0,
+     "med": null
+    }
+   },
+   "longDays": {
+    "healer": 24,
+    "scout": 0,
+    "fighter": 6,
+    "mage": 0
+   },
+   "recover": 1.22
+  },
+  "asLogged": {
+   "steady": 0.63,
+   "weekly": [
+    2.32,
+    0.9,
+    0.45,
+    0.68,
+    0.6,
+    0.38,
+    0.29,
+    0.48,
+    1.31,
+    0.8,
+    0.45,
+    0.64
+   ],
+   "zeroWeeks": 71,
+   "depth": {
+    "p10": 5,
+    "med": 10,
+    "p90": 12
+   },
+   "lumpy": 6,
+   "heavy": 0.54,
+   "light": 0.67,
+   "arrive": {
+    "healer": {
+     "pct": 100,
+     "med": 2
+    },
+    "scout": {
+     "pct": 0,
+     "med": null
+    },
+    "fighter": {
+     "pct": 0,
+     "med": null
+    },
+    "mage": {
+     "pct": 0,
+     "med": null
+    }
+   },
+   "longDays": {
+    "healer": 26,
+    "scout": 0,
+    "fighter": 0,
+    "mage": 0
+   }
+  }
+ }
+}

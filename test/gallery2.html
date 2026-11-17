@@ -1,0 +1,15 @@
+<!doctype html><html><head><style>body{background:#16131b;margin:0;padding:8px;font:10px sans-serif;color:#aaa}.g{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.g div{text-align:center}svg{width:100%;height:auto;background:#221d29;border-radius:8px}</style></head><body><div class="g" id="g"></div>
+<script src="../assets/core.js"></script><script src="../assets/art.js"></script><script>
+let seed=3; const r=()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;};
+const arts={weapon:['blade','axe','blunt','polearm','staff'],head:['hood','hat','helm','crown','mask'],body:['coat','armour','robe','light'],charm:['pendant','phial']};
+let html='';
+// 12 random looks, no gear
+for(let i=0;i<12;i++){const look=G.randomLook(r);html+=`<div>${Art.figure({look,inv:[],eq:{}})}${look.hair}/${look.beard}/${look.extra}</div>`;}
+// gear combos
+const look={skin:'#c98e66',hair:'short',hairColour:'#4a2f1f',beard:'beard',eyes:'round',ears:'pointed',extra:'none',outfit:'#5a6e8a',build:'regular'};
+let id=1;
+for(const slot of ['head','body','weapon']) for(const art of arts[slot]){ const inv=[{id:1,slot,art,tier:(id++)%5,bonus:{}}]; const eq={}; eq[slot]=1; html+=`<div>${Art.figure({look,inv,eq})}${slot} ${art}</div>`;}
+const full={look:{...look,build:'broad'},inv:[{id:1,slot:'weapon',art:'polearm',tier:4},{id:2,slot:'head',art:'hat',tier:3},{id:3,slot:'body',art:'coat',tier:2},{id:4,slot:'charm',art:'pendant',tier:4}],eq:{weapon:1,head:2,body:3,charm:4}};
+html+=`<div>${Art.figure(full)}full</div><div>${Art.head(full)}head</div>`;
+document.getElementById('g').innerHTML=html;
+</script></body></html>

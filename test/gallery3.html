@@ -1,0 +1,10 @@
+<!doctype html><html><head><style>body{background:#0b0a09;margin:0;padding:8px;font:10px sans-serif;color:#888}.g{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.g div{text-align:center}.g svg{width:100%;height:auto}.i{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:8px}.i svg{width:100%;background:#15120f;border:1px solid #3a3228}</style></head><body><div class="g" id="g"></div><div class="i" id="i"></div>
+<script src="../assets/core.js"></script><script src="../assets/art.js"></script><script>
+const L={hair:'long',build:'regular',beard:'none'};
+const sets=[{},{weapon:['blade',2],head:['hat',3],body:['coat',2]},{weapon:['polearm',4],head:['helm',4],body:['armour',3],charm:['pendant',4]},{weapon:['staff',3],head:['hood',2],body:['robe',3],charm:['phial',3]},{weapon:['axe',1],head:['crown',4],body:['light',1]},{weapon:['blunt',0],head:['mask',2],body:['coat',4]},{},{weapon:['blade',4],head:['hood',4],body:['coat',4],charm:['pendant',2]},{weapon:['staff',4],head:['hat',4],body:['coat',3]},{weapon:['polearm',2],head:['crown',3],body:['robe',4]}];
+const hairs=['bald','mohawk','bun','ponytail','swept','short','long','buzz','long','short'];
+let h='';sets.forEach((st,n)=>{const inv=[],eq={};let id=1;for(const sl in st){inv.push({id,slot:sl,art:st[sl][0],tier:st[sl][1]});eq[sl]=id++;}h+=`<div>${Art.silhouette({look:{...L,hair:hairs[n],beard:n==6?'long':'none',build:n%2?'broad':'regular'},inv,eq})}</div>`;});
+document.getElementById('g').innerHTML=h;
+let ic='';let id=100;['blade','axe','blunt','polearm','staff','hood','hat','helm','crown','mask','coat','armour','robe','light','pendant','phial'].forEach((a,i)=>{ic+=Art.icon({id:id++,art:a,tier:i%5});});['weapon','head','body','charm'].forEach(s=>ic+=Art.slotIcon(s));ic+=Art.SIGIL;
+document.getElementById('i').innerHTML=ic;
+</script></body></html>
