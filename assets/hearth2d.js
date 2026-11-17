@@ -1127,7 +1127,16 @@
         if (it.actor) { this._drawActor(g, it.actor); continue; }
         if (it.bird) { this._drawBird(g, it.bird); continue; }
         if (it.crit) { this._drawCritter(g, it.crit); continue; }
-        this._drawObj(g, it.ob, flashOn);
+        // Keep floor props inside the usable room area so they cannot paint over wall/floor trim.
+        const room = it.ob.room ? this.geom.rooms.find((r) => r.id === it.ob.room) : null;
+        if (room && !it.ob.wall) {
+          const x0 = room.x0 * T + 8, x1 = (room.x1 + 1) * T - 8;
+          const y0 = (room.y0 + 2) * T, y1 = (room.y1 + 1) * T - 16;
+          if (x1 > x0 && y1 > y0) {
+            g.save(); g.beginPath(); g.rect(x0, y0, x1 - x0, y1 - y0); g.clip();
+            this._drawObj(g, it.ob, flashOn); g.restore();
+          } else this._drawObj(g, it.ob, flashOn);
+        } else this._drawObj(g, it.ob, flashOn);
       }
       this._drawNightmare(g);   // 2.27
       // sparks
