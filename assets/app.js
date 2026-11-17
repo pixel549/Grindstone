@@ -2667,9 +2667,9 @@
         if (x1 < x0) { res(null); return; }
         const aw = (x1 - x0 + 1) / Z, ah = (y1 - y0 + 1) / Z;   // in the drawing's own units
         let k = 0.85;
-        // 2.28: make small decorative pieces (especially narrow ornaments) read clearly at house scale.
-        if (Math.max(aw, ah) * k < 42) k = 42 / Math.max(aw, ah);
-        if (ah * k > 68) k = 68 / ah;
+        // 2.28: small decorative pieces need a stronger minimum scale to read clearly at house scale.
+        if (Math.max(aw, ah) * k < 46) k = 46 / Math.max(aw, ah);
+        if (ah * k > 72) k = 72 / ah;
         if (aw * k > 90) k = 90 / aw;
         const w = Math.max(8, Math.round(aw * k)), h = Math.max(8, Math.round(ah * k));
         const c = document.createElement('canvas'); c.width = w; c.height = h;
