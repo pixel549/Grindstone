@@ -2902,7 +2902,7 @@
       ${f.at !== 'wall' && f.w > 0 ? '<button data-act="b-flip" aria-label="Flip">⇋</button>' : ''}<button data-act="b-store">Store</button><button data-act="b-desel" aria-label="Put down">✕</button></div>` : '';
     const tool = (k, n) => `<button class="${B.tool === k && !B.place ? 'on' : ''}" data-act="b-tool" data-v="${k}">${n}</button>`;
     return `<div class="bld-msg">${esc(B.msg || '')}</div>${sel}
-      <div class="bld-tools">${tool('move', 'Move')}${tool('room', 'Rooms')}${tool('door', 'Doors')}<button class="${B.place ? 'on' : ''}" data-act="b-add">＋Item</button><button class="${B.newRoom && B.newRoom.go ? 'on' : ''}" data-act="b-room">＋Room</button>
+      <div class="bld-tools">${tool('move', 'Move')}${tool('room', 'Rooms')}${tool('door', 'Doors')}<button class="${B.place ? 'on' : ''}" data-act="b-add">＋Item</button><button class="${HS().house.fenceOff ? 'on' : ''}" data-act="b-fence">${HS().house.fenceOff ? 'Fence off' : 'Fence on'}</button><button class="${B.newRoom && B.newRoom.go ? 'on' : ''}" data-act="b-room">＋Room</button>
       <button data-act="b-undo" ${B.undo.length ? '' : 'disabled'} aria-label="Undo">↶</button><button class="prime" data-act="b-done">Done</button></div>`;
   }
   function refreshBuild() {
@@ -2911,7 +2911,7 @@
     const B = UI.build, h = HOUSE.inst;
     if (h) h.setEdit(B ? { tool: B.place ? 'place' : B.moving ? 'rmove' : B.tool, sel: B.sel, draft: B.draft, room: B.room, mark: B.mark } : null);
   }
-  const snap = () => JSON.stringify({ rooms: HS().house.rooms, doors: HS().house.doors, items: HS().house.items, seq: HS().house.seq, gold: HS().gold, bought: HS().house.bought });
+  const snap = () => JSON.stringify({ rooms: HS().house.rooms, doors: HS().house.doors, items: HS().house.items, seq: HS().house.seq, gold: HS().gold, bought: HS().house.bought, fenceOff: HS().house.fenceOff });
   function buildDid(before, msg, cells) {
     const B = UI.build;
     B.undo.push(before); if (B.undo.length > 30) B.undo.shift();
@@ -3974,6 +3974,7 @@
       case 'h3-stars': S.settings.stars = S.settings.stars === false; save(); if (HOUSE.inst) HOUSE.inst.setStars(S.settings.stars); el.classList.toggle('on', S.settings.stars); toast(S.settings.stars ? 'Stars on: tap one to see its quests.' : 'Stars off.'); break;
       case 'b-tool': if (UI.build) { const B = UI.build; B.tool = el.dataset.v; B.place = null; B.draft = null; B.newRoom = null; B.sel = null; B.room = null; B.moving = null; B.msg = BUILD_TIPS[B.tool] + '.'; refreshBuild(); } break;
       case 'b-add': if (UI.build) openCatalogue(); break;
+      case 'b-fence': if (UI.build) { const before = snap(); HS().house.fenceOff = !HS().house.fenceOff; buildDid(before, HS().house.fenceOff ? 'Perimeter fence hidden. Use ＋Item to place segments where you want them.' : 'Perimeter fence restored.'); } break;
       case 'b-room': if (UI.build) { UI.build.place = null; UI.build.sel = null; UI.build.moving = null; openRoomShop(); refreshBuild(); } break;
       case 'b-done': endBuild(); break;
       case 'b-desel': if (UI.build) { UI.build.sel = null; UI.build.msg = BUILD_TIPS.move + '.'; refreshBuild(); } break;
