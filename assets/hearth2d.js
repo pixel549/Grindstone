@@ -429,9 +429,20 @@
         g.fillStyle = 'rgba(20,14,24,0.22)';
         for (let x = r.x0; x <= r.x1; x++) if (!geom.isDoor(x, r.y0)) g.fillRect(x * T, (r.y0 + 2) * T, T, 5); // shadow under the wall
       });
-      // wall tops
+      this.staticDirty = false;
+    }
+
+    // The wall faces stay in the static background, behind furniture. Draw only
+    // their narrow dark edges in the foreground so props can overlap the wall
+    // without losing the room's outline and depth cues.
+    _drawWallEdges(g) {
+      const geom = this.geom, H = this._house();
       const top = '#2b2733', lip = '#1b1720', edge = '#4a4452';
-      const band = (x, y, w, h, l) => { g.fillStyle = top; g.fillRect(x, y, w, h); g.fillStyle = edge; g.fillRect(x, y, w, 1); if (l) { g.fillStyle = lip; g.fillRect(x, y + h - l, w, l); } };
+      const band = (x, y, w, h, l) => {
+        g.fillStyle = top; g.fillRect(x, y, w, h);
+        g.fillStyle = edge; g.fillRect(x, y, w, 1);
+        if (l) { g.fillStyle = lip; g.fillRect(x, y + h - l, w, l); }
+      };
       H.rooms.forEach((r) => {
         for (let x = r.x0; x <= r.x1; x++) if (!geom.isDoor(x, r.y0)) band(x * T, r.y0 * T - 2, T, 10);
         for (let y = r.y0; y <= r.y1; y++) {
@@ -440,7 +451,6 @@
         }
         for (let x = r.x0; x <= r.x1; x++) if (!geom.isDoor(x, r.y1)) band(x * T, (r.y1 + 1) * T - 16, T, 16, 7);
       });
-      this.staticDirty = false;
     }
 
     // ---------------------------------------------------------------- the hero's little life
@@ -1147,6 +1157,9 @@
         if (it.crit) { this._drawCritter(g, it.crit); continue; }
         this._drawObj(g, it.ob, flashOn);
       }
+      // Keep the wall's solid face behind props; only the narrow dark outline
+      // sits over the scene to preserve the room's perspective.
+      this._drawWallEdges(g);
       this._drawNightmare(g);   // 2.27
       // sparks
       this.fx = this.fx.filter((f) => (f.t += 1 / 30) < f.life);
