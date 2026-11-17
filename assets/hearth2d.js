@@ -173,7 +173,7 @@
             }
           }
         }
-        const ob = { s: key, relic: f.relic, ax: ax, ay: ay, sw: sw, sh: sh, id: f.tap || null, item: it.id, k: it.k, flip: flip, flat: !!f.flat, ghost: ghost, wall: f.at === 'wall', f: f, room: room ? room.id : null, est: f.est };
+        const ob = { s: key, relic: f.relic, ax: ax, ay: ay, sw: sw, sh: sh, id: f.tap || null, item: it.id, k: it.k, flip: flip, turn: !!it.turn, flat: !!f.flat, ghost: ghost, wall: f.at === 'wall', f: f, room: room ? room.id : null, est: f.est };
         if (f.flatBelow) ob.flat = this.tier(f.est) < (f.est === 'garden' ? 3 : 9);
         if (f.at === 'wall') walls.push(ob); else add(ob);
         this.objById[it.id] = ob;
@@ -1104,7 +1104,8 @@
       if (!r) return;
       const x = Math.round(ob.ax - r[2] / 2), y = Math.round(ob.ay - r[3]);
       if (ob.ghost) g.globalAlpha = 0.32;
-      if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
+      if (ob.turn) { g.save(); g.translate(ob.ax, ob.ay); g.rotate(Math.PI / 2); this._drawSpr(g, ob.s, -r[2] / 2, -r[3], ob.flip); g.restore(); }
+      else if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
       else this._drawSpr(g, ob.s, x, y, ob.flip);
       g.globalAlpha = 1;
       if (ob.ghost) return;
