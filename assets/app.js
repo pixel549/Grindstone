@@ -2902,7 +2902,7 @@
       ${f.at !== 'wall' && f.w > 0 ? '<button data-act="b-flip" aria-label="Flip">⇋</button>' : ''}<button data-act="b-store">Store</button><button data-act="b-desel" aria-label="Put down">✕</button></div>` : '';
     const tool = (k, n) => `<button class="${B.tool === k && !B.place ? 'on' : ''}" data-act="b-tool" data-v="${k}">${n}</button>`;
     return `<div class="bld-msg">${esc(B.msg || '')}</div>${sel}
-      <div class="bld-tools">${tool('move', 'Move')}${tool('room', 'Rooms')}${tool('door', 'Doors')}<button class="${B.place ? 'on' : ''}" data-act="b-add">＋Item</button><button class="${HS().house.fenceOff ? 'on' : ''}" data-act="b-fence">${HS().house.fenceOff ? 'Fence off' : 'Fence on'}</button><button class="${B.newRoom && B.newRoom.go ? 'on' : ''}" data-act="b-room">＋Room</button>
+      <div class="bld-tools">${tool('move', 'Move')}${tool('room', 'Rooms')}${tool('door', 'Doors')}<button class="${B.place ? 'on' : ''}" data-act="b-add">＋Item</button><button class="${HS().house.fenceOff ? 'on' : ''}" data-act="b-fence">${HS().house.fenceOff ? 'Show fence' : 'Hide fence'}</button><button class="${B.newRoom && B.newRoom.go ? 'on' : ''}" data-act="b-room">＋Room</button>
       <button data-act="b-undo" ${B.undo.length ? '' : 'disabled'} aria-label="Undo">↶</button><button class="prime" data-act="b-done">Done</button></div>`;
   }
   function refreshBuild() {
