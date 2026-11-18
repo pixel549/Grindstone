@@ -5,6 +5,9 @@ set -euo pipefail
 unset JAVA_TOOL_OPTIONS
 cd "$(dirname "$0")"
 ANDROID_JAR="${ANDROID_JAR:-../sdk/android-34.jar}"
+# Framework resources aapt links against. Defaults to ANDROID_JAR; set it to an API 31+ framework-res.apk when
+# ANDROID_JAR is an older stub jar (see BUILDING.md).
+ANDROID_RES="${ANDROID_RES:-$ANDROID_JAR}"
 KEYSTORE="${KEYSTORE:-grindstone.jks}"
 KS_PASS="${KS_PASS:-grindstone}"
 OUT=build
@@ -20,7 +23,7 @@ fi
 rm -f assets/_*.html
 
 echo "› resources"
-aapt package -f -m -J "$OUT/gen" -S res -M AndroidManifest.xml -I "$ANDROID_JAR"
+aapt package -f -m -J "$OUT/gen" -S res -M AndroidManifest.xml -I "$ANDROID_RES"
 
 echo "› compile"
 javac -nowarn -Xlint:-options -source 8 -target 8 -encoding UTF-8 -bootclasspath "$ANDROID_JAR" -d "$OUT/obj" \
@@ -30,7 +33,7 @@ echo "› dex"
 dalvik-exchange --dex --min-sdk-version=26 --output="$OUT/classes.dex" "$OUT/obj"
 
 echo "› package"
-aapt package -f -0 arsc -0 glb -M AndroidManifest.xml -S res -A assets -I "$ANDROID_JAR" -F "$OUT/unaligned.apk"
+aapt package -f -0 arsc -0 glb -M AndroidManifest.xml -S res -A assets -I "$ANDROID_RES" -F "$OUT/unaligned.apk"
 (cd "$OUT" && aapt add unaligned.apk classes.dex >/dev/null)
 zipalign -f -p 4 "$OUT/unaligned.apk" "$OUT/aligned.apk"
 
