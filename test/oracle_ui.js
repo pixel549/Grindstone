@@ -61,6 +61,7 @@ const native = (seed) => {
   ok(/9 days since training/.test(main) && (await p.$('.chips [data-act="oracle-chat"]')), 'Today: nine days since training, and the Oracle’s chip');
 
   // ---- the Oracle's upgradeable rooms ----
+  let txt = '';
   await p.click('[data-act="tab"][data-v="hearth"]'); await p.waitForTimeout(500);
   ok(await p.$('[data-act="oracle-sanctum"]'), 'the Hearth has a separate entrance to the Oracle rooms');
   await tap('[data-act="oracle-sanctum"]');
@@ -77,8 +78,8 @@ const native = (seed) => {
   await tap('#modal [data-m="oracle-room"][data-k="archive"]');
   await tap('#modal [data-m="oracle-room-upgrade"][data-k="archive"]');
   ok(/Restoration · tier 1\/5/.test(await sheet()), 'the Archive can then be built');
-  s = await save();
-  ok(s.oracleRooms.tier.sanctum === 2 && s.oracleRooms.tier.archive === 1, 'room tiers are saved');
+  const roomSave = await save();
+  ok(roomSave.oracleRooms.tier.sanctum === 2 && roomSave.oracleRooms.tier.archive === 1, 'room tiers are saved');
 
   // ---- task sorting and personal order ----
   await p.evaluate(() => window.handleBack()); await p.waitForTimeout(250);
@@ -94,16 +95,16 @@ const native = (seed) => {
   let orderText = await p.$eval('#main', (el) => el.innerText);
   ok(orderText.indexOf('AA Sort easy') >= 0 && orderText.indexOf('ZZ Sort hard') > orderText.indexOf('AA Sort easy'), 'challenge sorting puts the easier task first');
   await p.selectOption('#q-sort', 'manual'); await p.waitForTimeout(250);
-  s = await save();
-  const easyId = s.quests.find((q) => q.name === 'AA Sort easy').id;
-  const hardId = s.quests.find((q) => q.name === 'ZZ Sort hard').id;
+  const taskSave = await save();
+  const easyId = taskSave.quests.find((q) => q.name === 'AA Sort easy').id;
+  const hardId = taskSave.quests.find((q) => q.name === 'ZZ Sort hard').id;
   let beforeOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
   ok(beforeOrder.indexOf('AA Sort easy') < beforeOrder.indexOf('ZZ Sort hard'), 'new tasks start available in the personal order');
   await tap('#main [data-act="quest-move"][data-id="' + easyId + '"][data-v="1"]');
   const afterOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
   ok(afterOrder.indexOf('ZZ Sort hard') < afterOrder.indexOf('AA Sort easy'), 'the up/down controls persist a manual reorder');
-  s = await save();
-  ok(!s.quests.find((q) => q.id === easyId).archived && !s.quests.find((q) => q.id === hardId).archived, 'newly created tasks are active, not archived');
+  const afterMoveSave = await save();
+  ok(!afterMoveSave.quests.find((q) => q.id === easyId).archived && !afterMoveSave.quests.find((q) => q.id === hardId).archived, 'newly created tasks are active, not archived');
 
   // ---- talking ----
   await tap('.chips [data-act="oracle-chat"]');
