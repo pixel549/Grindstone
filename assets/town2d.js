@@ -77,7 +77,7 @@
       this.people = this.people.filter((a) => want.some((p) => p.id === a.id && p.scene === a.p.scene));
       want.forEach((p) => {
         let a = this.people.find((x) => x.id === p.id);
-        if (!a) { a = this._actor(p.id, p.at[0], p.at[1]); a.home = p.at.slice(); a.dir = p.dir || 'down'; this.people.push(a); }
+        if (!a) { a = this._actor(p.id, p.at[0], p.at[1]); a.home = p.at.slice(); a.dir = p.dir || 'down'; a.barkNext = 7 + Math.random() * 12; this.people.push(a); }
         a.p = p; a.speed = 34 + (hsh(p.id.length, p.id.charCodeAt(p.id.length - 1), 7) % 14);
         const gear = G().npcGear({ garb: p.garb, hat: p.hat }), b = this._sheets(G().normLook(p.look), gear);
         if (a.sig !== b.sig) { a.sig = b.sig; b.p().then((h) => { if (a.sig === b.sig) a.sheets = h.sheets; }).catch(() => {}); }
@@ -319,6 +319,16 @@
         if (a.talking > 0) { a.talking -= dt; a.path = []; this._face(a, H.x, H.y); return; }
         if (a.path.length) { this._step(a, dt); return; }
         a.ft = 0;
+        // Characters speak in their own voice while idling; movement and player-initiated dialogue remain independent.
+        if (a.p.barks && a.p.barks.length && !a.bub) {
+          a.barkNext = (a.barkNext == null ? 8 + Math.random() * 10 : a.barkNext) - dt;
+          if (a.barkNext <= 0) {
+            const pool = a.p.barks.filter((line) => line && line !== a.barkLast);
+            const line = pool[Math.floor(Math.random() * pool.length)] || a.p.barks[0];
+            if (line) { a.barkLast = line; a.bub = { text: String(line), t: 0, dur: 5.2 }; }
+            a.barkNext = 24 + Math.random() * 22;
+          }
+        }
         if ((a.next -= dt) > 0) return;
         a.next = 2.5 + Math.random() * 6;
         if (!a.p.roam) { a.dir = a.p.dir || 'down'; return; }
@@ -445,12 +455,27 @@
       this.people.forEach((a) => {
         const b = a.bub; if (!b || a.p.scene !== this.scene) return;
         if ((b.t += 1 / 30) >= b.dur) { a.bub = null; return; }
-        const al = Math.min(1, b.t * 5, (b.dur - b.t) * 3), bw = 20 * u, bh = 17 * u;
-        const sx = Math.round(ox + (a.x + 4) * k), sy = Math.round(oy + (a.y - 50) * k - bh);
+        const font = Math.max(7, Math.round((b.text ? 7.2 : 10.5) * u));
+        let lines = [];
+        if (b.text) {
+          const maxW = 112 * u;
+          g.font = '600 ' + font + 'px sans-serif';
+          String(b.text).split(/\s+/).forEach((word) => {
+            const last = lines.length - 1, test = last >= 0 ? lines[last] + ' ' + word : word;
+            if (last < 0 || g.measureText(test).width > maxW) lines.push(word); else lines[last] = test;
+          });
+          if (lines.length > 4) { lines = lines.slice(0, 4); lines[3] = lines[3].replace(/[.,;:]?$/, '…'); }
+        }
+        const bw = b.text ? Math.min(120 * u, Math.max(48 * u, ...lines.map((line) => { g.font = '600 ' + font + 'px sans-serif'; return g.measureText(line).width + 14 * u; }))) : 20 * u;
+        const bh = b.text ? (lines.length * font * 1.25 + 10 * u) : 17 * u;
+        const sx = Math.round(ox + (a.x + 4) * k - bw / 2), sy = Math.round(oy + (a.y - 50) * k - bh);
         g.globalAlpha = al; g.fillStyle = '#faf6ec'; g.strokeStyle = '#3c3230'; g.lineWidth = Math.max(1, k * 0.8);
         g.beginPath(); g.roundRect ? g.roundRect(sx, sy, bw, bh, 6 * u) : g.rect(sx, sy, bw, bh); g.fill(); g.stroke();
-        g.font = Math.round(10.5 * u) + 'px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#000';
-        g.fillText(b.icon, sx + bw / 2, sy + bh * 0.55);
+        g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        if (b.text) {
+          g.font = '600 ' + font + 'px sans-serif';
+          lines.forEach((line, i) => g.fillText(line, sx + bw / 2, sy + 5 * u + font * (i + 0.55) * 1.25, bw - 10 * u));
+        } else { g.font = Math.round(10.5 * u) + 'px sans-serif'; g.fillText(b.icon, sx + bw / 2, sy + bh * 0.55); }
         g.globalAlpha = 1;
       });
       // who you can talk to, a small marker that pulses
