@@ -1513,6 +1513,8 @@
     bag: ['END', 'rounds on it'], weights: ['STR', 'lifting'], aviary: ['DIS', 'feeding the birds'], yard: ['END', 'the yard work'],
     garage: ['STR', 'training'], pool: ['END', 'swimming'], shed: ['STR', 'building things'], garden: ['END', 'digging and weeding'],
     grill: ['VIT', 'cooking'], pond: ['DIS', 'keeping it clean'], tower: ['INT', 'planning'],
+    oracleSanctum: ['INT', 'studying the old rites'], oracleArchive: ['INT', 'preserving old knowledge'],
+    oracleObservatory: ['INT', 'reading the heavens'], oracleReliquary: ['INT', 'tending the relics'],
   };
   // What a given level of a piece asks for: hero level, and how much of its stat.
   function estateReq(k, t) {
@@ -1547,8 +1549,13 @@
     grill: { icon: '🍖', name: 'Outdoor kitchen', area: 'wings', wing: true, lvl: 12, unlock: 300, mult: 1.3, needs: 'garden', note: 'Needs the bigger lot.', tiers: ['Brick BBQ on the dirt', 'Kettle BBQ & esky', 'Outdoor kitchen', 'Deck & pizza oven', 'Gilded pizza oven', 'Diamond-encrusted pizza oven'] },
     pond: { icon: '🐟', name: 'Koi pond', area: 'wings', wing: true, lvl: 15, unlock: 350, mult: 1.3, needs: 'garden', note: 'Needs the bigger lot.', tiers: ['Puddle with one goldfish', 'Small pond', 'Koi pond', 'Japanese garden pond', 'Gold-lined pond', 'Diamond pond, golden koi'] },
     tower: { icon: '🗼', name: 'Watchtower', area: 'wings', wing: true, lvl: 20, unlock: 600, mult: 1.6, needs: 'garden', note: 'Needs the bigger lot. Purely for brooding.', tiers: ['Rickety platform', 'Timber lookout', 'Stone watchtower', 'Bannered keep', 'Gilded spire', 'Diamond spire with a beacon'] },
+    // Separate underground chambers: estate-tiered, but never inserted into the editable Hearth layout.
+    oracleSanctum: { icon: '🔮', name: 'The Sanctum', area: 'oracle', wing: true, oracleRoom: true, lvl: 1, unlock: 120, mult: 1.15, note: 'The first chamber beneath the Hearth. The altar gives the Oracle a place to speak.', tiers: ['A bare stone shrine', 'A tended candlelit altar', 'A proper sanctuary', 'A rune-bound sanctum', 'A gilded inner sanctum', 'The Veil’s radiant heart'] },
+    oracleArchive: { icon: '📚', name: 'The Archive', area: 'oracle', wing: true, oracleRoom: true, lvl: 8, unlock: 350, mult: 1.1, needs: 'oracleSanctum', note: 'A quiet library of records, maps and things the Oracle refuses to forget.', tiers: ['Dusty shelves and loose scrolls', 'Shelves and a reading desk', 'A catalogued archive', 'A vaulted library', 'A gilded scriptorium', 'The Infinite Archive'] },
+    oracleObservatory: { icon: '🌙', name: 'The Observatory', area: 'oracle', wing: true, oracleRoom: true, lvl: 16, unlock: 600, mult: 1.25, needs: 'oracleArchive', note: 'A chamber open to the night sky, where the Oracle watches patterns unfold.', tiers: ['A crack in the ceiling', 'A small roof aperture', 'A brass star viewer', 'A proper celestial dome', 'A gilded orrery', 'A window into the heavens'] },
+    oracleReliquary: { icon: '🏺', name: 'The Reliquary', area: 'oracle', wing: true, oracleRoom: true, lvl: 24, unlock: 900, mult: 1.3, needs: 'oracleSanctum', note: 'A guarded collection of relics, strange devices and promises best left unbroken.', tiers: ['A locked stone niche', 'A handful of sealed cases', 'A guarded relic chamber', 'A hall of strange artefacts', 'A gilded reliquary', 'The Vault of First Things'] },
   };
-  const ESTATE_AREAS = [['house', 'The house'], ['kitchen', 'Kitchen'], ['lounge', 'Lounge'], ['bedroom', 'Bedroom'], ['study', 'Study'], ['gym', 'Gym'], ['yard', 'Yard'], ['wings', 'Expansions']];
+  const ESTATE_AREAS = [['house', 'The house'], ['kitchen', 'Kitchen'], ['lounge', 'Lounge'], ['bedroom', 'Bedroom'], ['study', 'Study'], ['gym', 'Gym'], ['yard', 'Yard'], ['wings', 'Expansions'], ['oracle', 'The Oracle’s chambers']];
   function estateTier(s, k) { const d = ESTATE[k]; if (d.wing && !s.estate.wings[k]) return -1; return s.estate.tiers[k] | 0; }
   // What the next step costs, and whether it can be bought now.
   function estateNext(s, k) {
@@ -1638,7 +1645,11 @@
   }
   function estateFor3D(s) {
     const t = {}, w = {};
-    Object.keys(ESTATE).forEach((k) => { if (ESTATE[k].wing) { if (s.estate.wings[k]) { w[k] = true; t[k] = s.estate.tiers[k] | 0; } } else t[k] = s.estate.tiers[k] | 0; });
+    Object.keys(ESTATE).forEach((k) => {
+      if (ESTATE[k].oracleRoom) return; // underground chambers are rendered separately from the Hearth
+      if (ESTATE[k].wing) { if (s.estate.wings[k]) { w[k] = true; t[k] = s.estate.tiers[k] | 0; } }
+      else t[k] = s.estate.tiers[k] | 0;
+    });
     return { t: t, w: w, land: landOf(s), f: finishesOn(s) };
   }
 
