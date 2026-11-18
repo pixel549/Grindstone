@@ -49,6 +49,14 @@ fs.mkdirSync(OUT, { recursive: true });
   await notice('ROAD TO TOWN IS OPEN', 'a notice says the road is open');
   await tap('[data-act="tab"][data-v="hearth"]');
   ok(await p.evaluate(() => document.querySelectorAll('[data-act="town"]').length === 11 && /For sale/i.test(document.querySelector('#main').innerText)), 'eleven buildings for sale');
+  await p.waitForFunction(() => window.__town && window.__town.inst && window.__town.inst.people.length > 0, null, { timeout: 30000 });
+  const townVoices = await p.evaluate(() => {
+    const t = window.__town.inst; t.t = 100; t.barkLock = 0;
+    t.people.forEach((a) => { a.bub = null; a.barkNext = 0; a.talking = 0; });
+    t._update(0.1);
+    return { active: t.people.filter((a) => a.bub).length, lock: t.barkLock };
+  });
+  ok(townVoices.active <= 1 && townVoices.lock > 100, 'town NPCs take turns speaking without overlapping bubbles');
   await shot('t02-forsale');
   await tap('[data-act="town"][data-k="gym"]'); await shot('t03-gym');
   ok(await p.evaluate(() => /Gain 1 Strength/.test(document.querySelector('#modal').innerText) && /\+3% damage/.test(document.querySelector('#modal').innerText)), 'the sheet shows the ladder and the rewards');
