@@ -1,0 +1,77 @@
+name: Release APK
+
+# Every push to main: if the version in AndroidManifest.xml has no release yet, build the signed APK and publish it.
+# Needs one repo secret, set once: KEYSTORE_B64 (base64 of grindstone.jks) and KEYSTORE_PASS (the keystore password).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    if: ${{ secrets.KEYSTORE_B64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: |
+          V=$(sed -n 's/.*android:versionName="\([^"]*\)".*/\1/p' AndroidManifest.xml | head -1)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "tag=v$V" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if already released
+        id: check
+        run: |
+          if gh release view "v${{ steps.ver.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=no" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Install build tools
+        if: steps.check.outputs.exists == 'no'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y aapt apksigner zipalign dalvik-exchange android-framework-res openjdk-17-jdk-headless
+
+      - name: Fetch android.jar
+        if: steps.check.outputs.exists == 'no'
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/Reginer/aosp-android-jar.git /tmp/aj
+          git -C /tmp/aj sparse-checkout set android-34
+          mkdir -p "$RUNNER_TEMP/sdk"
+          cp /tmp/aj/android-34/android.jar "$RUNNER_TEMP/sdk/android-34.jar"
+
+      - name: Decode signing key
+        if: steps.check.outputs.exists == 'no'
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/keys/grindstone.jks"
+
+      - name: Build and sign
+        if: steps.check.outputs.exists == 'no'
+        env:
+          KS_PASS: ${{ secrets.KEYSTORE_PASS }}
+        run: |
+          ANDROID_JAR="$RUNNER_TEMP/sdk/android-34.jar" \
+          ANDROID_RES=/usr/share/android-framework-res/framework-res.apk \
+          KEYSTORE="$RUNNER_TEMP/keys/grindstone.jks" KS_PASS="$KS_PASS" \
+          ./build.sh
+          cp build/Grindstone.apk "Grindstone-${{ steps.ver.outputs.version }}.apk"
+          apksigner verify --print-certs "Grindstone-${{ steps.ver.outputs.version }}.apk" | grep -q 47d9ce55e01ccea09489d9a5dd76b8016b06a78f5e93f2a4178db671c042ea51
+
+      - name: Publish release
+        if: steps.check.outputs.exists == 'no'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" "Grindstone-${{ steps.ver.outputs.version }}.apk" \
+            --target "$GITHUB_SHA" --title "Grindstone ${{ steps.ver.outputs.version }}" \
+            --notes "Built and signed by the release workflow from main. Installs over the current app."
