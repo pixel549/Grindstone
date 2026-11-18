@@ -166,6 +166,13 @@
     mage: ['I read something fascinating. It would take three days to explain.', 'Magic is just study with better lighting.', 'Shh, I’m thinking. That was the thought.'],
   };
   const HOME_BARKS = ['Feels like home now. Thank you.', 'Pop in any time. Wipe your feet.', 'Best little house on the row, this.', 'I sleep better under my own roof.', 'Come and see what I’ve done with the place.'];
+  // Ambient speech for household companions. Keep each voice rooted in their calling, then let their own home life show through.
+  function npcBarks(n) {
+    if (!n) return ['Lovely weather for staying in.'];
+    const role = n.comp || n.role, voice = CALLING_BARKS[role] || [];
+    const home = HOME_BARKS;
+    return voice.concat(home, n.about && String(n.about).length > 35 ? [String(n.about)] : []);
+  }
 
   // ---------------------------------------------------------------- companions' homes
   // Every companion who lives with him (people, not the birds) gets a plot on Hearth Row or Cobble Row. He builds the
@@ -290,7 +297,7 @@
     const out = [], own = owned(s);
     own.forEach((k) => {
       const K = KEEPERS[k], I = INSIDE[k];
-      out.push({ id: 'k:' + k, kind: 'keeper', k: k, name: K.name, look: KEEPER_LOOK(k), garb: K.garb, hat: K.hat, scene: 'in:' + k, at: I.keeper.slice(), dir: 'down', still: true });
+      out.push({ id: 'k:' + k, kind: 'keeper', k: k, name: K.name, look: KEEPER_LOOK(k), garb: K.garb, hat: K.hat, scene: 'in:' + k, at: I.keeper.slice(), dir: 'down', still: true, barks: K.barks });
     });
     // townsfolk: a few more as the town grows; new faces each day
     const nf = Math.min(12, 3 + own.length + Math.floor((s.level | 0) / 12)), G0 = townGround(), roads = [];
@@ -298,7 +305,7 @@
     for (let i = 0; i < nf; i++) {
       const r = rng('folk:' + t + ':' + i), look = G.randomLook(r);
       const c = roads[Math.floor(r() * roads.length)];
-      out.push({ id: 'f:' + i, kind: 'folk', name: G.randomName(r), look: look, garb: pick(FOLK_GARB, r), hat: pick(FOLK_HAT, r), scene: 'town', at: c.slice(), roam: 8 });
+      out.push({ id: 'f:' + i, kind: 'folk', name: G.randomName(r), look: look, garb: pick(FOLK_GARB, r), hat: pick(FOLK_HAT, r), scene: 'town', at: c.slice(), roam: 8, barks: FOLK_BARKS });
     }
     // companions, at their plots; the ones looking for work, in the square
     homesNorm(s);
@@ -307,15 +314,15 @@
       if (n.status === 'resident') {
         const h = homeOf(s, n.id); if (!h) return;
         const P = PLOTS[h.plot], d = door(P);
-        out.push({ id: 'n:' + n.id, kind: 'comp', npc: n.id, name: n.name, look: n.look, garb: n.garb, hat: n.hat, scene: 'town', at: [d[0] - 1, d[1]], roam: 3 });
+        out.push({ id: 'n:' + n.id, kind: 'comp', npc: n.id, name: n.name, look: n.look, garb: n.garb, hat: n.hat, scene: 'town', at: [d[0] - 1, d[1]], roam: 3, barks: npcBarks(n) });
       } else if (n.via && n.via.type === 'gold') {
         const i = out.filter((p) => p.kind === 'wand').length;
-        out.push({ id: 'n:' + n.id, kind: 'wand', npc: n.id, name: n.name, look: n.look, garb: n.garb, hat: n.hat, scene: 'town', at: [[18, 14], [25, 14], [20, 16], [23, 12]][i % 4], roam: 2 });
+        out.push({ id: 'n:' + n.id, kind: 'wand', npc: n.id, name: n.name, look: n.look, garb: n.garb, hat: n.hat, scene: 'town', at: [[18, 14], [25, 14], [20, 16], [23, 12]][i % 4], roam: 2, barks: npcBarks(n) });
       }
     });
     if (G.traderHere && G.traderHere(s, t)) {
       const L = G.randomLook(rng('trader')); L.sex = 'm'; L.beard = 'bushy';
-      out.push({ id: 'trader', kind: 'trader', name: 'The trader', look: L, garb: 'oilskin', hat: 'tricorn', scene: 'town', at: [27, 14], dir: 'left', still: true });
+      out.push({ id: 'trader', kind: 'trader', name: 'The trader', look: L, garb: 'oilskin', hat: 'tricorn', scene: 'town', at: [27, 14], dir: 'left', still: true, barks: ['I buy what people need and sell what they forgot they wanted.', 'Coin changes hands. I make sure it changes mine first.', 'No, I don’t know where the trader goes on Tuesdays.', 'A fair price is one we both agree to. Eventually.'] });
     }
     return out;
   }
@@ -468,7 +475,7 @@
 
   Object.assign(G, {
     TMAP: { w: TW, h: TH, gate: GATE, spawn: SPAWN, lots: LOTS, plots: PLOTS, streets: STREETS, props: PROPS, inside: INSIDE, inW: IN_W, inH: IN_H, exit: EXIT },
-    KEEPERS, townGround, townLots, townPeople, townTalk, townHints, townGossip, gossipFor,
+    KEEPERS, townGround, townLots, townPeople, townTalk, townHints, townGossip, gossipFor, npcBarks,
     homesNorm, homeOf, homeCost, homeBuild, homeFresh, homeWants, homeSettle, homeSettled, homeProxy, homeEstate3D, streetOf,
   });
 })(typeof window !== 'undefined' ? window : globalThis);
