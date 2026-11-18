@@ -82,7 +82,8 @@ const native = (seed) => {
     const h = window.__house.inst, ob = h.objs.find((o) => o.oraclePortal), r = h.canvas.getBoundingClientRect(), v = h.view, d = h.dpr || 1;
     return { x: r.left + (v.ox + ob.ax * v.k) / d, y: r.top + (v.oy + (ob.ay - 26) * v.k) / d };
   });
-  await p.touchscreen.tap(portal.x, portal.y); await p.waitForTimeout(4500);
+  await p.touchscreen.tap(portal.x, portal.y);
+  await p.waitForFunction(() => { const m = document.querySelector('#modal:not(.hidden) .sheet, #modal:not(.hidden) .dlg'); return m && /THE ORACLE’S SANCTUM/.test(m.innerText); }, null, { timeout: 15000 }).catch(() => {});
   ok(/THE ORACLE’S SANCTUM/.test(await sheet()) && /Approach the Oracle/.test(await sheet()), 'touching the pillar walks him up and opens the sanctum');
   await tap('#modal [data-m="oracle-sanctum-talk"]');
   ok(/goes to Groq/.test(await sheet()), 'the sanctum opens the existing deliberate conversation');
