@@ -258,7 +258,29 @@ An asset is ready to commit only when the relevant checks pass:
 - [ ] It has been inspected in the actual app, not only in an image editor or contact sheet.
 - [ ] Source/licence information is recorded where required.
 
-## 14. Prompt brief for new artwork
+## 14. Initial repository asset audit
+
+The first source-level review of the current `main` art pipeline found the following. This is a technical/source audit; raster-level visual approval still requires opening the PNG atlases at native size and in the running game.
+
+### Existing strengths
+
+- `tools2d/bake_world.py` uses the established `#241A20` outline colour and the documented wood, stone, gold, cloth and iron palette anchors for bespoke additions.
+- `tools2d/bake_extras.py` uses the same outline colour and matching palette anchors. Its custom assets are drawn directly at pixel resolution rather than being blurred or vector-rendered.
+- `tools2d/bake_town.py` builds the town atlas from LPC Revised building art, applies distinct facade recolours and draws compact pixel-signage. Its building metadata also records door position and blocking depth.
+- `tools2d/bake_mobs.py` uses the LPC character pipeline and 64-pixel animation frames for the delve enemies, with animation metadata stored in `delve.json`. This is consistent with the project's existing character pipeline rather than an unrelated sprite format.
+- The town, world and delve atlases have separate metadata files, keeping sprite coordinates and animation definitions out of the rendering code.
+
+### Gaps and follow-up checks
+
+- The current `world.json` furniture keys (including `fridge.0`–`fridge.5`, `ktable.*`, `ctable.*`, `chair.dining` and `deskchair`) describe existing variants/tiers, not a complete north/east/south/west directional set. Do not treat these sprites as fully rotatable until four directional views have been created and wired into the renderer.
+- The world baking scripts do not apply one identical outline operation to every source sprite. Some bespoke props are explicitly outlined, while many LPC source crops are retained as supplied. This is not automatically a defect: inspect the actual atlas and compare each asset with its neighbours before adding or thickening outlines.
+- Town buildings are recoloured source artwork with custom signs; check the final PNG at native size for colour banding, recolour masks that affect unintended areas, and signage that remains legible in the game view.
+- Delve enemies use LPC-derived layered art and a common animation pipeline. Check frame alignment, feet/ground contact, weapon offsets and outline consistency across the full enemy set, especially larger attack frames.
+- The PNG atlases must receive a visual review at native resolution and in-game before they can be marked visually approved. Metadata and generator code alone cannot establish that there are no stray pixels, edge artefacts or palette mismatches.
+
+**Audit status:** Source conventions are broadly aligned with the guide. Rotatable furniture is a known art/metadata gap. Raster-level visual approval remains outstanding; do not describe the current atlases as fully visually signed off until they have been inspected.
+
+## 15. Prompt brief for new artwork
 
 Use this as the default brief when creating new Grindstone assets:
 
@@ -268,7 +290,7 @@ Use this as the default brief when creating new Grindstone assets:
 
 ---
 
-## 15. Reference files
+## 16. Reference files
 
 When making or reviewing art, inspect these project files first:
 
