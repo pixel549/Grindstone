@@ -44,7 +44,7 @@
   class House2D {
     constructor(el, o) {
       this.el = el;
-      this.o = Object.assign({ base: '2d/', state: {}, mind: {}, estate: { t: {}, w: {} }, house: null, npcs: [] }, o || {});
+      this.o = Object.assign({ base: '2d/', state: {}, mind: {}, estate: { t: {}, w: {} }, house: null, npcs: [], oraclePortal: false, oracleBarks: [] }, o || {});
       this.alive = true;
       this.active = true;
       this.t = 0;
@@ -117,6 +117,8 @@
       if (!!this.edit !== was) { this.staticDirty = true; if (this.atlas) this._layout(); }
     }
     setStars(on) { this.starsOn = !!on; }
+    setOraclePortal(on) { if (this.o.oraclePortal !== !!on) { this.o.oraclePortal = !!on; if (this.atlas) this._layout(); } }
+    setOracleBarks(lines) { this.o.oracleBarks = Array.isArray(lines) ? lines.slice() : []; }
     previewItem(k, t, fin) { this.preview = { key: k, tier: t, fin: fin }; this._layout(); this.focus(k); }
     endPreview() { this.preview = null; this._layout(); this.unfocus(); }
     setActive(a) { this.active = !!a; if (a) this._resize(); }
@@ -219,6 +221,25 @@
         if (!ft) return;
         for (let y = ft[1]; y <= ft[3]; y++) for (let x = ft[0]; x <= ft[2]; x++) if (x >= 0 && y >= 0 && x < WT && y < HT) blocked[y * WT + x] = o.flat ? 2 : 1;
       });
+      // The Oracle's pillar belongs to the player's Hearth, not a companion's visit.
+      // Reserve a clear outdoor cell so the player can walk up to it from any house layout.
+      const previousOracle = this.oracle;
+      this.oracle = null;
+      if (this.o.oraclePortal) {
+        const candidates = [];
+        for (let y = 16; y <= Math.min(HT - 2, 24); y++) for (let x = 17; x <= Math.min(WT - 2, 24); x++) {
+          const i = y * WT + x;
+          if (geom.kind(x, y) === 'out' && geom.open(x, y) && !blocked[i]) candidates.push({ x: x, y: y, d: Math.pow(x - 22, 2) + Math.pow(y - 20, 2) });
+        }
+        candidates.sort((a, b) => a.d - b.d);
+        const cell = candidates[0];
+        if (cell) {
+          blocked[cell.y * WT + cell.x] = 1;
+          const ax = px(cell.x), ay = (cell.y + 1) * T;
+          this.oracle = previousOracle && previousOracle.x === ax && previousOracle.y === ay ? previousOracle : { x: ax, y: ay, bub: null, next: 18 + Math.random() * 18, lastBark: '' };
+          add({ s: 'x.oracleportal', ax: ax, ay: ay, sw: 38, sh: 54, id: 'oracle', cell: [cell.x, cell.y], oraclePortal: true });
+        }
+      }
       this.blocked = blocked;
       const lawnCells = [], isLawn = new Uint8Array(WT * HT);
       for (let y = Gm.PLOT.y0; y <= Gm.PLOT.y1; y++) for (let x = Gm.PLOT.x0; x <= Gm.PLOT.x1; x++) {
@@ -590,6 +611,18 @@
     // ---------------------------------------------------------------- thoughts
     _say(a, icons, dur, tone) { a.bub = { icons: icons, t: 0, dur: dur || 3.2, tone: tone || '' }; }
     _sayText(a, text, dur, tone) { a.bub = { text: String(text || '').slice(0, 150), t: 0, dur: dur || 5.2, tone: tone || '' }; }
+    _updateOracle(dt) {
+      const a = this.oracle;
+      if (!a || !this.o.oraclePortal || this.capturing || this.edit) return;
+      if (this.o.oracleBusy && this.o.oracleBusy()) { a.next = Math.max(a.next, 4); return; }
+      if ((a.next -= dt) > 0) return;
+      const occupied = !!(this.hero && this.hero.bub) || this.npcs.some((n) => n.bub) || this.birds.some((b) => b.bub);
+      if (occupied) { a.next = 3 + Math.random() * 3; return; }
+      const bank = this.o.oracleBarks || [], pool = bank.filter((line) => line && line !== a.lastBark);
+      const line = pool[Math.floor(Math.random() * pool.length)] || bank[0];
+      if (line) { a.lastBark = line; this._sayText(a, line, 6.5); }
+      a.next = 78 + Math.random() * 42;
+    }
     _think() {
       const H = this.hero, M = this.o.mind || {}, chores = M.chores || {}, done = M.done || [], due = M.due || [];
       const opts = [];
@@ -783,11 +816,15 @@
         if (a.think <= 0 && !this.capturing) {
           const chore = a.spot && a.spot.fret && (this.o.mind && this.o.mind.chores || {})[a.spot.fret];
           if (a.npc && !a.sleep && !a.dozing && !a.meal && !chore && !a.birdsT) {
-            const bank = G().npcBarks ? G().npcBarks(a.npc) : [];
-            const pool = bank.filter((line) => line && line !== a.lastBark);
-            const line = pool.length ? pool[Math.floor(Math.random() * pool.length)] : bank[0];
-            if (line) { a.lastBark = line; this._sayText(a, line, 5.2); }
-            a.think = 22 + Math.random() * 20;
+            const occupied = !!(this.hero && this.hero.bub) || this.npcs.some((n) => n !== a && n.bub) || this.birds.some((b) => b.bub);
+            if (this.t < (this.barkLock || 0) || occupied) { a.think = 2.5 + Math.random() * 2.5; }
+            else {
+              const bank = G().npcBarks ? G().npcBarks(a.npc) : [];
+              const pool = bank.filter((line) => line && line !== a.lastBark);
+              const line = pool.length ? pool[Math.floor(Math.random() * pool.length)] : bank[0];
+              if (line) { a.lastBark = line; this._sayText(a, line, 5.2); this.barkLock = this.t + 10 + Math.random() * 7; }
+              a.think = 22 + Math.random() * 20;
+            }
           } else {
             let ic;
             if (a.sleep || a.dozing) ic = ['💤'];
@@ -1070,6 +1107,7 @@
       this._resize();
       this._update(dt);
       this._updateNpcs(dt);
+      this._updateOracle(dt);
       this._updateBirds(dt);
       this._updateCritters(dt);
       if (this.cam.manual > 0) this.cam.manual -= dt; else if (!this.edit || this.focusK) { const [tx, ty] = this._camTarget(); this.cam.x += (tx - this.cam.x) * Math.min(1, dt * 3); this.cam.y += (ty - this.cam.y) * Math.min(1, dt * 3); }
@@ -1093,8 +1131,13 @@
     }
     _drawObj(g, ob, flashOn) {
       if (ob.relic) { this._relic(g, ob); return; }
+      if (ob.oraclePortal) {
+        const pulse = 0.5 + 0.5 * Math.sin(this.t * 2.1);
+        g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(132,91,220,' + (0.08 + pulse * 0.12) + ')';
+        g.beginPath(); g.ellipse(ob.ax, ob.ay - 27, 21 + pulse * 3, 27 + pulse * 3, 0, 0, Math.PI * 2); g.fill(); g.restore();
+      }
       const r = this.spr[ob.s];
-      if (!r) return;
+      if (!r) { if (ob.oraclePortal) this._drawOraclePortal(g, ob); return; }
       const x = Math.round(ob.ax - r[2] / 2), y = Math.round(ob.ay - r[3]);
       if (ob.ghost) g.globalAlpha = 0.32;
       if (ob.sway) { g.save(); const a = Math.sin(this.t * 1.3 + ob.sway) * 0.05; g.translate(ob.ax, ob.ay); g.transform(1, 0, a, 1, 0, 0); g.translate(-ob.ax, -ob.ay); this._drawSpr(g, ob.s, x, y); g.restore(); }
@@ -1105,6 +1148,20 @@
       if (ob.fire) { const fi = Math.floor(this.t * 7) % 3, fr = this.spr['fire.' + fi]; if (fr) this._drawSpr(g, 'fire.' + fi, Math.round(ob.ax - fr[2] / 2), Math.round(ob.ay - 30)); }
       if (ob.flies) for (let f = 0; f < 4; f++) { const a = this.t * 3 + f * 1.7; g.fillStyle = '#1a1a1a'; g.fillRect(Math.round(ob.ax + Math.cos(a) * 10), Math.round(ob.ay - 22 + Math.sin(a * 1.3) * 6), 1, 1); }
       if (ob.s && /\.5(\.b|\.f)?$/.test(ob.s) && Math.sin(this.t * 3 + ob.ax) > 0.6) { g.fillStyle = '#ffffff'; const sx = x + ((ob.ax * 7 + Math.floor(this.t)) % Math.max(1, r[2])), sy = y + ((ob.ay * 3 + Math.floor(this.t * 1.3)) % Math.max(1, r[3])); g.fillRect(sx, sy, 1, 1); g.fillRect(sx - 1, sy, 3, 1); g.fillRect(sx, sy - 1, 1, 3); }
+    }
+    _drawOraclePortal(g, ob) {
+      const x = Math.round(ob.ax - 18), y = Math.round(ob.ay - 54);
+      const rect = (col, a, b, w, h) => { g.fillStyle = col; g.fillRect(x + a, y + b, w, h); };
+      // Crisp 1px charcoal outline, worn stone frame, and a violet-blue aperture.
+      rect('#241d28', 5, 2, 28, 48); rect('#241d28', 2, 10, 34, 38); rect('#241d28', 9, 0, 18, 5);
+      rect('#756b78', 8, 5, 22, 39); rect('#a69a8c', 10, 5, 17, 2); rect('#514653', 6, 9, 26, 36);
+      rect('#21182f', 11, 11, 14, 30); rect('#563b83', 13, 12, 10, 27); rect('#7654b0', 15, 13, 6, 24);
+      rect('#b38ce8', 16, 14, 2, 20); rect('#4d79a8', 12, 17, 2, 13); rect('#b38ce8', 23, 18, 1, 10);
+      rect('#d7bd83', 7, 8, 2, 3); rect('#d7bd83', 27, 8, 2, 3); rect('#514653', 8, 43, 20, 5);
+      rect('#241d28', 1, 46, 36, 6); rect('#8e8174', 3, 45, 32, 4); rect('#c0a77f', 5, 45, 28, 1);
+      const sparkle = Math.floor(this.t * 3) % 3;
+      rect('#e3d0ff', 16 + sparkle * 2, 8 + (sparkle % 2) * 3, 1, 1);
+      rect('#9ac9e8', 10 + sparkle * 4, 22 - (sparkle % 2) * 4, 1, 1);
     }
     render(g, W, H, k, cx, cy, o) {
       o = o || {};
@@ -1454,6 +1511,7 @@
       const tick = (a) => { if (a.bub && (a.bub.t += 1 / 30) >= a.bub.dur) a.bub = null; return a.bub; };
       this.birds.forEach((b) => { if (tick(b)) draw(b, b.x, b.y - 8, b.bub, true); });
       this.npcs.forEach((a) => { if (a.sheets && tick(a)) { const p = this._pos(a); draw(a, p.x, p.top, a.bub, true); } });
+      if (this.oracle && tick(this.oracle)) draw(this.oracle, this.oracle.x, this.oracle.y - 52, this.oracle.bub, true);
       if (tick(H)) { const p = this._pos(H); draw(H, p.x, p.top, H.bub); }
     }
 
@@ -1538,6 +1596,7 @@
       for (const a of this.npcs) { const p = this._pos(a); if (a.sheets && near(p.x, a.sleep ? p.y + 10 : p.y, 12, a.sleep ? 22 : 48)) { this._say(a, [a.sleep ? '💤' : '👋'], 2); this._emit('npc:' + a.id); return; } }
       if (near(hx, hy, 13, H.sleep ? 22 : 50)) { this._emit('hero'); return; }
       const ob = this._hitObj(wx, wy);
+      if (ob && ob.oraclePortal) { this._approach(ob.cell[0], ob.cell[1], () => this._emit('oracle'), 1); return; }
       if (ob) { this._emit(ob.id); return; }
       if (this.isLawn && cx >= 0 && cy >= 0 && cx < WT && cy < HT && this.isLawn[cy * WT + cx]) { this._emit('lawn'); return; }
       if (!this.lotOpen && cx >= 25 && cx <= 32) { this._emit('garden'); return; }
