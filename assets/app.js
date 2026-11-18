@@ -3243,7 +3243,8 @@
     }).join('');
     const ladder = d.tiers.map((name, i) => {
       const rq = G.estateReq(k, i), met = S.level >= rq.lvl && (S.stats[rq.st] | 0) >= rq.sv;
-      const label = i === cur ? 'Yours' : i < cur ? 'Built' : i === n.tier ? (n.ok ? '◈ ' + n.cost : 'Next') : 'Locked';
+      const reqText = rq.sv ? `Lv ${rq.lvl} · ${rq.sv} ${SI[rq.st].short}` : `Lv ${rq.lvl}`;
+      const label = i === cur ? 'Yours' : i < cur ? 'Built' : i === n.tier ? (n.ok ? '◈ ' + n.cost : reqText) : reqText;
       return `<button class="or-tier ${i === cur ? 'cur' : ''} ${i < cur ? 'past' : ''} ${i === selected ? 'selected' : ''}" data-m="oracle-room-preview" data-k="${k}" data-v="${i}"><span>${i + 1}</span><b>${esc(name)}</b><small>${label}</small></button>`;
     }).join('');
     const req = n.max ? '' : `<p class="lore or-req">${n.why ? esc(n.why) : (n.unlock ? 'The first stone is ready to be laid.' : 'The next improvement is ready to be made.')}</p>`;
@@ -3254,7 +3255,7 @@
     const html = `<div class="oracle-sanctum-head"><span>BELOW THE HEARTH</span><small>THE ORACLE’S ROOMS</small></div>
       <div class="or-room-nav">${tabs}</div>
       ${oracleRoomScene(k, selected)}
-      <div class="or-room-copy"><h3>${d.icon} ${esc(d.name)}</h3><p class="lore">${esc(art.lore)}</p><div class="or-current">${cur < 0 ? 'Not yet built' : esc(d.tiers[cur])} ${cur >= 0 ? '· Tier ' + (cur + 1) + ' of 6' : ''}</div></div>
+      <div class="or-room-copy"><h3>${d.icon} ${esc(d.name)}</h3><p class="lore">${esc(art.lore)}</p><div class="or-current">${selected !== cur ? 'Previewing: ' + esc(d.tiers[selected]) + (cur >= 0 ? ' · owned: ' + esc(d.tiers[cur]) : ' · not yet built') : cur < 0 ? 'Not yet built' : esc(d.tiers[cur]) + ' · Tier ' + (cur + 1) + ' of 6'}</div></div>
       <div class="or-tier-list"><div class="hd">Chamber development<small>Six stages · paid from your estate purse</small></div>${ladder}</div>
       ${req}<div class="btns"><button class="btn" data-m="close">Return upstairs</button>${talk}${action}</div>`;
     openSheet(html, 'oracle-room');
