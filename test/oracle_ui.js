@@ -60,6 +60,7 @@ const native = (seed) => {
   let main = await p.evaluate(() => document.querySelector('#main').innerText);
   ok(/9 days since training/.test(main) && (await p.$('.chips [data-act="oracle-chat"]')), 'Today: nine days since training, and the Oracle’s chip');
 
+  let txt = '';
   // ---- the Oracle's basement sanctuary ----
   await p.click('[data-act="tab"][data-v="hearth"]'); await p.waitForTimeout(3500);
   ok(await p.$('[data-act="oracle-sanctum"]'), 'the Hearth has a separate stair to the Oracle below');
@@ -77,7 +78,7 @@ const native = (seed) => {
   await p.fill('#oc-in', 'Rolled my ankle this morning.');
   await tap('#modal [data-m="oc-send"]');
   await p.waitForTimeout(400);
-  let txt = await sheet();
+  txt = await sheet();
   ok(/Rest it/.test(txt) && /Hold Swim and Run for 2 weeks/.test(txt) && /Add “Ankle circles”/.test(txt), 'it answers, and proposes a hold and a new quest');
   const ask = await p.evaluate(() => window.__asks.find((a) => /Player: Rolled/.test(a.user)));
   ok(ask && /\|Swim\|h\|END/.test(ask.user) && ask.max === 900, 'it was told the quests (compactly)');
