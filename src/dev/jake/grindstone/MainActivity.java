@@ -586,6 +586,40 @@ public class MainActivity extends Activity {
             }).start();
         }
 
+        /** 2.27.2: asks GitHub for the newest release. Answers via window.onUpdate(json). */
+        @JavascriptInterface
+        public void updateCheck() {
+            final String cur = version();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final String json = Updater.check(cur).toString();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() { web.evaluateJavascript("window.onUpdate && window.onUpdate(" + JSONObject.quote(json) + ")", null); }
+                    });
+                }
+            }).start();
+        }
+
+        /** 2.27.2: downloads the release APK (GitHub only), then opens Android's installer, which the user confirms. Failures go to window.onUpdateNote(text). */
+        @JavascriptInterface
+        public void updateInstall(final String url) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final String fail = Updater.download(MainActivity.this, url);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String why = fail != null ? fail : Updater.install(MainActivity.this);
+                            if (why != null) web.evaluateJavascript("window.onUpdateNote && window.onUpdateNote(" + JSONObject.quote(why) + ")", null);
+                        }
+                    });
+                }
+            }).start();
+        }
+
         @JavascriptInterface
         public String version() {
             try {

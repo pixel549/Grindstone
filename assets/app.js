@@ -705,6 +705,21 @@
       S = G.normalize(parsed, G.today()); S.uiV = 3; UI.pct = null; save(); closeModal(); goto('quests:today'); toast('Backup restored.');
     }, true);
   };
+  // 2.27.2: the app checks GitHub for a newer APK (Android). Hidden in the browser build, which has no installer.
+  function cmpVer(a, b) { const x = String(a).split('.'), y = String(b).split('.'); for (let i = 0; i < Math.max(x.length, y.length); i++) { const p = parseInt(x[i], 10) || 0, q = parseInt(y[i], 10) || 0; if (p !== q) return p < q ? -1 : 1; } return 0; }
+  function updateSettings() {
+    if (!N || !N.updateCheck) return '';
+    const u = S.upd || {}, cur = N.version ? N.version() : '', newer = !!(u.latest && cmpVer(u.latest, cur) > 0);
+    return `<div class="hd">Updates</div><div class="set"><div class="l">${newer ? 'Version ' + esc(u.latest) + ' is out' : 'Grindstone ' + esc(cur)}<small>${esc(u.note || u.msg || 'Checked when you open the app, at most once a day.')}</small></div>${newer ? '<button class="btn small" data-act="upd-install">Install</button>' : ''}<button class="btn small" data-act="upd-check">Check</button></div>`;
+  }
+  window.onUpdate = function (raw) {
+    let r = null; try { r = JSON.parse(raw); } catch (e) { return; }
+    S.upd = { at: Date.now(), latest: r.latest || '', url: r.url || '', msg: r.msg || '', note: '' };
+    save();
+    if (r.newer) toast('Grindstone ' + r.latest + ' is out. See Settings → Updates.');
+  };
+  window.onUpdateNote = function (text) { S.upd = Object.assign({}, S.upd || {}, { note: text }); save(); toast(text); };
+
   function backupSettings() {
     const at = S.settings.backupAt, said = S.settings.backupSaid || '';
     return `<div class="hd">Backup</div>
@@ -3760,6 +3775,7 @@
       ${rosterSettings()}
       <div class="hd">Your week</div><div class="set"><div class="l">Bins, payday, the shop<small>${esc(lifeSummary())}</small></div><button class="btn small" data-act="life">Change</button></div>
       ${weatherSettings()}
+      ${updateSettings()}
       ${backupSettings()}
       <div class="hd blood">Start over</div>
       <div class="set"><div class="l">Wipe everything<small>Your character, gear, gold and quests</small></div><button class="btn small blood" data-act="reset">Reset</button></div>
@@ -4025,6 +4041,8 @@
       case 'estate': openEstate(el.dataset.k); break;
       case 'land': openLand(); break;
       case 'life': UI.lifeDraft = null; openLife(); break;
+      case 'upd-check': if (N && N.updateCheck) { S.upd = Object.assign({}, S.upd || {}, { msg: 'Checking…' }); N.updateCheck(); render(); } break;
+      case 'upd-install': if (N && N.updateInstall && S.upd && S.upd.url) { S.upd.note = 'Downloading…'; N.updateInstall(S.upd.url); render(); } break;
       case 'life-skip': S.life.skip = true; save(); render(); break;
       case 'plan-swap': openPlanSwap(); break;
       case 'plan-n': { const k = el.dataset.k; S.settings.planN = S.settings.planN || {}; S.settings.planN[k] = Math.max(0, Math.min(12, G.planSize(S, k) + (+el.dataset.v))); if (S.plan && !S.plan.swaps) S.plan.key = ''; save(); render(); break; }
@@ -4459,6 +4477,7 @@
     lastDay = G.today();
     rosterPull(); weatherPull(); maybeBackup(); houseDay(); peoplePull();
     setTimeout(oracleChores, 8000);   // 2.27
+    if (N && N.updateCheck && Date.now() - ((S.upd && S.upd.at) || 0) > 864e5) setTimeout(() => N.updateCheck(), 4000);   // 2.27.2
     if (UI.sheet && UI.sheet !== 'notice') { renderTop(); heraldPoll(); return; }
     render();
     heraldPoll();
