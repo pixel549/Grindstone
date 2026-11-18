@@ -21,7 +21,7 @@ Do real-life quests and earn XP and gold. Levelling up gives you chests, chests 
 | `src/.../MainActivity.java` | WebView host and the JS ↔ Android bridge (`window.Native`) |
 | `assets/hearth2d.js`, `assets/lpchero.js` | The 2D Hearth and the LPC hero compositor |
 | `assets/2d/` | Baked art: `world.png`/`world.json` (house) and `hero/` (LPC layers + palettes) |
-| `tools2d/` | `bake_world.py`, `bake_hero.py`: rebuild `assets/2d/` from the LPC repos |
+| `tools2d/` | `bake_world.py`, `bake_hero.py`: rebuild `assets/2d/` from the LPC repos; run `bake_extras.py` after the world bake to add the extra props (all with the one-pixel outline) |
 | `src3d/`, `tools3d/`, `legacy3d/` | The retired 3D Hearth (not shipped) |
 | `grindstone.jks` | Signing key. **Keep it.** Updates must be signed with the same key or Android will refuse to install them over the top |
 
