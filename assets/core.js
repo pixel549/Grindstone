@@ -3306,7 +3306,7 @@
   // 2.28: the Oracle's rooms are a separate, upgradeable place below the Hearth.
   // They use the same gold-and-tier progression as the estate, without altering the player's house plan.
   const ORACLE_ROOMS = {
-    sanctum: { name: 'The Sanctum', icon: '✧', base: 0, level: 1, desc: 'The old stone shrine where the Oracle receives you.', unlock: null },
+    sanctum: { name: 'The Sanctum', icon: '✧', base: 450, level: 1, desc: 'The old stone shrine where the Oracle receives you.', unlock: null },
     archive: { name: 'The Archive', icon: '📜', base: 650, level: 10, desc: 'A quiet chamber of ledgers, histories and remembered deeds.', unlock: { room: 'sanctum', tier: 2 } },
     observatory: { name: 'The Observatory', icon: '☾', base: 1100, level: 14, desc: 'A vaulted room for watching the turning days and weighing what lies ahead.', unlock: { room: 'archive', tier: 2 } },
     scriptorium: { name: 'The Scriptorium', icon: '✒', base: 1600, level: 18, desc: 'A workroom of ink, maps and unfinished intentions.', unlock: { room: 'archive', tier: 3 } },
