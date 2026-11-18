@@ -10,9 +10,9 @@ This guide is intended to keep new artwork visually consistent with the existing
 
 ## 1. Core visual identity
 
-Grindstone uses **warm, hand-crafted fantasy pixel art**: readable silhouettes, compact clusters of colour, tactile materials and a slightly worn, lived-in atmosphere.
+Grindstone uses **hand-crafted fantasy pixel art**: readable silhouettes, compact clusters of colour, tactile materials and deliberate environmental storytelling. The shared art style creates visual consistency; it does not impose one mood or palette on every location.
 
-The world should feel like a place that has been inhabited and used, not a collection of shiny icons. Timber can be scuffed, stone can be uneven, metal can be tarnished and fabric can fade. Special places may be mysterious or magical, but should still look as though they belong to the same world.
+The Hearth and town are intended to feel **cozy, welcoming and lived-in**. Dungeons, wilderness, ruins and other locations are free to be unsettling, hostile, bleak, strange, grand, eerie or otherwise distinct. Each place should have its own atmosphere, lighting, material treatment and palette appropriate to its purpose. A dungeon should not be made cozy just to match the Hearth. What ties locations together is the game's pixel craft, scale, outline discipline, perspective and readable design—not a universal colour scheme.
 
 ### The five principles
 
@@ -75,8 +75,10 @@ These are reference colours, not a restriction to a tiny fixed palette. Sample t
 - Prefer a small, coherent ramp for each material: shadow, base, highlight and (where needed) a bright accent.
 - Keep shadows coloured; avoid simply adding black.
 - Keep highlights controlled. Large areas of pure white or saturated colour should be rare.
-- Use warm browns, muted greens, aged stone, iron greys and restrained golds as the normal world palette.
-- Strong cyan, violet, crimson or spectral colours are welcome for distinct magical effects, but should be used as accents with a clear purpose.
+- Use warm browns, muted greens, aged stone, iron greys and restrained golds where they suit the location. The Hearth and town will generally favour warmer, softer and more inviting combinations.
+- Other locations may use colder, harsher, darker, more saturated or more oppressive palettes when that supports their identity. Dungeons may lean into cold stone, sickly greens, deep reds, desaturated blues or near-monochrome schemes, for example.
+- Strong cyan, violet, crimson or spectral colours are welcome wherever the setting calls for them; they do not need to be limited to magical accents in otherwise warm scenes.
+- Do not force a location's palette to match the Hearth. Maintain material readability and coherent ramps within each scene instead.
 - Do not apply a global colour tint to an asset if it makes different materials indistinguishable.
 
 ### Lighting
@@ -143,19 +145,30 @@ Material cues:
 - Avoid baked shadows that conflict with dynamic or separately layered shadows.
 - A bespoke room may introduce its own palette and decorative language, but it must retain the same pixel scale, outline discipline and material logic.
 
-### Special locations: the Oracle's Sanctum
+### Location-specific art direction
 
-The Sanctum can be darker and more ceremonial than the Hearth without becoming visually disconnected.
+Every major location should have a short visual brief of its own. Define its mood, dominant materials, palette, lighting, architecture and signature details before producing a large asset set.
 
-Suggested direction:
-- Old, cool stone for the room structure, with warm candlelight as the main contrast.
-- A restrained palette of charcoal, slate, muted violet, aged bronze and candle gold.
+**The Hearth and town — cozy and welcoming**
+- Warm, inviting light; comfortable interiors; natural timber, softened stone, textiles, plants and signs of everyday use.
+- Friendly visual rhythms, approachable silhouettes and small decorative details that make the settlement feel inhabited.
+- Avoid making every surface pristine. Wear and age should add warmth rather than menace.
+
+**Dungeons and hostile places — atmosphere is allowed to turn**
+- These locations do not need to feel cozy or use the Hearth's warm palette.
+- Use architecture, negative space, scale, lighting and colour to communicate danger, isolation, age, corruption or uncertainty.
+- Uneven stone, oppressive ceilings, deep shadows, harsh directional light, damp surfaces, decay, strange growths and unsettling silhouettes are all valid where appropriate.
+- Different dungeon types should not all look alike. A crypt, overgrown ruin, mine, ancient machine complex and corrupted cavern should each have a recognisable visual identity.
+
+**The Oracle's Sanctum — quiet, ancient and ceremonial**
+- A distinct underground space, separate from the editable Hearth layout.
+- Old, cool stone for the room structure, with selective candlelight and restrained magical illumination.
 - A strong altar silhouette as the visual focal point.
 - Small, purposeful magical accents around the shrine or Oracle; avoid filling the whole room with glow.
 - Details that imply age and use: worn steps, repaired stone, wax drips, old cloth, carved marks and offerings.
 - The Oracle should be recognisable at a glance and visually grounded in the same world as the player character.
 
-This is a location-specific palette, not a replacement for the global palette.
+These are mood and palette directions, not separate rendering styles. All locations retain the same pixel scale, deliberate cluster work, material readability and technical sprite conventions.
 
 ## 9. Effects, lighting and particles
 
@@ -233,7 +246,7 @@ An asset is ready to commit only when the relevant checks pass:
 
 Use this as the default brief when creating new Grindstone assets:
 
-> Create original Grindstone game artwork in warm, hand-crafted fantasy pixel art. Match the existing game's 32-pixel world tile scale and established sprite proportions. Use deliberate pixel clusters, readable silhouettes, a restrained earthy palette, consistent top-left lighting and a one-pixel warm near-black outline (#241A20) where appropriate. Use crisp hard pixel edges and integer-scale detail. Keep the background fully transparent and include safe transparent padding. Do not use anti-aliasing, blur, smooth gradients, painterly texture, 3D rendering, vector shapes, text, watermarks or a checkerboard background. Preserve the requested object's exact proportions and provide clean, game-ready artwork that can be inspected and aligned before atlas integration.
+> Create original Grindstone game artwork in the project's established hand-crafted fantasy pixel-art style. Match the existing game's 32-pixel world tile scale and established sprite proportions. Follow the requested location's own mood and art direction; do not automatically make every scene warm, cozy or earthy. Use deliberate pixel clusters, readable silhouettes, coherent material palettes, appropriate scene lighting and a one-pixel warm near-black outline (#241A20) where appropriate. Use crisp hard pixel edges and integer-scale detail. Keep the background fully transparent and include safe transparent padding. Do not use anti-aliasing, blur, smooth gradients, painterly texture, 3D rendering, vector shapes, text, watermarks or a checkerboard background. Preserve the requested object's exact proportions and provide clean, game-ready artwork that can be inspected and aligned before atlas integration.
 
 **Always append the asset-specific requirements:** exact dimensions, number of frames, view direction, animation, palette exceptions, anchor point and whether the asset must tile.
 
