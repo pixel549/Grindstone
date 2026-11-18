@@ -17,6 +17,7 @@ Use the scene key from `G.TMAP.inside`, with a PNG extension:
 - `dojo.png`
 - `track.png`
 - `tower.png`
+- `oracle.png` (reserved for the Oracle's bespoke sanctum; the scene key is `in_oracle`)
 
 Place files in `assets/2d/locations/`. Missing files automatically use the original tile-based interior.
 
