@@ -427,7 +427,7 @@
   function questRow(q, t, mode, tag) {
     const can = G.canComplete(q, t);
     const cnt = q.type === 'habit' ? G.habitCount(q, t) : 0;
-    const sub = [`<span class="st">${SI[q.stat].short}</span>`, `+${DIFF[q.diff - 1].xp}`];
+    const sub = [`<span class="st">${SI[q.stat].short}</span>`, ...(mode === 'all' ? [q.type, 'Challenge ' + DIFF[q.diff - 1].name] : []), `+${DIFF[q.diff - 1].xp}`];
     const rl = G.restLeft(q, t);
     if (q.type === 'habit' && q.rest > 1) sub.push(rl ? `back in ${rl} day${rl === 1 ? '' : 's'}` : restWord(q.rest));
     else if (q.type === 'habit') sub.push(q.cap > 1 ? `${cnt}/${q.cap} today` : q.cap ? (cnt ? 'done today' : 'once a day') : cnt ? `×${cnt}` : 'repeatable');
@@ -790,6 +790,7 @@
         else if (mode === 'name') n = a.name.localeCompare(b.name);
         else if (mode === 'recent') n = b.id - a.id;
         else n = order.indexOf(a.id) - order.indexOf(b.id);
+        if (S.settings.questSortDesc && mode !== 'manual') n = -n;
         return n || a.name.localeCompare(b.name);
       });
   }
@@ -809,6 +810,7 @@
       <div class="qtools"><label><small>Sort by</small><select class="field" id="q-sort">${opts([['manual','My order'],['difficulty','Challenge'],['stat','Related stat'],['frequency','Frequency'],['type','Task type'],['name','Name'],['recent','Recently added']],sort)}</select></label>
       <label><small>Task filter</small><select class="field" id="q-filter">${opts([['all','All active'],['daily','Dailies'],['habit','Habits'],['todo','To-dos'],['STR','Strength'],['END','Endurance'],['VIT','Vitality'],['DIS','Discipline'],['INT','Intellect']],S.settings.questFilter || 'all')}</select></label>
       <label><small>Challenge</small><select class="field" id="q-diff">${opts([['all','Any challenge'],['1','Trivial'],['2','Easy'],['3','Solid'],['4','Hard'],['5','Heroic']],S.settings.questDiff || 'all')}</select></label>
+      <button class="btn small q-direction" data-act="quest-sort-dir" ${sort === 'manual' ? 'disabled' : ''}>${S.settings.questSortDesc ? 'Descending ↓' : 'Ascending ↑'}</button>
       <div class="q-sort-note">${sort === 'manual' ? 'Use the arrows on each task to set your own order.' : 'Switch to My order to arrange tasks yourself.'}</div></div>`;
     const grp = (type) => S.quests.filter((q) => q.type === type && !q.archived && q.doneOn);
     return tools + block('Available tasks', list) + block('Finished to-dos', grp('todo')) + block('Archived', S.quests.filter((q) => q.archived)) +
@@ -4130,6 +4132,7 @@
       case 'oracle-chat': openOracleChat(); break;
       case 'oracle-sanctum': openOracleSanctum('sanctum'); break;
       case 'quest-move': moveQuest(id, el.dataset.v); break;
+      case 'quest-sort-dir': S.settings.questSortDesc = !S.settings.questSortDesc; save(); render(); break;
       case 'fold-hidden': UI.showHidden = !UI.showHidden; render(); break;
       case 'oracle-barks': S.settings.oracleBarks = S.settings.oracleBarks === false; save(); render(); break;
       case 'oracle-hints': S.settings.oracleHints = S.settings.oracleHints === false; save(); render(); break;
