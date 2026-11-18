@@ -41,6 +41,33 @@ def blank(w, h):
     return Image.new('RGBA', (w, h), (0, 0, 0, 0))
 
 
+def square_window():
+    """A square-topped 32x59 stone window; deliberately no arch or rounded crown."""
+    im = blank(32, 59)
+    d = ImageDraw.Draw(im)
+    d.rectangle((3, 2, 28, 56), fill=OUTL)
+    d.rectangle((4, 3, 27, 55), fill=(132, 134, 140))
+    d.rectangle((6, 5, 25, 52), fill=(78, 80, 88))
+    # Four panes and straight stone mullions.
+    d.rectangle((8, 7, 14, 26), fill=(91, 145, 170))
+    d.rectangle((17, 7, 23, 26), fill=(57, 105, 135))
+    d.rectangle((8, 30, 14, 49), fill=(57, 105, 135))
+    d.rectangle((17, 30, 23, 49), fill=(39, 77, 105))
+    d.rectangle((15, 6, 16, 50), fill=(174, 174, 166))
+    d.rectangle((7, 27, 24, 29), fill=(174, 174, 166))
+    d.line((9, 8, 13, 8), fill=(164, 205, 216))
+    d.line((9, 9, 9, 22), fill=(132, 184, 204))
+    d.line((18, 8, 21, 8), fill=(116, 168, 190))
+    d.line((7, 3, 26, 3), fill=(204, 205, 196))
+    d.line((4, 4, 4, 53), fill=(186, 187, 180))
+    d.line((27, 4, 27, 54), fill=(82, 84, 92))
+    # Flat, square-cornered sill.
+    d.rectangle((2, 51, 29, 57), fill=OUTL)
+    d.rectangle((3, 51, 28, 54), fill=(165, 166, 160))
+    d.line((3, 51, 28, 51), fill=(220, 216, 198))
+    return im
+
+
 def stack(*parts):
     """Compose (image, x, y) parts onto the smallest canvas holding them all."""
     W = max(x + im.width for im, x, y in parts)
@@ -598,7 +625,7 @@ def furniture():
     put('ladder', trim(src(F + 'Ladder.png', (32, 0, 96, 96))))
     put('painttins', painttins())
     put('clock', trim(src(F + 'Clock, Grandfather.png', (0, 0, 32, 96))))
-    put('window', trim(src('Structure/Windows/Stone Windows A.png', (0, 0, 32, 64))))
+    put('window', square_window())
     put('torch', trim(src('Objects/Wall Items/Lighting, Wall.png', (72, 20, 88, 60))))
     put('walllamp', trim(src('Objects/Wall Items/Lighting, Wall.png', (4, 2, 28, 34))))
     put('curtains', trim(src('Objects/Wall Items/Curtains.png', (0, 32, 192, 96))))
