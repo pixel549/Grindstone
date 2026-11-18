@@ -1114,11 +1114,12 @@
       if (vx1 > vx0 && vy1 > vy0) g.drawImage(this.stat, vx0, vy0, vx1 - vx0, vy1 - vy0, vx0, vy0, vx1 - vx0, vy1 - vy0);
       const seen = (ob) => ob.ax > vx0 - 120 && ob.ax < vx1 + 120 && ob.ay > vy0 - 40 && ob.ay < vy1 + 160;
       const flashOn = this.flash && Math.floor(this.t * 4) % 2 === 0;
-      // what hangs on the walls
-      this.wallItems.forEach((w) => { w.fire = w.f && w.f.fire; this._drawObj(g, w, flashOn); });
-      // everything that stands on the floor, back to front
+      // Wall-mounted and floor objects share depth ordering. This lets the
+      // wall trim sit in front of things behind it, without hiding objects in
+      // front of the wall (trees, actors, furniture, etc.).
+      this.wallItems.forEach((w) => { w.fire = w.f && w.f.fire; });
       const H0 = this.hero, hy = this._pos(H0).sy;
-      const list = this.objs.filter((ob) => (ob.s || ob.relic) && !ob.hidden && seen(ob));
+      const list = this.objs.concat(this.wallItems).filter((ob) => (ob.s || ob.relic) && !ob.hidden && seen(ob));
       const items = list.map((ob) => ({ y: ob.flat ? ob.ay - 4000 : ob.ay + (ob.z || 0) * 0.01 + (ob.front ? 0.5 : 0), ob: ob }));
       items.push({ y: hy + (H0.spot && H0.spot.s.swim ? -0.5 : 0) + 0.2, actor: H0 });
       this.npcs.forEach((a) => { if (a.sheets) items.push({ y: this._pos(a).sy + 0.15, actor: a }); });
