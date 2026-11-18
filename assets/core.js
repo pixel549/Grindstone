@@ -1439,6 +1439,7 @@
     setEst(s);
     houseNorm(s);
     townNorm(s);
+    oracleRoomsNorm(s);
     restatSave(s);
     lifeNorm(s);
     weekliesFit(s, today());
@@ -3301,6 +3302,53 @@
   // The list Claude needs: what each deed is called.
   function deedNames(s) { return s.quests.filter((q) => !q.archived && !(q.type === 'todo' && q.doneOn)).map((q) => q.name); }
 
+
+  // 2.28: the Oracle's rooms are a separate, upgradeable place below the Hearth.
+  // They use the same gold-and-tier progression as the estate, without altering the player's house plan.
+  const ORACLE_ROOMS = {
+    sanctum: { name: 'The Sanctum', icon: '✧', base: 0, level: 1, desc: 'The old stone shrine where the Oracle receives you.', unlock: null },
+    archive: { name: 'The Archive', icon: '📜', base: 650, level: 10, desc: 'A quiet chamber of ledgers, histories and remembered deeds.', unlock: { room: 'sanctum', tier: 2 } },
+    observatory: { name: 'The Observatory', icon: '☾', base: 1100, level: 14, desc: 'A vaulted room for watching the turning days and weighing what lies ahead.', unlock: { room: 'archive', tier: 2 } },
+    scriptorium: { name: 'The Scriptorium', icon: '✒', base: 1600, level: 18, desc: 'A workroom of ink, maps and unfinished intentions.', unlock: { room: 'archive', tier: 3 } },
+  };
+  const ORACLE_ROOM_MAX = 5;
+  function oracleRoomsNorm(s) {
+    const old = s.oracleRooms && typeof s.oracleRooms === 'object' ? s.oracleRooms : {};
+    const tiers = {};
+    Object.keys(ORACLE_ROOMS).forEach((k) => {
+      const n = old.tier && old.tier[k];
+      tiers[k] = Math.max(0, Math.min(ORACLE_ROOM_MAX, Number.isFinite(Number(n)) ? Number(n) | 0 : 0));
+    });
+    if (!tiers.sanctum) tiers.sanctum = 1;
+    s.oracleRooms = { tier: tiers };
+    return s.oracleRooms;
+  }
+  function oracleRoomState(s, k) {
+    oracleRoomsNorm(s);
+    const d = ORACLE_ROOMS[k];
+    if (!d) return null;
+    const tier = s.oracleRooms.tier[k] | 0, next = tier + 1;
+    const req = d.unlock && (s.oracleRooms.tier[d.unlock.room] | 0) < d.unlock.tier;
+    const levelLocked = s.level < d.level;
+    const locked = !!(tier === 0 && (levelLocked || req));
+    const cost = tier >= ORACLE_ROOM_MAX ? 0 : tier === 0 ? d.base : Math.round((d.base * (0.48 + tier * 0.62)) / 10) * 10;
+    let why = '';
+    if (tier === 0 && levelLocked) why = 'Reach level ' + d.level;
+    else if (tier === 0 && req) why = 'Improve ' + ORACLE_ROOMS[d.unlock.room].name + ' to tier ' + d.unlock.tier;
+    else if (tier < ORACLE_ROOM_MAX && s.gold < cost) why = 'Need ' + (cost - s.gold) + ' more gold';
+    return { key: k, name: d.name, icon: d.icon, desc: d.desc, tier: tier, max: tier >= ORACLE_ROOM_MAX, cost: cost, locked: locked, ok: !locked && tier < ORACLE_ROOM_MAX && s.gold >= cost, why: why, next: next };
+  }
+  function oracleRoomUpgrade(s, k) {
+    const st = oracleRoomState(s, k);
+    if (!st) return { err: 'That room does not exist' };
+    if (st.locked) return { err: st.why || 'Not yet' };
+    if (st.max) return { err: 'That room is fully restored' };
+    if (s.gold < st.cost) return { err: 'Need ' + (st.cost - s.gold) + ' more gold' };
+    s.gold -= st.cost;
+    s.oracleRooms.tier[k] = st.tier + 1;
+    return { key: k, tier: st.tier + 1, cost: st.cost, max: st.tier + 1 >= ORACLE_ROOM_MAX };
+  }
+
   root.G = {
     STATS, STAT_INFO, TRAINING, DIFF, TYPES, SLOTS, SLOT_NAME, RARITY, CHESTS,
     need, statVal, statNextAt, statPrevAt,
@@ -3325,6 +3373,7 @@
     RESTAT, restatOf, restatSave,
     isOut, weatherRead, planSize, PLAN_SIZE, planFor, planSwap, planState, planClaim, PLAN_SWAPS,
     END_LEVEL, END_DUNGEON, contentState, contentCheck, newGamePlus, TOWN, TOWN_TIERS, townNorm, townSlots, townGate, townState, townBuy, townPay, townPayCost, TOWN_PAY, townToggle, townPerks, townTick, townNote, townReward,
+    ORACLE_ROOMS, ORACLE_ROOM_MAX, oracleRoomsNorm, oracleRoomState, oracleRoomUpgrade,
     BIRDS, GARB, HATS, NPC_ROLES, NPC_ELS, npcGear, npcNorm, CALLINGS, CALLING_ORDER, CALLING_TUNE, adherence, callingsNorm, callingState, callingsCheck, npcInvite, npcVowKept, WANDERERS, wanderersCheck, wandererNext,
   };
 })(typeof window !== 'undefined' ? window : globalThis);
