@@ -32,6 +32,9 @@
       this.k = 0; this.cam = { x: 21 * T, y: 40 * T, manual: 0 };
       this.people = []; this.fx = [];
       this.scene = null;
+      this.sceneArt = null;
+      this.sceneArtKey = null;
+      this.sceneArtFailed = {};
       this.canvas = document.createElement('canvas');
       this.canvas.className = 't2d';
       this.canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none';
@@ -83,9 +86,47 @@
     }
 
     // ---------------------------------------------------------------- the scene
+    // Optional bespoke room backgrounds live at assets/2d/locations/<scene-key>.png.
+    // They replace only the static room dressing; movement, NPCs, collision and taps stay game-driven.
+    _loadSceneArt(key) {
+      const cacheKey = (this.o.base || '2d/') + 'locations/' + key + '.png';
+      this.sceneArt = null;
+      this.sceneArtKey = key;
+      if (this.sceneArtFailed[cacheKey] === true) return Promise.resolve(null);
+      const cached = Town2D.sceneArtCache[cacheKey];
+      if (cached) {
+        this.sceneArt = cached;
+        this._static();
+        return Promise.resolve(cached);
+      }
+      if (this.sceneArtFailed[cacheKey] === 'loading') return Promise.resolve(null);
+      this.sceneArtFailed[cacheKey] = 'loading';
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          Town2D.sceneArtCache[cacheKey] = img;
+          this.sceneArtFailed[cacheKey] = false;
+          if (this.scene !== 'town' && this.ik === key) {
+            this.sceneArt = img;
+            this.sceneArtKey = key;
+            this._static();
+          }
+          resolve(img);
+        };
+        img.onerror = () => {
+          this.sceneArtFailed[cacheKey] = true;
+          if (this.ik === key) { this.sceneArt = null; this._static(); }
+          resolve(null); // Missing artwork is expected until the player supplies it.
+        };
+        img.src = cacheKey;
+      });
+    }
     goScene(scene, at) {
       this.scene = scene;
+      this.sceneArt = null;
+      this.sceneArtKey = null;
       this._layout();
+      if (scene !== 'town') this._loadSceneArt(scene.slice(3));
       const H = this.hero;
       let c = at;
       if (!c) c = scene === 'town' ? G().TMAP.spawn : G().TMAP.exit.slice();
@@ -200,11 +241,18 @@
         });
       } else {
         const I = this.inside || {}, W = this.W;
-        for (let y = 2; y < this.H - 1; y++) for (let x = 0; x < W; x++) {
-          const r = this.spr[I.floor] || this.spr['floor.0'];
-          g.drawImage(this.atlas, r[0], r[1] + ((y * 32) % r[3]), 32, 32, x * T, y * T, 32, 32);
+        if (this.sceneArt && this.sceneArtKey === this.ik) {
+          // Artwork is authored at 352 × 288 (11 × 9 tiles), or an exact integer multiple.
+          // Nearest-neighbour scaling preserves hard pixel edges on every phone size.
+          g.imageSmoothingEnabled = false;
+          g.drawImage(this.sceneArt, 0, 0, W * T, this.H * T);
+        } else {
+          for (let y = 2; y < this.H - 1; y++) for (let x = 0; x < W; x++) {
+            const r = this.spr[I.floor] || this.spr['floor.0'];
+            g.drawImage(this.atlas, r[0], r[1] + ((y * 32) % r[3]), 32, 32, x * T, y * T, 32, 32);
+          }
+          for (let x = 0; x < W; x++) { const r = this.spr[I.wall] || this.spr['wall.0']; g.drawImage(this.atlas, r[0], r[1], 32, 64, x * T, 0, 32, 64); }
         }
-        for (let x = 0; x < W; x++) { const r = this.spr[I.wall] || this.spr['wall.0']; g.drawImage(this.atlas, r[0], r[1], 32, 64, x * T, 0, 32, 64); }
         g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(0, 2 * T, W * T, 4);
         // the front wall, with the doorway
         g.fillStyle = '#2a2420'; g.fillRect(0, (this.H - 1) * T, W * T, T);
@@ -326,6 +374,9 @@
       g.drawImage(sheet, (f % A.n) * 64, row * 64, 64, 64, x, y, 64, 64);
     }
     _drawObj(g, ob) {
+      // The generated room background already contains its static furniture and architecture.
+      // Keep the legacy objects in the scene data for collision/interaction, but don't double-draw them.
+      if (this.scene !== 'town' && this.sceneArt && this.sceneArtKey === this.ik) return;
       if (ob.ts) { const r = this.tspr[ob.ts]; g.drawImage(this.tatlas, r[0], r[1], r[2], r[3], ob.x0, ob.y0, r[2], r[3]); return; }
       const r = this.spr[ob.s]; if (!r) return;
       if (ob.lot) { g.drawImage(this.atlas, r[0], r[1], r[2], r[3], ob.x0, ob.y0, r[2], r[3]); return; }
@@ -477,5 +528,6 @@
     dispose() { this.alive = false; cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); if (this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas); }
   }
   Town2D.assets = assets;
+  Town2D.sceneArtCache = {};
   root.Town2D = Town2D;
 })(typeof window !== 'undefined' ? window : globalThis);
