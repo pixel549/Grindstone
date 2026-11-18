@@ -98,14 +98,15 @@ const native = (seed) => {
   const taskSave = await save();
   const easyId = taskSave.quests.find((q) => q.name === 'AA Sort easy').id;
   const hardId = taskSave.quests.find((q) => q.name === 'ZZ Sort hard').id;
-  let beforeOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
+  let beforeOrder = await p.$$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
   ok(beforeOrder.indexOf('AA Sort easy') < beforeOrder.indexOf('ZZ Sort hard'), 'new tasks start available in the personal order');
   await tap('#main [data-act="quest-move"][data-id="' + easyId + '"][data-v="1"]');
-  const afterOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
+  const afterOrder = await p.$$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
   ok(afterOrder.indexOf('ZZ Sort hard') < afterOrder.indexOf('AA Sort easy'), 'the up/down controls persist a manual reorder');
   const afterMoveSave = await save();
   ok(!afterMoveSave.quests.find((q) => q.id === easyId).archived && !afterMoveSave.quests.find((q) => q.id === hardId).archived, 'newly created tasks are active, not archived');
 
+  await p.evaluate(() => window.gotoFromWidget('quests:today')); await p.waitForTimeout(350);
   // ---- talking ----
   await tap('.chips [data-act="oracle-chat"]');
   ok(/goes to Groq/.test(await sheet()), 'the chat says where it goes');
@@ -161,6 +162,7 @@ const native = (seed) => {
   ok(rq && rq.judged === 'oracle' && rq.stat === 'VIT' && rq.cap === 1 && rq.judgedWhy === 'Gentle rehab.', 'the Oracle judged it: ' + JSON.stringify(rq && [rq.stat, rq.diff, rq.cap, rq.judged]));
   // renaming is a new thing to judge
   await p.evaluate((id) => window.gotoFromWidget('quests:all'), rq.id); await p.waitForTimeout(400);
+  await p.selectOption('#q-filter', 'all'); await p.waitForTimeout(250);   // the earlier todo filter is saved and would hide this habit
   await p.evaluate(() => { const r = [...document.querySelectorAll('.row[data-act="edit"]')].find((x) => /Ankle rehab band/.test(x.textContent)); r.click(); }); await p.waitForTimeout(400);
   await p.fill('#e-name', 'Hydrate properly');
   await tap('#modal [data-m="e-save"]');
