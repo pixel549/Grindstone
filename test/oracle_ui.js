@@ -63,6 +63,14 @@ const native = (seed) => {
   // ---- the Oracle speaks from the physical portal, then admits him to the sanctum ----
   await tap('[data-act="tab"][data-v="hearth"]');
   await p.waitForFunction(() => window.__house.inst && window.__house.inst.oracle && window.__house.inst.objs.some((o) => o.oraclePortal), null, { timeout: 30000 });
+  const householdVoices = await p.evaluate(() => {
+    const h = window.__house.inst;
+    h.hero.bub = null; h.birds.forEach((b) => { b.bub = null; }); h.barkLock = 0; h.t = 100;
+    h.npcs.forEach((n) => { n.bub = null; n.think = 0; n.sleep = false; n.dozing = false; n.meal = null; n.spot = null; n.path = []; n.chat = null; n.birdsT = 0; });
+    h._updateNpcs(0.1);
+    return h.npcs.filter((n) => n.bub && n.bub.text).length;
+  });
+  ok(householdVoices <= 1, 'household dialogue takes turns instead of overlapping');
   const ambient = await p.evaluate(() => {
     const h = window.__house.inst;
     h.hero.bub = null; h.npcs.forEach((n) => { n.bub = null; }); h.birds.forEach((b) => { b.bub = null; });
