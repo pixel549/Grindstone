@@ -52,7 +52,7 @@ fs.mkdirSync(OUT, { recursive: true });
   await p.waitForFunction(() => window.__town && window.__town.inst && window.__town.inst.people.length > 0, null, { timeout: 30000 });
   const townVoices = await p.evaluate(() => {
     const t = window.__town.inst; t.t = 100; t.barkLock = 0;
-    t.people.forEach((a) => { a.bub = null; a.barkNext = 0; a.talking = 0; });
+    t.people.forEach((a) => { a.bub = null; a.barkNext = 0; a.talking = 0; a.path = []; a.next = 100; });
     t._update(0.1);
     return { active: t.people.filter((a) => a.bub).length, lock: t.barkLock };
   });
