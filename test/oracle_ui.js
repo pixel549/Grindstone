@@ -66,7 +66,7 @@ const native = (seed) => {
   const householdVoices = await p.evaluate(() => {
     const h = window.__house.inst;
     h.hero.bub = null; h.birds.forEach((b) => { b.bub = null; }); h.barkLock = 0; h.t = 100;
-    h.npcs.forEach((n) => { n.bub = null; n.think = 0; n.sleep = false; n.dozing = false; n.meal = null; n.spot = null; n.path = []; n.chat = null; n.birdsT = 0; });
+    h.npcs.forEach((n) => { n.bub = null; n.think = 0; n.sleep = false; n.dozing = false; n.meal = null; n.spot = null; n.path = []; n.chat = null; n.birdsT = 0; n.next = 100; n.evT = 100; });
     h._updateNpcs(0.1);
     return h.npcs.filter((n) => n.bub && n.bub.text).length;
   });
