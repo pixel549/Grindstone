@@ -35,7 +35,7 @@
   // delve copy is written for 'he'
   const HE = (t) => (G.pron ? G.pron(!!(S && S.look && S.look.sex === 'f'), t) : t);
   const UI = { tab: 'quests', sub: { status: 'attr', quests: 'today', hearth: '', delve: '', goods: 'coffers', records: 'deeds' }, run: null, preview: null, sheet: null, edit: null, onOk: null, undo: null,
-    pct: null, eqSlot: 'weapon', unlocks: [], goalDone: [], look: null };
+    pct: null, eqSlot: 'weapon', unlocks: [], goalDone: [], look: null, oracleRoom: 'sanctum' };
   let lastDay = G.today();
   let toastTimer = null;
   const oracleCbs = {};
@@ -443,8 +443,9 @@
     else if (q.type === 'habit' && cnt) btn = `<button class="chk" data-act="complete" data-id="${q.id}"><span>${cnt}</span></button>`;
     else btn = `<button class="chk" data-act="complete" data-id="${q.id}"></button>`;
     const minBtn = mode !== 'all' && can && q.min ? `<button class="minb" data-act="complete-min" data-id="${q.id}" title="${esc(q.min)}">min</button>` : '';
+    const mover = mode === 'all' && (S.settings.questSort || 'manual') === 'manual' ? `<div class="qmove"><button data-act="quest-move" data-id="${q.id}" data-v="-1" aria-label="Move up">▲</button><button data-act="quest-move" data-id="${q.id}" data-v="1" aria-label="Move down">▼</button></div>` : '';
     return `<div class="row ${mode !== 'all' && !can ? 'done' : ''}" style="--c:var(--${q.stat})" data-act="edit" data-id="${q.id}">
-      <div class="ri">${esc(q.icon)}</div><div class="rb"><div class="rn">${esc(q.name)}</div><div class="rs">${sub.join(' · ')}</div>${mode !== 'all' && can && q.min ? `<div class="rmin">or at least: ${esc(q.min)} (half)</div>` : ''}${buffChip(q)}</div>${minBtn}${btn}</div>`;
+      <div class="ri">${esc(q.icon)}</div><div class="rb"><div class="rn">${esc(q.name)}</div><div class="rs">${sub.join(' · ')}</div>${mode !== 'all' && can && q.min ? `<div class="rmin">or at least: ${esc(q.min)} (half)</div>` : ''}${buffChip(q)}</div>${mover}${minBtn}${btn}</div>`;
   }
   // 2.9: the list wears down. Anything finished for today (or resting until it comes round again) drops off; what is
   // left is what is still to do. A fold at the bottom keeps the finished ones in reach, for undo or another go.
@@ -762,13 +763,56 @@
       ${todayList(t, dailies, letOff, habits, todos, resting)}${hiddenStrip(t)}`;
   }
 
+  function questOrderEnsure() {
+    const ids = S.quests.filter((q) => !q.archived).map((q) => q.id);
+    const old = Array.isArray(S.questOrder) ? S.questOrder : [];
+    S.questOrder = old.filter((id, i) => ids.indexOf(id) >= 0 && old.indexOf(id) === i).concat(ids.filter((id) => old.indexOf(id) < 0));
+    return S.questOrder;
+  }
+  function questFrequency(q) {
+    if (q.type === 'todo') return 999;
+    if (q.rest > 1) return q.rest;
+    if (q.type === 'daily') return 7 / Math.max(1, q.days.filter(Boolean).length);
+    return 1 / Math.max(1, q.cap || 1);
+  }
+  function allQuestList() {
+    const order = questOrderEnsure(), f = S.settings.questFilter || 'all', d = S.settings.questDiff || 'all';
+    return S.quests.filter((q) => !q.archived && !(q.type === 'todo' && q.doneOn))
+      .filter((q) => f === 'all' || ['daily','habit','todo'].includes(f) && q.type === f || ['STR','END','VIT','DIS','INT'].includes(f) && q.stat === f)
+      .filter((q) => d === 'all' || q.diff === Number(d))
+      .sort((a, b) => {
+        const mode = S.settings.questSort || 'manual';
+        let n = 0;
+        if (mode === 'difficulty') n = a.diff - b.diff;
+        else if (mode === 'stat') n = ['STR','END','VIT','DIS','INT'].indexOf(a.stat) - ['STR','END','VIT','DIS','INT'].indexOf(b.stat);
+        else if (mode === 'frequency') n = questFrequency(a) - questFrequency(b);
+        else if (mode === 'type') n = ['daily','habit','todo'].indexOf(a.type) - ['daily','habit','todo'].indexOf(b.type);
+        else if (mode === 'name') n = a.name.localeCompare(b.name);
+        else if (mode === 'recent') n = b.id - a.id;
+        else n = order.indexOf(a.id) - order.indexOf(b.id);
+        return n || a.name.localeCompare(b.name);
+      });
+  }
+  function moveQuest(id, dir) {
+    const list = allQuestList(), i = list.findIndex((q) => q.id === id), j = i + Number(dir);
+    if (i < 0 || j < 0 || j >= list.length) return;
+    const order = questOrderEnsure(), a = order.indexOf(list[i].id), b = order.indexOf(list[j].id);
+    if (a < 0 || b < 0) return;
+    [order[a], order[b]] = [order[b], order[a]];
+    S.settings.questSort = 'manual'; save(); render();
+  }
   function viewAll() {
-    const t = G.today();
-    const grp = (type) => S.quests.filter((q) => q.type === type && !q.archived);
-    const block = (title, list) => (list.length ? `<div class="hd">${title}<small>${list.length}</small></div>` + list.map((q) => questRow(q, t, 'all')).join('') : '');
-    return `<div class="btns" style="margin:4px 0 2px"><button class="btn" data-act="lib-open">📜 The quest library · ${G.libraryCount()} ideas</button></div>` + block('Dailies', grp('daily')) + block('Habits', grp('habit')) + block('To-dos', grp('todo').filter((q) => !q.doneOn)) +
-      block('Finished to-dos', grp('todo').filter((q) => q.doneOn)) + block('Archived', S.quests.filter((q) => q.archived)) +
-      (S.quests.length ? '' : '<div class="empty">No quests. Tap + to forge one.</div>');
+    const t = G.today(), list = allQuestList(), sort = S.settings.questSort || 'manual';
+    const block = (title, rows) => rows.length ? `<div class="hd">${title}<small>${rows.length}</small></div>` + rows.map((q) => questRow(q, t, 'all')).join('') : '';
+    const opts = (items, val) => items.map((o) => `<option value="${o[0]}" ${o[0] === val ? 'selected' : ''}>${o[1]}</option>`).join('');
+    const tools = `<div class="btns" style="margin:4px 0 2px"><button class="btn" data-act="lib-open">📜 The quest library · ${G.libraryCount()} ideas</button></div>
+      <div class="qtools"><label><small>Sort by</small><select class="field" id="q-sort">${opts([['manual','My order'],['difficulty','Challenge'],['stat','Related stat'],['frequency','Frequency'],['type','Task type'],['name','Name'],['recent','Recently added']],sort)}</select></label>
+      <label><small>Task filter</small><select class="field" id="q-filter">${opts([['all','All active'],['daily','Dailies'],['habit','Habits'],['todo','To-dos'],['STR','Strength'],['END','Endurance'],['VIT','Vitality'],['DIS','Discipline'],['INT','Intellect']],S.settings.questFilter || 'all')}</select></label>
+      <label><small>Challenge</small><select class="field" id="q-diff">${opts([['all','Any challenge'],['1','Trivial'],['2','Easy'],['3','Solid'],['4','Hard'],['5','Heroic']],S.settings.questDiff || 'all')}</select></label>
+      <div class="q-sort-note">${sort === 'manual' ? 'Use the arrows on each task to set your own order.' : 'Switch to My order to arrange tasks yourself.'}</div></div>`;
+    const grp = (type) => S.quests.filter((q) => q.type === type && !q.archived && q.doneOn);
+    return tools + block('Available tasks', list) + block('Finished to-dos', grp('todo')) + block('Archived', S.quests.filter((q) => q.archived)) +
+      (!S.quests.length ? '<div class="empty">No tasks yet. Tap + to add one.</div>' : !list.length ? '<div class="empty">No tasks match those filters.</div>' : '');
   }
 
   function doComplete(id, btn, min) {
@@ -1209,7 +1253,7 @@
     if (UI.visit) return viewVisit();
     const res = S.npcs.filter((n) => n.status === 'resident');
     const chip = (n) => `<div class="hh" data-act="npc" data-k="${esc(n.id)}"><canvas class="npcport" width="96" height="96" data-k="${esc(n.id)}"></canvas><div class="hn">${esc(n.name)}</div></div>`;
-    let h = h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
+    let h = `<button class="oracle-entry" data-act="oracle-sanctum"><span class="oracle-entry-mark">✧</span><span><b>The Oracle’s Rooms</b><small>A stair beneath the Hearth · descend</small></span><span class="oracle-entry-glyph">⌄</span></button>` + h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
     h += `<div class="omen" style="text-align:center"><span class="gl">◈ ${S.gold}</span> in the purse · <span class="gl">◈ ${S.estate.spent}</span> sunk into the estate</div>`;
     const vis = G.visitorsNow(S, G.today());   // 2.26: and whoever's visiting from the calendar
     const vchip = (v) => `<div class="hh" data-act="person" data-id="${esc(v.p.id)}"><canvas class="pport" width="96" height="96" data-p="${esc(v.p.id)}"></canvas><div class="hn">${v.ev && !v.lives ? G.EV_ICON[v.ev.kind] + ' ' : ''}${esc(v.p.name)}</div></div>`;
@@ -3217,6 +3261,32 @@
     });
   }
 
+
+  // ---------- 2.28: the Oracle's rooms, kept below the editable Hearth ----------
+  function openOracleSanctum(room) {
+    UI.oracleRoom = G.ORACLE_ROOMS[room] ? room : (UI.oracleRoom || 'sanctum');
+    const keys = Object.keys(G.ORACLE_ROOMS), k = UI.oracleRoom, d = G.ORACLE_ROOMS[k], st = G.oracleRoomState(S, k);
+    const art = {
+      sanctum: '<div class="os-arch os-arch-a"></div><div class="os-arch os-arch-b"></div><div class="os-candle os-candle-a"><i></i></div><div class="os-candle os-candle-b"><i></i></div><div class="os-oracle"><i class="os-hood"></i><i class="os-face"></i><i class="os-robe"></i><i class="os-eye"></i></div><div class="os-altar"><i class="os-rune">✧</i><i class="os-orb"></i><i class="os-step"></i></div><div class="os-floor"></div><div class="os-caption">THE VEIL IS THIN HERE</div>',
+      archive: '<div class="or-shelf left"><i></i><i></i><i></i><i></i></div><div class="or-shelf right"><i></i><i></i><i></i><i></i></div><div class="or-desk"><i></i></div><div class="or-glow"></div><div class="os-caption">EVERY DEED LEAVES A TRACE</div>',
+      observatory: '<div class="or-dome"></div><div class="or-star a">✦</div><div class="or-star b">✧</div><div class="or-star c">✦</div><div class="or-telescope"></div><div class="os-caption">THE HOURS TURN ABOVE</div>',
+      scriptorium: '<div class="or-window"></div><div class="or-desk"><i></i></div><div class="or-ink"></div><div class="or-scroll"></div><div class="os-caption">THOUGHT MADE TANGIBLE</div>',
+    };
+    const pips = Array.from({length:5},(_,i)=>`<i class="${i < st.tier ? 'lit' : ''}"></i>`).join('');
+    const roomTabs = keys.map((x)=>{const xst=G.oracleRoomState(S,x), xd=G.ORACLE_ROOMS[x];return `<button class="or-tab ${x===k?'on':''} ${xst.tier?'built':''}" data-m="oracle-room" data-k="${x}"><span>${xd.icon}</span><small>${xd.name}</small></button>`;}).join('');
+    const requirement = st.locked ? st.why : st.max ? 'This chamber has been fully restored.' : st.tier === 0 ? `The room is ready to be built. Cost: ◈ ${st.cost}.` : `Next restoration: tier ${st.next} · ◈ ${st.cost}.`;
+    const upgrade = st.max ? '<div class="oracle-room-max">✧ Fully restored</div>' : `<div class="btns"><button class="btn prime" data-m="oracle-room-upgrade" data-k="${k}" ${st.ok?'':'disabled'}>${st.tier?'Restore ·':'Build ·'} ◈ ${st.cost}</button></div>`;
+    const action = k === 'sanctum' ? '<button class="btn" data-m="oracle-sanctum-talk">Approach the altar</button>' : k === 'archive' ? '<button class="btn" data-m="oracle-room-quests">Open the quest ledger</button>' : k === 'observatory' ? '<button class="btn" data-m="oracle-room-forecast">Ask about the days ahead</button>' : '<button class="btn" data-m="oracle-room-newquest">Forge a new task</button>';
+    openSheet(`<div class="oracle-sanctum-head"><span>BELOW THE HEARTH</span><small>THE QUIET PLACE</small></div>
+      <div class="oracle-room-tabs">${roomTabs}</div>
+      <div class="oracle-sanctum ${k} tier-${st.tier}" role="img" aria-label="${esc(d.name)} in the Oracle's underground chambers">${art[k]}</div>
+      <div class="oracle-room-title"><div><h3>${esc(d.name)}</h3><small>Restoration · tier ${st.tier}/5</small></div><div class="oracle-pips">${pips}</div></div>
+      <p class="lore oracle-sanctum-lore">${esc(d.desc)}</p>
+      <p class="oracle-room-status">${esc(requirement)}${st.why && !st.locked ? ' · ' + esc(st.why) : ''}</p>
+      ${upgrade}
+      <div class="btns"><button class="btn" data-m="close">Return upstairs</button>${action}</div>`, 'oracle-sanctum');
+  }
+
   // ---------- 2.27: talking to the Oracle ----------
   function openOracleChat(prefill) {
     UI.ocPre = prefill || '';
@@ -4057,6 +4127,8 @@
       case 'overdue': openOverdue(); break;
       case 'people': UI.fromFound = true; openPeopleFound(false); break;
       case 'oracle-chat': openOracleChat(); break;
+      case 'oracle-sanctum': openOracleSanctum('sanctum'); break;
+      case 'quest-move': moveQuest(id, el.dataset.v); break;
       case 'fold-hidden': UI.showHidden = !UI.showHidden; render(); break;
       case 'oracle-barks': S.settings.oracleBarks = S.settings.oracleBarks === false; save(); render(); break;
       case 'oracle-hints': S.settings.oracleHints = S.settings.oracleHints === false; save(); render(); break;
@@ -4074,6 +4146,9 @@
   });
 
   document.addEventListener('change', (ev) => {
+    if (ev.target.id === 'q-sort') { S.settings.questSort = ev.target.value; save(); render(); }
+    if (ev.target.id === 'q-filter') { S.settings.questFilter = ev.target.value; save(); render(); }
+    if (ev.target.id === 'q-diff') { S.settings.questDiff = ev.target.value; save(); render(); }
     if (ev.target.id === 'model-in') { S.settings.oracleModel = ev.target.value.trim() || DEFAULT_MODEL; save(); }
     if (ev.target.id === 'herald-cal') {
       const c = heraldInfo().cals.find((x) => String(x.id) === ev.target.value);
@@ -4103,6 +4178,12 @@
     const e = UI.edit, v = el.dataset.v, id = el.dataset.id != null ? Number(el.dataset.id) : null;
     switch (el.dataset.m) {
       case 'close': closeSheet(); break;
+      case 'oracle-room': openOracleSanctum(el.dataset.k); break;
+      case 'oracle-room-upgrade': { const k = el.dataset.k, r = G.oracleRoomUpgrade(S, k); if (r.err) { toast(r.err + '.'); break; } S.log.unshift({ t: Date.now(), d: G.today(), b: 1, n: 'Oracle room: ' + G.ORACLE_ROOMS[k].name + ' tier ' + r.tier, i: G.ORACLE_ROOMS[k].icon, x: 0, g: -r.cost }); save(); Sfx.play('coin'); openOracleSanctum(k); toast(G.ORACLE_ROOMS[k].name + ' restored to tier ' + r.tier + '.'); break; }
+      case 'oracle-sanctum-talk': closeModal(); openOracleChat(); break;
+      case 'oracle-room-quests': closeModal(); goto('quests:all'); break;
+      case 'oracle-room-newquest': closeModal(); openEditor(null); break;
+      case 'oracle-room-forecast': closeModal(); openOracleChat('What should I keep an eye on over the next few days?'); break;
       case 'wk-swap': swapWeekly(el.dataset.id); break;
       case 'roster-set': S.settings.rosterCal = el.dataset.id || null; S.settings.rosterName = v || ''; if (!S.settings.rosterCal) S.roster = null; save(); rosterPull(); closeModal(); render(); toast(S.settings.rosterCal ? 'Roster linked.' : 'Roster unlinked.'); break;
       case 'e-core': e.core = !e.core; renderEditor(); break;
