@@ -35,7 +35,7 @@
   // delve copy is written for 'he'
   const HE = (t) => (G.pron ? G.pron(!!(S && S.look && S.look.sex === 'f'), t) : t);
   const UI = { tab: 'quests', sub: { status: 'attr', quests: 'today', hearth: '', delve: '', goods: 'coffers', records: 'deeds' }, run: null, preview: null, sheet: null, edit: null, onOk: null, undo: null,
-    pct: null, eqSlot: 'weapon', unlocks: [], goalDone: [], look: null };
+    pct: null, eqSlot: 'weapon', unlocks: [], goalDone: [], look: null, oracleRoom: 'oracleSanctum', oraclePreview: null };
   let lastDay = G.today();
   let toastTimer = null;
   const oracleCbs = {};
@@ -1209,7 +1209,7 @@
     if (UI.visit) return viewVisit();
     const res = S.npcs.filter((n) => n.status === 'resident');
     const chip = (n) => `<div class="hh" data-act="npc" data-k="${esc(n.id)}"><canvas class="npcport" width="96" height="96" data-k="${esc(n.id)}"></canvas><div class="hn">${esc(n.name)}</div></div>`;
-    let h = h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
+    let h = `<button class="oracle-entry" data-act="oracle-sanctum"><span class="oracle-entry-mark">✧</span><span><b>The Oracle’s chambers</b><small>Old rooms beneath the Hearth · descend</small></span><span class="oracle-entry-glyph">⌄</span></button>` + h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
     h += `<div class="omen" style="text-align:center"><span class="gl">◈ ${S.gold}</span> in the purse · <span class="gl">◈ ${S.estate.spent}</span> sunk into the estate</div>`;
     const vis = G.visitorsNow(S, G.today());   // 2.26: and whoever's visiting from the calendar
     const vchip = (v) => `<div class="hh" data-act="person" data-id="${esc(v.p.id)}"><canvas class="pport" width="96" height="96" data-p="${esc(v.p.id)}"></canvas><div class="hn">${v.ev && !v.lives ? G.EV_ICON[v.ev.kind] + ' ' : ''}${esc(v.p.name)}</div></div>`;
@@ -1308,6 +1308,7 @@
   function openEstate(k, keep) {
     const d = G.ESTATE[k];
     if (!d) return;
+    if (d.oracleRoom) { openOracleRoom(k); return; }
     const cur = G.estateTier(S, k), n = G.estateNext(S, k);
     let h = `<h3>${d.icon} ${esc(d.name)}</h3>${d.note ? `<p class="lore">${esc(d.note)}</p>` : ''}<div class="tladder">` +
       d.tiers.map((t, i) => { const rq = G.estateReq(k, i), met = S.level >= rq.lvl && (S.stats[rq.st] | 0) >= rq.sv;
@@ -1341,6 +1342,7 @@
     closeModal();
     if (UI.tab === 'hearth') $('#main').scrollTop = 0;
     render();
+    if (d.oracleRoom) { UI.oraclePreview = null; openOracleRoom(k); toast(n.unlock ? `${d.name}: built.` : `${n.name}. The chamber changes around you.`); return; }
     const h = HOUSE.inst;
     if (h && UI.tab === 'hearth') h.ready.then(() => { h.focus(k); clearTimeout(HOUSE.focusT); HOUSE.focusT = setTimeout(() => { if (HOUSE.inst === h && !UI.preview) h.unfocus(); }, 3800); });
     toast(n.unlock ? `${d.name}: built.${wingNote ? ' ' + wingNote : ''}` : n.tier === 5 ? `${n.name}. Magnificent. Horrifying.` : `${n.name}. Much better.`);
@@ -3217,6 +3219,47 @@
     });
   }
 
+  // ---------- the Oracle's chambers: separate from the editable Hearth, upgraded like the estate ----------
+  const ORACLE_ROOMS = ['oracleSanctum', 'oracleArchive', 'oracleObservatory', 'oracleReliquary'];
+  const ORACLE_ROOM_ART = {
+    oracleSanctum: { title: 'The Sanctum', caption: 'THE VEIL IS THIN HERE', lore: 'A narrow stair descends beneath the house into old stone. The altar waits in the candlelight; this is where the Oracle speaks.', parts: '<i class="or-arch left"></i><i class="or-arch right"></i><i class="or-candle left"></i><i class="or-candle right"></i><i class="or-figure"><b></b><em></em></i><i class="or-altar"><b>✧</b><em></em></i>' },
+    oracleArchive: { title: 'The Archive', caption: 'NOTHING IS EVER LOST', lore: 'A library of records, maps and impossible ledgers. Some volumes are older than the house above; some are not yet written.', parts: '<i class="or-shelf left"><b></b><em></em></i><i class="or-shelf right"><b></b><em></em></i><i class="or-table"><b></b><em></em></i><i class="or-scroll s1"></i><i class="or-scroll s2"></i><i class="or-page"></i>' },
+    oracleObservatory: { title: 'The Observatory', caption: 'THE NIGHT HAS A PATTERN', lore: 'A shaft opens through the earth to a sky that never quite matches the one above. Brass instruments trace the movements of distant things.', parts: '<i class="or-dome"></i><i class="or-star s1">✦</i><i class="or-star s2">✧</i><i class="or-star s3">✦</i><i class="or-telescope"><b></b></i><i class="or-orrery"><b></b><em></em></i>' },
+    oracleReliquary: { title: 'The Reliquary', caption: 'SOME THINGS MUST REMAIN SEALED', lore: 'A guarded collection of relics, strange devices and promises best left unbroken. The Oracle keeps the oldest things here, under lock and ward.', parts: '<i class="or-case left"><b>✧</b><em></em></i><i class="or-case mid"><b>◈</b><em></em></i><i class="or-case right"><b>☼</b><em></em></i><i class="or-plinth p1"></i><i class="or-plinth p2"></i><i class="or-ward"></i>' }
+  };
+  function oracleRoomScene(k, tier) {
+    const a = ORACLE_ROOM_ART[k] || ORACLE_ROOM_ART.oracleSanctum;
+    return `<div class="oracle-scene ${k} oracle-tier-${tier}" role="img" aria-label="${esc(a.title)}, tier ${tier + 1}"><div class="or-back"></div><div class="or-room-parts">${a.parts}</div><div class="or-scene-caption">${a.caption}</div></div>`;
+  }
+  function openOracleSanctum() { UI.oraclePreview = null; openOracleRoom('oracleSanctum'); }
+  function openOracleRoom(k) {
+    if (ORACLE_ROOMS.indexOf(k) < 0) k = 'oracleSanctum';
+    UI.oracleRoom = k;
+    const d = G.ESTATE[k], cur = G.estateTier(S, k), n = G.estateNext(S, k);
+    const art = ORACLE_ROOM_ART[k], selected = UI.oraclePreview && UI.oraclePreview.k === k ? UI.oraclePreview.t : Math.max(0, cur);
+    const tabs = ORACLE_ROOMS.map((rk) => {
+      const rd = G.ESTATE[rk], rt = G.estateTier(S, rk), active = rk === k;
+      return `<button class="or-room-tab ${active ? 'on' : ''} ${rt < 0 ? 'locked' : ''}" data-m="oracle-room-select" data-k="${rk}"><span>${rd.icon}</span><b>${esc(rd.name)}</b><small>${rt < 0 ? 'Locked' : 'Tier ' + (rt + 1) + ' / 6'}</small></button>`;
+    }).join('');
+    const ladder = d.tiers.map((name, i) => {
+      const rq = G.estateReq(k, i), met = S.level >= rq.lvl && (S.stats[rq.st] | 0) >= rq.sv;
+      const label = i === cur ? 'Yours' : i < cur ? 'Built' : i === n.tier ? (n.ok ? '◈ ' + n.cost : 'Next') : 'Locked';
+      return `<button class="or-tier ${i === cur ? 'cur' : ''} ${i < cur ? 'past' : ''} ${i === selected ? 'selected' : ''}" data-m="oracle-room-preview" data-k="${k}" data-v="${i}"><span>${i + 1}</span><b>${esc(name)}</b><small>${label}</small></button>`;
+    }).join('');
+    const req = n.max ? '' : `<p class="lore or-req">${n.why ? esc(n.why) : (n.unlock ? 'The first stone is ready to be laid.' : 'The next improvement is ready to be made.')}</p>`;
+    const action = n.max
+      ? '<p class="lore or-max">The chamber has reached its final form. The Oracle seems pleased. That is probably not a good sign.</p>'
+      : `<button class="btn prime" data-m="oracle-room-buy" data-k="${k}" ${n.ok ? '' : 'disabled'}>${n.unlock ? 'Build chamber' : 'Upgrade chamber'} · ◈ ${n.cost}</button>`;
+    const talk = k === 'oracleSanctum' && cur >= 0 ? '<button class="btn" data-m="oracle-sanctum-talk">Approach the altar</button>' : '';
+    const html = `<div class="oracle-sanctum-head"><span>BELOW THE HEARTH</span><small>THE ORACLE’S ROOMS</small></div>
+      <div class="or-room-nav">${tabs}</div>
+      ${oracleRoomScene(k, selected)}
+      <div class="or-room-copy"><h3>${d.icon} ${esc(d.name)}</h3><p class="lore">${esc(art.lore)}</p><div class="or-current">${cur < 0 ? 'Not yet built' : esc(d.tiers[cur])} ${cur >= 0 ? '· Tier ' + (cur + 1) + ' of 6' : ''}</div></div>
+      <div class="or-tier-list"><div class="hd">Chamber development<small>Six stages · paid from your estate purse</small></div>${ladder}</div>
+      ${req}<div class="btns"><button class="btn" data-m="close">Return upstairs</button>${talk}${action}</div>`;
+    openSheet(html, 'oracle-room');
+  }
+
   // ---------- 2.27: talking to the Oracle ----------
   function openOracleChat(prefill) {
     UI.ocPre = prefill || '';
@@ -3934,6 +3977,7 @@
     const id = el.dataset.id != null ? Number(el.dataset.id) : null;
     switch (el.dataset.act) {
       case 'tab': goto(el.dataset.v + ':', true); break;
+      case 'oracle-sanctum': openOracleSanctum(); break;
       case 'fold-done': UI.showDone = !UI.showDone; render(); break;
       case 'sub': UI.sub[UI.tab] = el.dataset.v; render(); $('#main').scrollTop = 0; break;
       case 'goto': goto(el.dataset.v); break;
@@ -4192,6 +4236,10 @@
       case 'n-save': saveNpc(); break;
       case 'ok': { const f = UI.onOk; closeModal(); if (f) f(); break; }
       case 'estate-open': openEstate(el.dataset.k); break;
+      case 'oracle-room-select': UI.oraclePreview = null; openOracleRoom(el.dataset.k); break;
+      case 'oracle-room-preview': UI.oraclePreview = { k: el.dataset.k, t: Number(v) }; openOracleRoom(el.dataset.k); break;
+      case 'oracle-room-buy': buyEstateUI(el.dataset.k); break;
+      case 'oracle-sanctum-talk': openOracleChat(); break;
       case 'run-skip': runSkip(); break;
       case 'run-big': { const r = $('#modal .runp'); if (r) { r.classList.toggle('big'); S.settings.crawlBig = r.classList.contains('big'); save(); } break; } // tap the scene: just watch (the log hides)
       case 'run-pick': runPick(Number(v)); break;
