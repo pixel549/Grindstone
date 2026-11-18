@@ -589,6 +589,7 @@
     }
     // ---------------------------------------------------------------- thoughts
     _say(a, icons, dur, tone) { a.bub = { icons: icons, t: 0, dur: dur || 3.2, tone: tone || '' }; }
+    _sayText(a, text, dur, tone) { a.bub = { text: String(text || '').slice(0, 150), t: 0, dur: dur || 5.2, tone: tone || '' }; }
     _think() {
       const H = this.hero, M = this.o.mind || {}, chores = M.chores || {}, done = M.done || [], due = M.due || [];
       const opts = [];
@@ -780,14 +781,23 @@
         if (a.chat) return;
         a.next -= dt; a.think -= dt;
         if (a.think <= 0 && !this.capturing) {
-          let ic;
-          if (a.sleep || a.dozing) ic = ['💤'];
-          else if (a.meal) ic = [Math.random() < 0.6 ? a.meal : '😋'];
-          else if (a.spot && a.spot.fret) { const ch = (this.o.mind && this.o.mind.chores || {})[a.spot.fret]; ic = [ch ? ch.icon : '🧹', Math.random() < 0.5 ? '😬' : '🤢']; }
-          else if (a.birdsT) ic = ['🦜', '❤️'];
-          else ic = [a.spot && a.spot.s.icon && Math.random() < 0.55 ? a.spot.s.icon : NPC_IDLE[Math.floor(Math.random() * NPC_IDLE.length)]];
-          this._say(a, ic, 3, a.spot && a.spot.fret ? 'bad' : '');
-          a.think = a.sleep ? 6 + Math.random() * 6 : 7 + Math.random() * 9;
+          const chore = a.spot && a.spot.fret && (this.o.mind && this.o.mind.chores || {})[a.spot.fret];
+          if (a.npc && !a.sleep && !a.dozing && !a.meal && !chore && !a.birdsT) {
+            const bank = G().npcBarks ? G().npcBarks(a.npc) : [];
+            const pool = bank.filter((line) => line && line !== a.lastBark);
+            const line = pool.length ? pool[Math.floor(Math.random() * pool.length)] : bank[0];
+            if (line) { a.lastBark = line; this._sayText(a, line, 5.2); }
+            a.think = 22 + Math.random() * 20;
+          } else {
+            let ic;
+            if (a.sleep || a.dozing) ic = ['💤'];
+            else if (a.meal) ic = [Math.random() < 0.6 ? a.meal : '😋'];
+            else if (chore) ic = [chore.icon || '🧹', Math.random() < 0.5 ? '😬' : '🤢'];
+            else if (a.birdsT) ic = ['🦜', '❤️'];
+            else ic = [a.spot && a.spot.s.icon && Math.random() < 0.55 ? a.spot.s.icon : NPC_IDLE[Math.floor(Math.random() * NPC_IDLE.length)]];
+            this._say(a, ic, 3, chore ? 'bad' : '');
+            a.think = a.sleep ? 6 + Math.random() * 6 : 10 + Math.random() * 10;
+          }
         }
         if (a.next > 0) return;
         if ((a.sleep || a.dozing) && bedtime(hr)) { a.next = 60; return; }
@@ -1410,17 +1420,35 @@
       const draw = (a, hx, hy, b, small) => {
         const u = small ? u0 * 0.78 : u0;
         const al = Math.min(1, b.t * 5, (b.dur - b.t) * 3);
-        const bw = (b.icons.length > 1 ? 30 : 20) * u, bh = 18 * u;
-        const sx = Math.round(ox + (hx + 3) * k), sy = Math.round(oy + (hy - 4) * k - bh - 8 * u);
+        const font = Math.max(7, Math.round((b.text ? 7.2 : 11) * u));
+        let lines = [];
+        if (b.text) {
+          const maxW = 112 * u;
+          g.font = '600 ' + font + 'px sans-serif';
+          String(b.text).split(/\\s+/).forEach((word) => {
+            const last = lines.length - 1, test = last >= 0 ? lines[last] + ' ' + word : word;
+            if (last < 0 || g.measureText(test).width > maxW) lines.push(word); else lines[last] = test;
+          });
+          if (lines.length > 4) { lines = lines.slice(0, 4); lines[3] = lines[3].replace(/[.,;:]?$/, '…'); }
+        }
+        const bw = b.text ? Math.min(120 * u, Math.max(48 * u, ...lines.map((line) => { g.font = '600 ' + font + 'px sans-serif'; return g.measureText(line).width + 14 * u; }))) : (b.icons.length > 1 ? 30 : 20) * u;
+        const bh = b.text ? (lines.length * font * 1.25 + 10 * u) : 18 * u;
+        const sx = Math.round(ox + (hx + 3) * k - bw / 2), sy = Math.round(oy + (hy - 4) * k - bh - 8 * u);
         g.globalAlpha = al;
         g.fillStyle = b.tone === 'bad' ? '#fbe9e4' : b.tone === 'good' ? '#f1f6e2' : '#faf6ec';
         g.strokeStyle = b.tone === 'bad' ? '#8b1e2b' : '#3c3230'; g.lineWidth = Math.max(1, k * 0.8);
         const r = 6 * u;
         g.beginPath(); g.moveTo(sx + r, sy); g.arcTo(sx + bw, sy, sx + bw, sy + bh, r); g.arcTo(sx + bw, sy + bh, sx, sy + bh, r); g.arcTo(sx, sy + bh, sx, sy, r); g.arcTo(sx, sy, sx + bw, sy, r); g.closePath(); g.fill(); g.stroke();
         [[3, 4, 2.4], [0, 8, 1.6]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(sx + dx * u, sy + bh + dy * u, rr * u, 0, Math.PI * 2); g.fill(); g.stroke(); });
-        g.font = Math.round(11 * u) + 'px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#000';
-        if (b.icons.length > 1) { g.fillText(b.icons[0], sx + bw * 0.32, sy + bh * 0.54); g.font = Math.round(8.5 * u) + 'px sans-serif'; g.fillText(b.icons[1], sx + bw * 0.74, sy + bh * 0.56); }
-        else g.fillText(b.icons[0], sx + bw / 2, sy + bh * 0.54);
+        g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        if (b.text) {
+          g.font = '600 ' + font + 'px sans-serif';
+          lines.forEach((line, i) => g.fillText(line, sx + bw / 2, sy + 5 * u + font * (i + 0.55) * 1.25, bw - 10 * u));
+        } else {
+          g.font = Math.round(11 * u) + 'px sans-serif';
+          if (b.icons.length > 1) { g.fillText(b.icons[0], sx + bw * 0.32, sy + bh * 0.54); g.font = Math.round(8.5 * u) + 'px sans-serif'; g.fillText(b.icons[1], sx + bw * 0.74, sy + bh * 0.56); }
+          else g.fillText(b.icons[0], sx + bw / 2, sy + bh * 0.54);
+        }
         g.globalAlpha = 1;
       };
       const tick = (a) => { if (a.bub && (a.bub.t += 1 / 30) >= a.bub.dur) a.bub = null; return a.bub; };
