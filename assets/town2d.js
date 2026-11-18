@@ -6,7 +6,6 @@
   const T = 32, FEET = 58;
   const DIRS = { up: 0, left: 1, down: 2, right: 3 };
   const SEASON = (d) => { const m = d.getMonth(); return m === 11 || m <= 1 ? 'summer' : m <= 4 ? 'autumn' : m <= 7 ? 'winter' : 'spring'; };
-  const IDLE = ['☕', '🎵', '💭', '🍞', '🌿', '🙂', '👋', '🐟', '🌧️', '📜', '🥕', '😮'];
   const G = () => root.G;
   const px = (c) => c * T + 16;
   const hourNow = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
@@ -332,7 +331,6 @@
         if ((a.next -= dt) > 0) return;
         a.next = 2.5 + Math.random() * 6;
         if (!a.p.roam) { a.dir = a.p.dir || 'down'; return; }
-        if (Math.random() < 0.18 && !a.bub) { a.bub = { icon: IDLE[Math.floor(Math.random() * IDLE.length)], t: 0, dur: 2.4 }; return; }
         const [cx, cy] = this._cellOf(a), R = a.p.roam;
         for (let i = 0; i < 8; i++) {
           const x = a.home[0] + Math.round((Math.random() * 2 - 1) * R), y = a.home[1] + Math.round((Math.random() * 2 - 1) * R);
