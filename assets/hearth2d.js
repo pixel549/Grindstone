@@ -414,7 +414,10 @@
       });
       // wall tops
       const top = '#2b2733', lip = '#1b1720', edge = '#4a4452';
-      const band = (x, y, w, h, l) => { g.fillStyle = top; g.fillRect(x, y, w, h); g.fillStyle = edge; g.fillRect(x, y, w, 1); if (l) { g.fillStyle = lip; g.fillRect(x, y + h - l, w, l); } };
+      // Keep wall-edge trim depth-sorted instead of baking it into the static
+      // background. Objects in front of an edge can then draw over it.
+      this.wallBorders = [];
+      const band = (x, y, w, h, l) => this.wallBorders.push({ x, y, w, h, l, depth: y + h, top, edge, lip });
       H.rooms.forEach((r) => {
         for (let x = r.x0; x <= r.x1; x++) if (!geom.isDoor(x, r.y0)) band(x * T, r.y0 * T - 2, T, 10);
         for (let y = r.y0; y <= r.y1; y++) {
@@ -1121,9 +1124,17 @@
       this.npcs.forEach((a) => { if (a.sheets) items.push({ y: this._pos(a).sy + 0.15, actor: a }); });
       this.birds.forEach((b) => items.push({ y: b.fly ? 1e6 : b.sy, bird: b }));
       (this.critters || []).forEach((c) => items.push({ y: c.y + 0.1, crit: c }));
+      (this.wallBorders || []).forEach((b) => items.push({ y: b.depth, border: b }));
       items.sort((a, b) => a.y - b.y);
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
+        if (it.border) {
+          const b = it.border;
+          g.fillStyle = b.top; g.fillRect(b.x, b.y, b.w, b.h);
+          g.fillStyle = b.edge; g.fillRect(b.x, b.y, b.w, 1);
+          if (b.l) { g.fillStyle = b.lip; g.fillRect(b.x, b.y + b.h - b.l, b.w, b.l); }
+          continue;
+        }
         if (it.actor) { this._drawActor(g, it.actor); continue; }
         if (it.bird) { this._drawBird(g, it.bird); continue; }
         if (it.crit) { this._drawCritter(g, it.crit); continue; }
