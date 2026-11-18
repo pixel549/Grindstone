@@ -705,12 +705,12 @@
       S = G.normalize(parsed, G.today()); S.uiV = 3; UI.pct = null; save(); closeModal(); goto('quests:today'); toast('Backup restored.');
     }, true);
   };
-  // 2.27.2: the app checks GitHub for a newer APK (Android). Hidden in the browser build, which has no installer.
+  // 2.27.2: the app checks GitHub for a newer APK on every open (Android). Hidden in the browser build, which has no installer.
   function cmpVer(a, b) { const x = String(a).split('.'), y = String(b).split('.'); for (let i = 0; i < Math.max(x.length, y.length); i++) { const p = parseInt(x[i], 10) || 0, q = parseInt(y[i], 10) || 0; if (p !== q) return p < q ? -1 : 1; } return 0; }
   function updateSettings() {
     if (!N || !N.updateCheck) return '';
     const u = S.upd || {}, cur = N.version ? N.version() : '', newer = !!(u.latest && cmpVer(u.latest, cur) > 0);
-    return `<div class="hd">Updates</div><div class="set"><div class="l">${newer ? 'Version ' + esc(u.latest) + ' is out' : 'Grindstone ' + esc(cur)}<small>${esc(u.note || u.msg || 'Checked when you open the app, at most once a day.')}</small></div>${newer ? '<button class="btn small" data-act="upd-install">Install</button>' : ''}<button class="btn small" data-act="upd-check">Check</button></div>`;
+    return `<div class="hd">Updates</div><div class="set"><div class="l">${newer ? 'Version ' + esc(u.latest) + ' is out' : 'Grindstone ' + esc(cur)}<small>${esc(u.note || u.msg || 'Checked every time you open the app.')}</small></div>${newer ? '<button class="btn small" data-act="upd-install">Install</button>' : ''}<button class="btn small" data-act="upd-check">Check</button></div>`;
   }
   window.onUpdate = function (raw) {
     let r = null; try { r = JSON.parse(raw); } catch (e) { return; }
@@ -4477,7 +4477,7 @@
     lastDay = G.today();
     rosterPull(); weatherPull(); maybeBackup(); houseDay(); peoplePull();
     setTimeout(oracleChores, 8000);   // 2.27
-    if (N && N.updateCheck && Date.now() - ((S.upd && S.upd.at) || 0) > 864e5) setTimeout(() => N.updateCheck(), 4000);   // 2.27.2
+    if (N && N.updateCheck && Date.now() - ((S.upd && S.upd.at) || 0) > 20000) setTimeout(() => N.updateCheck(), 4000);   // 2.27.3: every open (20 s floor only stops a double fire)
     if (UI.sheet && UI.sheet !== 'notice') { renderTop(); heraldPoll(); return; }
     render();
     heraldPoll();
