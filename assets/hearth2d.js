@@ -230,7 +230,8 @@
         for (let y = 16; y <= Math.min(HT - 2, 24); y++) for (let x = 17; x <= Math.min(WT - 2, 24); x++) {
           const i = y * WT + x;
           const underHero = heroCell && heroCell[0] === x && heroCell[1] === y;
-          if (!underHero && geom.kind(x, y) === 'out' && geom.open(x, y) && !blocked[i]) candidates.push({ x: x, y: y, d: Math.pow(x - 22, 2) + Math.pow(y - 20, 2) });
+          const underPerson = this.npcs.some((n) => { const p = this._cellOf(n); return p[0] === x && p[1] === y; });
+          if (!underHero && !underPerson && geom.kind(x, y) === 'out' && geom.open(x, y) && !blocked[i]) candidates.push({ x: x, y: y, d: Math.pow(x - 22, 2) + Math.pow(y - 20, 2) });
         }
         candidates.sort((a, b) => a.d - b.d);
         const cell = candidates[0];
