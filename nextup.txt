@@ -1,0 +1,41 @@
+# Grindstone — next up
+
+## Current branch: NPC dialogue barks
+
+- [x] Replace ambient emoji-only idle bubbles in town with spoken character barks.
+- [x] Give each town keeper their own authored lines; townsfolk use the town small-talk pool.
+- [x] Give companions and wanderers role-specific dialogue, mixed with home-life remarks.
+- [x] Add readable, wrapped text speech bubbles in the town and Hearth scenes.
+- [x] Keep contextual emotes (sleeping, eating, greetings, bird behaviour) as visual reactions rather than replacing every animation with text.
+
+## Next priorities
+
+1. **Finish the Oracle entrance**
+   - Remove the Oracle shortcut/menu above the Hearth map.
+   - Add a physical magical pillar/portal in the Hearth as the point of entry.
+   - Make it visually distinct and interactable; transition into the Oracle's sanctum.
+
+2. **Give the Oracle a proper voice**
+   - Add ambient spoken barks as well as the existing deliberate conversation.
+   - Keep the writing cryptic, observant, dryly funny and responsive to the player's progress.
+   - Avoid generic emoji-only reactions for the Oracle.
+
+3. **Restore consistent prop outlines**
+   - Audit the newer and resized prop sprites against the established one-pixel dark outline.
+   - Correct the source assets or rendering pipeline without softening the pixel edges.
+
+4. **Integrate generated location artwork**
+   - Add the supplied Oracle sanctum image as `assets/2d/locations/oracle.png`.
+   - Generate and add backgrounds for the purchasable non-residential town interiors using the documented 11:9 brief.
+   - Keep NPCs, player sprites, movement, collision and interactions game-rendered.
+
+5. **Polish ambient NPC behaviour**
+   - Test bark frequency and bubble readability on a phone-sized viewport.
+   - Add more individual lines where repeated role dialogue becomes noticeable.
+   - Keep barks from interrupting active conversations or overlapping excessively.
+
+## Notes
+
+- Character homes remain on the existing customisable house system.
+- Missing generated room images must continue to fall back to the original tile-based interiors.
+- Do not merge feature branches into `main` unless explicitly requested.
