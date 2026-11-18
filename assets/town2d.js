@@ -242,10 +242,16 @@
       } else {
         const I = this.inside || {}, W = this.W;
         if (this.sceneArt && this.sceneArtKey === this.ik) {
-          // Artwork is authored at 352 × 288 (11 × 9 tiles), or an exact integer multiple.
+          // Artwork targets the room's 11:9 world ratio (352 × 288 at native tile scale).
+          // Centre-crop rather than distort if the generator returns a slightly different canvas ratio.
           // Nearest-neighbour scaling preserves hard pixel edges on every phone size.
           g.imageSmoothingEnabled = false;
-          g.drawImage(this.sceneArt, 0, 0, W * T, this.H * T);
+          const iw = this.sceneArt.naturalWidth || this.sceneArt.width, ih = this.sceneArt.naturalHeight || this.sceneArt.height;
+          const target = (W * T) / (this.H * T);
+          let sx = 0, sy = 0, sw = iw, sh = ih;
+          if (iw / ih > target) { sw = Math.round(ih * target); sx = Math.floor((iw - sw) / 2); }
+          else if (iw / ih < target) { sh = Math.round(iw / target); sy = Math.floor((ih - sh) / 2); }
+          g.drawImage(this.sceneArt, sx, sy, sw, sh, 0, 0, W * T, this.H * T);
         } else {
           for (let y = 2; y < this.H - 1; y++) for (let x = 0; x < W; x++) {
             const r = this.spr[I.floor] || this.spr['floor.0'];
