@@ -998,6 +998,7 @@
     if (e.id == null) {
       const j = e.judged === 'library' ? { stat: e.stat, diff: e.diff, cap: e.cap, src: 'library' } : G.judgeRules(e);   // 2.27: judged, not chosen
       const nq = G.newQuest(S, Object.assign({}, e, { stat: j.stat, diff: j.diff, cap: e.type === 'habit' ? j.cap : e.cap }));
+      nq.archived = false; // Player-created tasks start available; they are never silently archived.
       nq.aliases = e.aliases; nq.judged = j.src; if (j.why) nq.judgedWhy = j.why;
       if (e.remind) nq.remind = Object.assign({}, e.remind, { from: G.today() }); G.normQuest(nq); S.quests.push(nq); lastDone(nq.id);
       if (j.src !== 'library') judge = nq.id;
