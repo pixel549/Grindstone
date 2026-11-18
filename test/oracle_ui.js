@@ -112,7 +112,7 @@ const native = (seed) => {
   await p.fill('#oc-in', 'Rolled my ankle this morning.');
   await tap('#modal [data-m="oc-send"]');
   await p.waitForTimeout(400);
-  let txt = await sheet();
+  txt = await sheet();
   ok(/Rest it/.test(txt) && /Hold Swim and Run for 2 weeks/.test(txt) && /Add “Ankle circles”/.test(txt), 'it answers, and proposes a hold and a new quest');
   const ask = await p.evaluate(() => window.__asks.find((a) => /Player: Rolled/.test(a.user)));
   ok(ask && /\|Swim\|h\|END/.test(ask.user) && ask.max === 900, 'it was told the quests (compactly)');
