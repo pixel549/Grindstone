@@ -159,5 +159,22 @@ ok(G.houseLevels(s, A(30)).dire.dishes === true && G.heroMind(s, A(30)).chores.d
 const hs2 = G.homeState(s, A(3));
 ok(!hs2.dishes.dire, 'a few days is only bad, not a nightmare');
 
+// ---- the Oracle's rooms: persistent tiers, prerequisites and gold costs ----
+s = fresh();
+ok(s.oracleRooms && s.oracleRooms.tier.sanctum === 1 && s.oracleRooms.tier.archive === 0, 'a new save starts with the Sanctum and keeps later chambers unbuilt');
+let room = G.oracleRoomState(s, 'archive');
+ok(room.locked && /Reach level 10/.test(room.why), 'the Archive is level-gated');
+s.level = 10; s.gold = 10000;
+room = G.oracleRoomState(s, 'archive');
+ok(room.locked && /Sanctum to tier 2/.test(room.why), 'the Archive also needs the Sanctum restored');
+let buy = G.oracleRoomUpgrade(s, 'sanctum');
+ok(!buy.err && buy.tier === 2 && s.gold === 10000 - buy.cost, 'restoring the Sanctum spends gold and advances its tier');
+room = G.oracleRoomState(s, 'archive');
+ok(!room.locked && room.ok, 'the Archive becomes available once its requirements are met');
+buy = G.oracleRoomUpgrade(s, 'archive');
+ok(!buy.err && s.oracleRooms.tier.archive === 1, 'the Archive can be built');
+const roundTrip = G.normalize(JSON.parse(JSON.stringify(s)), t);
+ok(roundTrip.oracleRooms.tier.archive === 1 && roundTrip.oracleRooms.tier.sanctum === 2, 'room tiers survive save normalisation');
+ok(G.oracleRoomState(s, 'unknown') === null, 'unknown rooms are rejected');
 console.log(n + ' checks, ' + fails + ' failed');
 if (fails) process.exit(1);
