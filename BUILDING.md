@@ -44,5 +44,8 @@ On a machine with a real SDK, `ANDROID_RES` can be left out (it defaults to `AND
 An update only installs over an existing copy if it is signed with the **same key**. `build.sh` generates a new
 `grindstone.jks` if `KEYSTORE` doesn't exist, which gives an APK that will NOT install over the user's current app
 (they must uninstall first, which loses app data unless they export a backup). `*.jks` is git-ignored on purpose.
-If the user still has the original `grindstone.jks`, ask them to attach it. Do not go searching for it. If you
-generate a new one, tell the user plainly.
+The original `grindstone.jks` (password and alias both `grindstone`) is kept in the user's Google Drive; its location is
+in the Claude Project instructions for "Grindstone". Fetch it with the Drive connector or ask the user to attach it,
+and pass it as `KEYSTORE`. Never commit it or put its link in this repo (the repo is public). Confirm the built APK's
+cert SHA-256 is `47d9ce55e01ccea09489d9a5dd76b8016b06a78f5e93f2a4178db671c042ea51`. If you ever have to generate a
+new key, tell the user plainly.
