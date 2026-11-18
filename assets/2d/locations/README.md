@@ -24,7 +24,7 @@ Place files in `assets/2d/locations/`. Missing files automatically use the origi
 ## Canvas and composition
 
 - World-space canvas: **352 × 288 px** (11 × 9 tiles at 32 px per tile).
-- Larger images are supported when both dimensions are exact integer multiples of 352 × 288; they are scaled with nearest-neighbour rendering.
+- Generate in an **11:9 aspect ratio** where possible. Any PNG dimensions are accepted; the runtime centre-crops to 11:9 without stretching and scales with nearest-neighbour rendering.
 - Include the room architecture, floor, walls and static furniture in the background.
 - Keep the bottom-centre doorway/exit visually clear. The player enters from that position.
 - Keep a clear standing area near the centre for the player and the keeper.
