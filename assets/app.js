@@ -743,7 +743,7 @@
     // 2.8: one strip of chips, not a paragraph of omens. Only what needs attention gets a chip.
     const chips = [];
     chips.push(`<span data-act="goto" data-v="quests:vows">Weeklies ${trialsDone}/${S.trials.list.length}</span>`);
-    if (hasKey()) chips.push('<span data-act="oracle-chat">🔮 The Oracle</span>');
+    // The Oracle is approached in person at the Hearth's portal; no floating shortcut chip.
     if (aff.length) chips.push(`<span class="bad" data-act="goto" data-v="hearth:">Overdue: ${aff.map((a) => esc(G.AFFLICT[a].name) + (hs[a].dire ? ' (' + esc(hs[a].word.toLowerCase()) + ')' : '')).join(', ')}</span>`);
     if (gap != null && gap >= S.settings.nudgeDays) chips.push(`<span class="bad">${gap} days since training</span>`);
     { const od = G.overdueList(S, t, rmMarks()); if (od.length) chips.push(`<span class="bad" data-act="overdue">⏰ ${od.slice(0, 3).map((x) => esc(x.name) + ' ' + x.gap + 'd').join(' · ')}${od.length > 3 ? ' +' + (od.length - 3) : ''}</span>`); }
@@ -2530,6 +2530,24 @@
     });
   }
 
+  function oracleAmbientBarks() {
+    const m = G.heroMind(S, G.today()) || {}, chores = Object.keys(m.chores || {}).map((k) => m.chores[k]);
+    const overdue = chores.filter((x) => x && x.state >= 2).length;
+    const due = chores.filter((x) => x && x.state === 1).length;
+    const done = (m.done || []).length;
+    const lines = [
+      'The stones remember every footstep. Yours are particularly easy to count.',
+      'I have watched kings mistake motion for progress. You, at least, have the decency to call it a busy week.',
+      'A promise is a small thing until you keep it. Then it becomes a habit. Be careful what you make of yourself.',
+      'You need not impress the stars. They are old, distant, and notoriously difficult to please.',
+      'The future is not written. It is, however, taking notes.'
+    ];
+    if (overdue) lines.push(overdue + ' neglected ' + (overdue === 1 ? 'matter waits' : 'matters wait') + '. They are not becoming more charming with age.');
+    if (due) lines.push(due + ' ' + (due === 1 ? 'small reckoning' : 'small reckonings') + ' ' + (due === 1 ? 'asks' : 'ask') + ' for your attention. Admiring them is not the same as doing them.');
+    if (done) lines.push(done + ' promise' + (done === 1 ? '' : 's') + ' kept today. I shall refrain from applauding. The effort was yours.');
+    else lines.push('A quiet page today. Do not mistake a blank page for a finished story.');
+    return lines;
+  }
   const houseState = () => G.houseLevels(S, G.today());
   // 2.24: while visiting a companion's home the hearth shows their house, with them in it
   const hState = () => (UI.visit ? {} : houseState());
@@ -2686,6 +2704,7 @@
     HOUSE.cheerT = S.log.length ? S.log[0].t : 0;
     HOUSE.inst = new window.House2D(HOUSE.el, {
       base: '2d/', look: G.normLook(S.look), gear: gearItems(), state: hState(), mind: G.heroMind(S, G.today()), house: G.houseView(HS()), npcs: hNpcs(), estate: hEstate(),
+      oraclePortal: !UI.visit, oracleBarks: oracleAmbientBarks(), oracleBusy: () => !!UI.sheet || !!UI.preview || !!UI.build || !!UI.visit,
       relicImage: relicImage,
       stars: S.settings.stars !== false, seen: S.seenTaps || (S.seenTaps = {}),
       onTap: houseTap,
@@ -2703,6 +2722,8 @@
     const cheer = last && last.q != null && last.t > HOUSE.cheerT;
     if (last) HOUSE.cheerT = Math.max(HOUSE.cheerT, last.t);
     h.setMind(G.heroMind(S, G.today()));
+    if (h.setOraclePortal) h.setOraclePortal(!UI.visit);
+    if (h.setOracleBarks) h.setOracleBarks(oracleAmbientBarks());
     if (h.setWeather) h.setWeather(houseWeather(), new Date().getMonth() === 11);
     const sig = houseSig();
     if (sig !== HOUSE.sig) {
@@ -2731,6 +2752,7 @@
     if (!UI.visit && id && id !== 'hero' && id.indexOf('npc:') !== 0 && id.indexOf('pet:') !== 0) { if (!S.seenTaps) S.seenTaps = {}; if (!S.seenTaps[id]) { S.seenTaps[id] = 1; save(); if (HOUSE.inst) HOUSE.inst.o.seen = S.seenTaps; } }   // 2.27: its star goes
     if (UI.visit) { if (id.indexOf('npc:') === 0) { const n = npcById(id.slice(4)); if (n) talkTo('n:' + n.id, { inside: true }); } return; }
     try {
+      if (id === 'oracle') { openOracleSanctum(); return; }
       if (id === 'hero') { goto('status:equip'); return; }
       if (id.indexOf('npc:') === 0) { const k = id.slice(4); if (personById(k)) { openPerson(k); return; } if (k === 'ruby') toast(BITES[Math.floor(Math.random() * BITES.length)].replace(/Ruby/g, G.birdName(S, 'ruby') || 'Ruby')); openNpc(k); return; }
       if (id.indexOf('pet:') === 0) { const pt = G.petOfItem(S, Number(id.slice(4))); if (pt) toast(pt.name + ' ' + G.PET_KINDS[pt.sp].i); return; }
@@ -3215,6 +3237,21 @@
       save(); render();
       toast(`The Oracle sets the bounty: ${j.gold} gold${j.chest ? ' and a coffer' : ''}.${j.why ? ' “' + j.why + '”' : ''}`);
     });
+  }
+
+  // The portal is the physical entrance; the sanctum artwork is optional until supplied.
+  // Its image path is already part of the location-art workflow, so it appears automatically when added.
+  function openOracleSanctum() {
+    const m = G.heroMind(S, G.today()) || {}, due = (m.due || []).length, done = (m.done || []).length;
+    const omen = due ? 'There are unfinished matters waiting beyond the veil.' : done ? 'The Oracle has noticed the promises you kept today.' : 'The chamber is quiet. The Oracle is not.';
+    openSheet(`<div class="oracle-sanctum" style="min-height:260px;padding:18px 14px 14px;border:1px solid #69558c;border-radius:12px;background:linear-gradient(180deg,rgba(14,10,25,.76),rgba(10,9,15,.96)),url('2d/locations/oracle.png') center/cover;color:#f1e8d5;text-align:center">
+      <div style="font:700 11px var(--gar);letter-spacing:.22em;color:#c5a8ef">BEYOND THE PILLAR</div>
+      <div style="font:700 23px var(--gar);letter-spacing:.08em;margin:12px 0 6px">THE ORACLE’S SANCTUM</div>
+      <div style="font-size:30px;line-height:1.2;color:#b99ae8;text-shadow:0 0 18px #8b63d8">✧ ◉ ✧</div>
+      <p class="lore" style="max-width:300px;margin:12px auto;color:#eee4d4">The air is older here. Candlelight clings to the stone, and a slow pulse moves through the great pillar at the chamber’s heart.</p>
+      <p class="lore" style="max-width:300px;margin:8px auto 18px;color:#cbbbe2">“${esc(omen)}”</p>
+      <div class="btns" style="justify-content:center"><button class="btn" data-m="close">Return to the Hearth</button><button class="btn prime" data-m="oracle-sanctum-talk">Approach the Oracle</button></div>
+    </div>`, 'oracle-sanctum');
   }
 
   // ---------- 2.27: talking to the Oracle ----------
@@ -4249,6 +4286,7 @@
       case 'ho-every': { const o = UI.hideOffer, q = G.findQ(S, o.id); if (q) { q.rest = o.days; if (q.type === 'habit' && !q.cap) q.cap = 1; G.normQuest(q); } UI.hideOffer = null; save(); closeModal(); render(); if (q) toast(`${q.name} now hides for ${o.days} days after each go.`); break; }
       case 'ho-later': { const q = G.findQ(S, UI.hideOffer.id); if (q) q.hideAskAt = G.today(); UI.hideOffer = null; save(); closeModal(); break; }
       case 'ho-never': { const q = G.findQ(S, UI.hideOffer.id); if (q) q.hideAsk = 'no'; UI.hideOffer = null; save(); closeModal(); toast('It won’t ask about that one again.'); break; }
+      case 'oracle-sanctum-talk': openOracleChat(); break;
       case 'oc-send': oracleSend(); break;
       case 'oc-clear': S.oracleChat = []; save(); renderOracleChat(); break;
       case 'oc-do': case 'oc-no': {
