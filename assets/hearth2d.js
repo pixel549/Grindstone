@@ -227,7 +227,7 @@
       this.oracle = null;
       if (this.o.oraclePortal) {
         const candidates = [], heroCell = this.hero ? this._cellOf(this.hero) : null;
-        for (let y = 16; y <= Math.min(HT - 2, 24); y++) for (let x = 17; x <= Math.min(WT - 2, 24); x++) {
+        for (let y = 1; y < HT - 1; y++) for (let x = 1; x < WT - 1; x++) {
           const i = y * WT + x;
           const underHero = heroCell && heroCell[0] === x && heroCell[1] === y;
           const underPerson = this.npcs.some((n) => { const p = this._cellOf(n); return p[0] === x && p[1] === y; });
