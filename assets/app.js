@@ -1209,7 +1209,7 @@
     if (UI.visit) return viewVisit();
     const res = S.npcs.filter((n) => n.status === 'resident');
     const chip = (n) => `<div class="hh" data-act="npc" data-k="${esc(n.id)}"><canvas class="npcport" width="96" height="96" data-k="${esc(n.id)}"></canvas><div class="hn">${esc(n.name)}</div></div>`;
-    let h = h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
+    let h = `<button class="oracle-entry" data-act="oracle-sanctum"><span class="oracle-entry-mark">⌄</span><span><b>The Oracle’s Sanctum</b><small>A stair beneath the Hearth · descend</small></span><span class="oracle-entry-glyph">✧</span></button>` + h3Slot() + `<div class="legend"><span>✨ up to date</span><span>🪰 due</span><span>💨 overdue</span></div>`;
     h += `<div class="omen" style="text-align:center"><span class="gl">◈ ${S.gold}</span> in the purse · <span class="gl">◈ ${S.estate.spent}</span> sunk into the estate</div>`;
     const vis = G.visitorsNow(S, G.today());   // 2.26: and whoever's visiting from the calendar
     const vchip = (v) => `<div class="hh" data-act="person" data-id="${esc(v.p.id)}"><canvas class="pport" width="96" height="96" data-p="${esc(v.p.id)}"></canvas><div class="hn">${v.ev && !v.lives ? G.EV_ICON[v.ev.kind] + ' ' : ''}${esc(v.p.name)}</div></div>`;
@@ -3217,6 +3217,23 @@
     });
   }
 
+  // ---------- 2.28: the Oracle's room, below the Hearth ----------
+  // Kept outside the editable house geometry: the sanctuary can grow without moving or replacing the player's rooms.
+  function openOracleSanctum() {
+    UI.sheet = null;
+    openSheet(`<div class="oracle-sanctum-head"><span>BELOW THE HEARTH</span><small>THE QUIET PLACE</small></div>
+      <div class="oracle-sanctum" role="img" aria-label="A candlelit stone basement shrine with a hooded Oracle behind an altar">
+        <div class="os-arch os-arch-a"></div><div class="os-arch os-arch-b"></div>
+        <div class="os-stone os-stone-a"></div><div class="os-stone os-stone-b"></div>
+        <div class="os-candle os-candle-a"><i></i></div><div class="os-candle os-candle-b"><i></i></div>
+        <div class="os-oracle"><i class="os-hood"></i><i class="os-face"></i><i class="os-robe"></i><i class="os-eye"></i></div>
+        <div class="os-altar"><i class="os-rune">✧</i><i class="os-orb"></i><i class="os-step"></i></div>
+        <div class="os-floor"></div><div class="os-caption">THE VEIL IS THIN HERE</div>
+      </div>
+      <p class="lore oracle-sanctum-lore">A narrow stair descends beneath the house into old stone. The air is still; a single altar waits in the candlelight. The Oracle has made this place its own.</p>
+      <div class="btns"><button class="btn" data-m="close">Return upstairs</button><button class="btn prime" data-m="oracle-sanctum-talk">Approach the altar</button></div>`, 'oracle-sanctum');
+  }
+
   // ---------- 2.27: talking to the Oracle ----------
   function openOracleChat(prefill) {
     UI.ocPre = prefill || '';
@@ -3934,6 +3951,7 @@
     const id = el.dataset.id != null ? Number(el.dataset.id) : null;
     switch (el.dataset.act) {
       case 'tab': goto(el.dataset.v + ':', true); break;
+      case 'oracle-sanctum': openOracleSanctum(); break;
       case 'fold-done': UI.showDone = !UI.showDone; render(); break;
       case 'sub': UI.sub[UI.tab] = el.dataset.v; render(); $('#main').scrollTop = 0; break;
       case 'goto': goto(el.dataset.v); break;
@@ -4251,6 +4269,7 @@
       case 'ho-every': { const o = UI.hideOffer, q = G.findQ(S, o.id); if (q) { q.rest = o.days; if (q.type === 'habit' && !q.cap) q.cap = 1; G.normQuest(q); } UI.hideOffer = null; save(); closeModal(); render(); if (q) toast(`${q.name} now hides for ${o.days} days after each go.`); break; }
       case 'ho-later': { const q = G.findQ(S, UI.hideOffer.id); if (q) q.hideAskAt = G.today(); UI.hideOffer = null; save(); closeModal(); break; }
       case 'ho-never': { const q = G.findQ(S, UI.hideOffer.id); if (q) q.hideAsk = 'no'; UI.hideOffer = null; save(); closeModal(); toast('It won’t ask about that one again.'); break; }
+      case 'oracle-sanctum-talk': openOracleChat(); break;
       case 'oc-send': oracleSend(); break;
       case 'oc-clear': S.oracleChat = []; save(); renderOracleChat(); break;
       case 'oc-do': case 'oc-no': {
