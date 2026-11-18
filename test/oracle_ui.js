@@ -60,6 +60,51 @@ const native = (seed) => {
   let main = await p.evaluate(() => document.querySelector('#main').innerText);
   ok(/9 days since training/.test(main) && (await p.$('.chips [data-act="oracle-chat"]')), 'Today: nine days since training, and the Oracle’s chip');
 
+  // ---- the Oracle's upgradeable rooms ----
+  await p.click('[data-act="tab"][data-v="hearth"]'); await p.waitForTimeout(500);
+  ok(await p.$('[data-act="oracle-sanctum"]'), 'the Hearth has a separate entrance to the Oracle rooms');
+  await tap('[data-act="oracle-sanctum"]');
+  txt = await sheet();
+  ok(/The Sanctum/.test(txt) && /Restoration · tier 1\/5/.test(txt) && /The Archive/.test(txt), 'the basement opens on the first chamber with the other rooms visible');
+  await tap('#modal [data-m="oracle-room"][data-k="archive"]');
+  ok(/Reach level 10/.test(await sheet()), 'the Archive is visible but level-locked');
+  await set(() => { const s = JSON.parse(localStorage.gs); s.level = 10; s.gold = 10000; s.oracleRooms = { tier: { sanctum: 1, archive: 0, observatory: 0, scriptorium: 0 } }; localStorage.gs = JSON.stringify(s); });
+  await tap('#modal [data-m="oracle-room"][data-k="archive"]');
+  ok(/Improve The Sanctum to tier 2/.test(await sheet()), 'the Archive also requires the Sanctum to be restored');
+  await tap('#modal [data-m="oracle-room"][data-k="sanctum"]');
+  await tap('#modal [data-m="oracle-room-upgrade"][data-k="sanctum"]');
+  ok(/Restoration · tier 2\/5/.test(await sheet()), 'the Sanctum can be upgraded for gold');
+  await tap('#modal [data-m="oracle-room"][data-k="archive"]');
+  await tap('#modal [data-m="oracle-room-upgrade"][data-k="archive"]');
+  ok(/Restoration · tier 1\/5/.test(await sheet()), 'the Archive can then be built');
+  s = await save();
+  ok(s.oracleRooms.tier.sanctum === 2 && s.oracleRooms.tier.archive === 1, 'room tiers are saved');
+
+  // ---- task sorting and personal order ----
+  await p.evaluate(() => window.handleBack()); await p.waitForTimeout(250);
+  await set(() => {
+    const s = JSON.parse(localStorage.gs);
+    s.quests.push(G.newQuest(s, { name: 'AA Sort easy', icon: '🧪', type: 'todo', stat: 'INT', diff: 4 }));
+    s.quests.push(G.newQuest(s, { name: 'ZZ Sort hard', icon: '🧪', type: 'todo', stat: 'STR', diff: 5 }));
+    localStorage.gs = JSON.stringify(s);
+  });
+  await p.evaluate(() => window.gotoFromWidget('quests:all')); await p.waitForTimeout(350);
+  ok(await p.$('#q-sort') && await p.$('#q-filter') && await p.$('#q-diff'), 'All has sort, task and challenge controls');
+  await p.selectOption('#q-filter', 'todo'); await p.selectOption('#q-sort', 'difficulty'); await p.waitForTimeout(250);
+  let orderText = await p.$eval('#main', (el) => el.innerText);
+  ok(orderText.indexOf('AA Sort easy') >= 0 && orderText.indexOf('ZZ Sort hard') > orderText.indexOf('AA Sort easy'), 'challenge sorting puts the easier task first');
+  await p.selectOption('#q-sort', 'manual'); await p.waitForTimeout(250);
+  s = await save();
+  const easyId = s.quests.find((q) => q.name === 'AA Sort easy').id;
+  const hardId = s.quests.find((q) => q.name === 'ZZ Sort hard').id;
+  let beforeOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
+  ok(beforeOrder.indexOf('AA Sort easy') < beforeOrder.indexOf('ZZ Sort hard'), 'new tasks start available in the personal order');
+  await tap('#main [data-act="quest-move"][data-id="' + easyId + '"][data-v="1"]');
+  const afterOrder = await p.$eval('#main .row[data-act="edit"] .rn', (els) => els.map((el) => el.innerText));
+  ok(afterOrder.indexOf('ZZ Sort hard') < afterOrder.indexOf('AA Sort easy'), 'the up/down controls persist a manual reorder');
+  s = await save();
+  ok(!s.quests.find((q) => q.id === easyId).archived && !s.quests.find((q) => q.id === hardId).archived, 'newly created tasks are active, not archived');
+
   // ---- talking ----
   await tap('.chips [data-act="oracle-chat"]');
   ok(/goes to Groq/.test(await sheet()), 'the chat says where it goes');
