@@ -58,11 +58,26 @@ const native = (seed) => {
   await set(() => { const s = JSON.parse(localStorage.gs); s.lastTraining = G.addDays(G.today(), -9); localStorage.gs = JSON.stringify(s); });
   await p.evaluate(() => window.gotoFromWidget('quests:today')); await clear();
   let main = await p.evaluate(() => document.querySelector('#main').innerText);
-  ok(/9 days since training/.test(main) && (await p.$('.chips [data-act="oracle-chat"]')), 'Today: nine days since training, and the Oracle’s chip');
+  ok(/9 days since training/.test(main) && !(await p.$('.chips [data-act="oracle-chat"]')), 'Today keeps the training nudge without a floating Oracle shortcut');
 
-  // ---- talking ----
-  await tap('.chips [data-act="oracle-chat"]');
-  ok(/goes to Groq/.test(await sheet()), 'the chat says where it goes');
+  // ---- the Oracle speaks from the physical portal, then admits him to the sanctum ----
+  await tap('[data-act="tab"][data-v="hearth"]');
+  await p.waitForFunction(() => window.__house.inst && window.__house.inst.oracle && window.__house.inst.objs.some((o) => o.oraclePortal), null, { timeout: 30000 });
+  const ambient = await p.evaluate(() => {
+    const h = window.__house.inst;
+    h.hero.bub = null; h.npcs.forEach((n) => { n.bub = null; }); h.birds.forEach((b) => { b.bub = null; });
+    h.oracle.next = 0; h._updateOracle(0.1);
+    return h.oracle.bub && h.oracle.bub.text;
+  });
+  ok(ambient && ambient.length > 20, 'the Oracle has a spoken ambient line at the Hearth portal');
+  const portal = await p.evaluate(() => {
+    const h = window.__house.inst, ob = h.objs.find((o) => o.oraclePortal), r = h.canvas.getBoundingClientRect(), v = h.view, d = h.dpr || 1;
+    return { x: r.left + (v.ox + ob.ax * v.k) / d, y: r.top + (v.oy + (ob.ay - 26) * v.k) / d };
+  });
+  await p.touchscreen.tap(portal.x, portal.y); await p.waitForTimeout(4500);
+  ok(/THE ORACLE’S SANCTUM/.test(await sheet()) && /Approach the Oracle/.test(await sheet()), 'touching the pillar walks him up and opens the sanctum');
+  await tap('#modal [data-m="oracle-sanctum-talk"]');
+  ok(/goes to Groq/.test(await sheet()), 'the sanctum opens the existing deliberate conversation');
   await p.fill('#oc-in', 'Rolled my ankle this morning.');
   await tap('#modal [data-m="oc-send"]');
   await p.waitForTimeout(400);
