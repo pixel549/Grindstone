@@ -162,6 +162,8 @@ ok(!hs2.dishes.dire, 'a few days is only bad, not a nightmare');
 // ---- the Oracle's rooms: persistent tiers, prerequisites and gold costs ----
 s = fresh();
 ok(s.oracleRooms && s.oracleRooms.tier.sanctum === 1 && s.oracleRooms.tier.archive === 0, 'a new save starts with the Sanctum and keeps later chambers unbuilt');
+const activeQuest = G.newQuest(s, { name: 'Player-created active task', type: 'todo', stat: 'DIS', diff: 2 });
+ok(!activeQuest.archived, 'a player-created task is active by default');
 let room = G.oracleRoomState(s, 'archive');
 ok(room.locked && /Reach level 10/.test(room.why), 'the Archive is level-gated');
 s.level = 10; s.gold = 10000;
