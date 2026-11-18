@@ -1328,6 +1328,7 @@
     SLOTS.forEach((sl) => { s.eq[sl] = eq[sl] != null && s.inv.some((i) => i.id === eq[sl]) ? eq[sl] : null; });
     s.settings = Object.assign({ nudge: true, nudgeDays: 3, oracleModel: 'claude-haiku-5-5', remind: true, remindHour: 18, overdue: true, overdueHour: 9, longHours: 9, backup: true, sound: true, calWrite: true, weather: true }, s.settings || {});
     if (!['manual', 'difficulty', 'stat', 'frequency', 'type', 'name', 'recent'].includes(s.settings.questSort)) s.settings.questSort = 'manual';
+    s.settings.questSortDesc = !!s.settings.questSortDesc;
     if (!['all', 'daily', 'habit', 'todo', 'STR', 'END', 'VIT', 'DIS', 'INT'].includes(s.settings.questFilter)) s.settings.questFilter = 'all';
     if (!['all', '1', '2', '3', '4', '5'].includes(String(s.settings.questDiff == null ? 'all' : s.settings.questDiff))) s.settings.questDiff = 'all';
 
