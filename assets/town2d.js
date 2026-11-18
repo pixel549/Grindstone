@@ -322,10 +322,16 @@
         if (a.p.barks && a.p.barks.length && !a.bub) {
           a.barkNext = (a.barkNext == null ? 8 + Math.random() * 10 : a.barkNext) - dt;
           if (a.barkNext <= 0) {
-            const pool = a.p.barks.filter((line) => line && line !== a.barkLast);
-            const line = pool[Math.floor(Math.random() * pool.length)] || a.p.barks[0];
-            if (line) { a.barkLast = line; a.bub = { text: String(line), t: 0, dur: 5.2 }; }
-            a.barkNext = 24 + Math.random() * 22;
+            const talking = this.people.some((p) => p.talking > 0);
+            const busy = talking || (this.o.busy && this.o.busy());
+            if (busy || this.t < (this.barkLock || 0) || this.people.some((p) => p !== a && p.bub)) {
+              a.barkNext = 2 + Math.random() * 2;
+            } else {
+              const pool = a.p.barks.filter((line) => line && line !== a.barkLast);
+              const line = pool[Math.floor(Math.random() * pool.length)] || a.p.barks[0];
+              if (line) { a.barkLast = line; a.bub = { text: String(line), t: 0, dur: 5.2 }; this.barkLock = this.t + 9 + Math.random() * 6; }
+              a.barkNext = 24 + Math.random() * 22;
+            }
           }
         }
         if ((a.next -= dt) > 0) return;
