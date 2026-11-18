@@ -427,7 +427,7 @@
   function questRow(q, t, mode, tag) {
     const can = G.canComplete(q, t);
     const cnt = q.type === 'habit' ? G.habitCount(q, t) : 0;
-    const sub = [`<span class="st">${SI[q.stat].short}</span>`, ...(mode === 'all' ? [q.type, 'Challenge ' + DIFF[q.diff - 1].name] : []), `+${DIFF[q.diff - 1].xp}`];
+    const sub = [`<span class="st">${SI[q.stat].short}</span>`, ...(mode === 'all' ? [({ daily: 'Daily', habit: 'Habit', todo: 'To-do' })[q.type] || q.type, 'Challenge ' + DIFF[q.diff - 1].name] : []), `+${DIFF[q.diff - 1].xp}`];
     const rl = G.restLeft(q, t);
     if (q.type === 'habit' && q.rest > 1) sub.push(rl ? `back in ${rl} day${rl === 1 ? '' : 's'}` : restWord(q.rest));
     else if (q.type === 'habit') sub.push(q.cap > 1 ? `${cnt}/${q.cap} today` : q.cap ? (cnt ? 'done today' : 'once a day') : cnt ? `×${cnt}` : 'repeatable');
