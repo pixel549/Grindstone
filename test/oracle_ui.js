@@ -60,6 +60,17 @@ const native = (seed) => {
   let main = await p.evaluate(() => document.querySelector('#main').innerText);
   ok(/9 days since training/.test(main) && (await p.$('.chips [data-act="oracle-chat"]')), 'Today: nine days since training, and the Oracle’s chip');
 
+  // ---- the Oracle's basement sanctuary ----
+  await p.click('[data-act="tab"][data-v="hearth"]'); await p.waitForTimeout(3500);
+  ok(await p.$('[data-act="oracle-sanctum"]'), 'the Hearth has a separate stair to the Oracle below');
+  await tap('[data-act="oracle-sanctum"]');
+  txt = await sheet();
+  ok(/BELOW THE HEARTH/.test(txt) && /THE QUIET PLACE/.test(txt) && /altar/i.test(txt), 'the sanctuary opens as its own stone basement room');
+  await tap('#modal [data-m="oracle-sanctum-talk"]');
+  ok(/The Oracle/.test(await sheet()) && await p.$('#oc-in'), 'approaching the altar opens the existing Oracle conversation');
+  await p.evaluate(() => window.handleBack()); await p.waitForTimeout(300);
+  await p.evaluate(() => window.gotoFromWidget('quests:today')); await p.waitForTimeout(350);
+
   // ---- talking ----
   await tap('.chips [data-act="oracle-chat"]');
   ok(/goes to Groq/.test(await sheet()), 'the chat says where it goes');
