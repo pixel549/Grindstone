@@ -135,7 +135,22 @@ Material cues:
 - For interactive objects, keep the visual sprite separate from hitboxes, interaction markers and UI.
 - Tiered objects should remain recognisably the same object across tiers. Upgrades may add material quality, ornament, gold or gems, but should not unexpectedly change the object's footprint or identity.
 
-## 8. Tilesets, rooms and environment art
+## 8. Rotatable props and directional artwork
+
+Some furniture and appliances are intended to be rotated by the player when arranging a room. If a prop is suitable for rotation, its artwork must support **all four cardinal directions**:
+
+- Draw dedicated north-facing, east-facing, south-facing and west-facing versions.
+- Do not rely on rotating one top-down sprite in code unless the object is genuinely rotationally symmetrical. Directional furniture often has different visible faces, legs, handles, cushions, doors, controls or shadows.
+- Keep the object's footprint, anchor point and interaction/collision footprint documented for each direction. If the footprint changes with orientation, define that explicitly.
+- Keep lighting direction, outline thickness, palette and pixel scale consistent across all four versions.
+- Ensure details that establish the object's front remain correct in each direction. For example, a fridge door handle, chair back, table apron or cabinet front must move to the appropriate visible face.
+- Use a consistent naming convention such as `chair.north`, `chair.east`, `chair.south`, `chair.west`; follow the renderer's existing key format if it already defines one.
+- If a prop is not meaningfully rotatable (for example, a wall-mounted painting or a built-in fireplace), do not create redundant directional variants.
+- Check every direction in the actual room renderer, including depth sorting, collision and placement preview.
+
+**Minimum requirement:** if a table, chair, fridge, cabinet or other relevant free-standing prop can be rotated in the editor, all four directional art views must exist before the prop is considered complete.
+
+## 9. Tilesets, rooms and environment art
 
 - Floor tiles must tile seamlessly on all intended edges. Test a repeated 3 × 3 or larger patch, not just one tile in isolation.
 - Wall pieces must have consistent thickness, top/side faces, corners and joins.
@@ -170,7 +185,7 @@ Every major location should have a short visual brief of its own. Define its moo
 
 These are mood and palette directions, not separate rendering styles. All locations retain the same pixel scale, deliberate cluster work, material readability and technical sprite conventions.
 
-## 9. Effects, lighting and particles
+## 10. Effects, lighting and particles
 
 - Effects should communicate an event or state clearly: glow, fire, dust, magic, impact, reward or damage.
 - Keep particles small and sparse enough that they do not obscure characters or interaction targets.
@@ -178,7 +193,7 @@ These are mood and palette directions, not separate rendering styles. All locati
 - Separate the effect from the underlying object when it needs independent animation or depth sorting.
 - Do not use large soft glows as a substitute for pixel-art lighting.
 
-## 10. UI art versus world art
+## 11. UI art versus world art
 
 The app interface has its own established visual language: dark near-black panels, ivory text, restrained antique gold and serif display typography (see CSS variables in `assets/style.css`).
 
@@ -187,7 +202,7 @@ The app interface has its own established visual language: dark near-black panel
 - Do not bake UI text, buttons, labels or panels into world sprites.
 - World art and interface art should complement one another, but they are not required to use identical rendering techniques.
 
-## 11. Asset production and integration
+## 12. Asset production and integration
 
 ### Preferred source files
 
@@ -225,7 +240,7 @@ AI-generated artwork is a starting point, not automatically production-ready gam
 - Keep source art and generated atlas outputs in sync.
 - Record any new external source and its licence/attribution in the appropriate project documentation.
 
-## 12. Quality assurance checklist
+## 13. Quality assurance checklist
 
 An asset is ready to commit only when the relevant checks pass:
 
@@ -238,11 +253,12 @@ An asset is ready to commit only when the relevant checks pass:
 - [ ] Tiles repeat seamlessly, if applicable.
 - [ ] Animation frames align and do not jitter, if applicable.
 - [ ] Its anchor, footprint and depth order are correct in-game.
+- [ ] If rotatable, north, east, south and west artwork exists and has been checked in-game.
 - [ ] Sprite keys and metadata match the renderer.
 - [ ] It has been inspected in the actual app, not only in an image editor or contact sheet.
 - [ ] Source/licence information is recorded where required.
 
-## 13. Prompt brief for new artwork
+## 14. Prompt brief for new artwork
 
 Use this as the default brief when creating new Grindstone assets:
 
@@ -252,7 +268,7 @@ Use this as the default brief when creating new Grindstone assets:
 
 ---
 
-## 14. Reference files
+## 15. Reference files
 
 When making or reviewing art, inspect these project files first:
 
