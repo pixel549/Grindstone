@@ -249,6 +249,11 @@ def record_has_duplicate_files(record: dict) -> bool:
     return len(hashes) != len(set(hashes))
 
 
+def browser_attachment_is_original(browser_downloaded: bool, files: list[dict]) -> bool:
+    """Accept a browser attachment only when it is not a byte-identical preview duplicate."""
+    return browser_downloaded and not record_has_duplicate_files({"files": files})
+
+
 def pack_is_complete(record: dict, folder: Path) -> bool:
     if record.get("status") != "complete" or not record.get("files"):
         return False
@@ -366,8 +371,11 @@ def main() -> None:
                 files = pack_files(folder)
                 # A preview-only set is not accepted as a completed original pack.
                 has_archive = any(Path(item["path"]).suffix.lower() in ARCHIVE_EXTS for item in files)
-                if successful and not failed and (has_archive or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
-                    record.update(status="complete", files=files, source_file_count=len(links))
+                unique_browser_source = browser_attachment_is_original(browser_downloaded, files)
+                if successful and not failed and (has_archive or unique_browser_source or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
+                    if unique_browser_source:
+                        record["download_method"] = "unique itch.io browser attachment"
+                    record.update(status="complete", files=files, source_file_count=len(links) + (1 if browser_downloaded else 0))
                 else:
                     record.update(status="incomplete", files=files, source_file_count=len(links), failed=failed,
                                   note="A pack is only complete when all listed downloads succeed and the page exposes an original archive or non-preview source files.")
