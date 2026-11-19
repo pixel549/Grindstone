@@ -40,11 +40,13 @@
    - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
    - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
 
-7. **Seveneves asset collector** — downloader fix in progress
-   - The collector must retrieve files from the actual itch.io download page, not mistake preview sheets for complete packs.
+7. **Asset collector** — resumable downloader merged; full-run verification pending
+   - Retrieve files from actual itch.io download pages, not preview sheets.
    - Preserve completed downloads between GitHub Actions runs and skip verified files/packs on reruns.
    - Retry incomplete packs and report unresolved/manual-check packs clearly.
-   - Run the workflow from the GitHub Actions tab; download the resulting 30-day artifact.
+   - Verify the first full run before treating the Seveneves collection as complete.
+   - The animated-sprite collector branch adds CC0 libraries for looping fire, water, waterfalls, torches, sparkles, weather, leaves and ambient effects.
+   - Keep collected source archives in GitHub Actions artifacts, not in the public repository.
 
 ## Notes
 
