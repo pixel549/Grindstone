@@ -84,12 +84,24 @@ def get_download_links(page) -> list[tuple[str, str]]:
         label = clean_name(a.inner_text() or "")
         full = page.evaluate("(u) => new URL(u, location.href).href", href)
         parsed = urlparse(full)
-        if parsed.netloc.endswith("itch.io") and (
-            "/file/" in parsed.path or re.search(r"\.(zip|png|7z|rar|aseprite)(?:$|\?)", full, re.I)
-        ):
+        host = parsed.netloc.lower()
+        is_itch_download_host = host.endswith(".itch.zone") or host.endswith(".itch.io")
+        looks_like_file = "/file/" in parsed.path or re.search(r"\.(zip|png|7z|rar|aseprite)(?:$|\?)", full, re.I) is not None
+        if is_itch_download_host and looks_like_file:
             if full not in {item[0] for item in links}:
                 links.append((full, label or Path(parsed.path).name or "download"))
     return links
+
+
+def safe_extract(archive: Path, destination: Path) -> None:
+    """Extract a ZIP without allowing paths to escape the destination."""
+    root = destination.resolve()
+    with zipfile.ZipFile(archive) as zf:
+        for member in zf.infolist():
+            target = (destination / member.filename).resolve()
+            if target != root and root not in target.parents:
+                raise ValueError(f"Unsafe ZIP member path: {member.filename}")
+        zf.extractall(destination)
 
 
 def main() -> None:
@@ -97,11 +109,12 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=OUT, help="download destination")
     parser.add_argument("--limit", type=int, default=0, help="limit number of eligible packs (0 = all)")
     parser.add_argument("--dry-run", action="store_true", help="list eligible packs without downloading")
+    parser.add_argument("--headed", action="store_true", help="show the browser (not suitable for GitHub Actions)")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=not args.headed)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
         urls = creator_games(page)
@@ -121,6 +134,10 @@ def main() -> None:
         if args.limit:
             eligible = eligible[: args.limit]
         if args.dry_run:
+            (args.out / "manifest.json").write_text(json.dumps([
+                {"title": title, "url": url, "status": "eligible-not-downloaded"}
+                for url, title in eligible
+            ], indent=2), encoding="utf-8")
             print(f"\nFound {len(eligible)} free/name-your-price packs. No files downloaded.")
             browser.close()
             return
@@ -156,8 +173,7 @@ def main() -> None:
                             extract_to = folder / target.stem
                             extract_to.mkdir(exist_ok=True)
                             try:
-                                with zipfile.ZipFile(target) as zf:
-                                    zf.extractall(extract_to)
+                                safe_extract(target, extract_to)
                                 print(f"  Extracted to {extract_to}")
                             except zipfile.BadZipFile:
                                 print(f"  [WARN] {target.name} was not a valid ZIP")

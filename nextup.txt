@@ -55,4 +55,5 @@
 - Character homes remain on the existing customisable house system.
 - Missing generated room images must continue to fall back to the original tile-based interiors.
 - Third-party asset sources and licence notes are tracked in `docs/third-party-pixel-assets.md`.
+- Seveneves GitHub Actions collector is being added on `automation/seveneves-github-actions`; run it from the Actions tab and download its seven-day artifact.
 - Do not merge feature branches into `main` unless explicitly requested.
