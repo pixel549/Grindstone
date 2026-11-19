@@ -170,7 +170,9 @@ def main() -> None:
                     if not response.ok:
                         raise RuntimeError(f"HTTP {response.status} from direct pack URL")
                     payload = response.body()
-                    filename = download_name(response, label or source["id"] + ".zip")
+                    if not payload or "text/html" in response.headers.get("content-type", "").lower():
+                        raise RuntimeError("Direct URL returned an empty response or HTML instead of an asset archive")
+                    filename = download_name(response, source["id"] + ".zip")
                     target = folder / filename
                     if not target.exists() or digest_file(target) != digest_bytes(payload):
                         target.write_bytes(payload)
@@ -186,6 +188,8 @@ def main() -> None:
                         raise RuntimeError("Archive contained no files")
                     record["source_file_count"] = 1
                 else:
+                    page.goto(source["url"], wait_until="domcontentloaded", timeout=60000)
+                    page.wait_for_timeout(900)
                     reached_downloads, browser_downloaded = open_download_page(page, folder)
                     if not reached_downloads:
                         raise RuntimeError("No real itch.io download-page file links found")
@@ -215,7 +219,9 @@ def main() -> None:
                             successful += 1
                         except Exception as exc:
                             failures.append(f"{link}: {exc}")
-                    record["source_file_count"] = len(links)
+                    record["source_file_count"] = len(links) + (1 if browser_downloaded else 0)
+                    if browser_downloaded:
+                        record["download_method"] = "itch.io browser attachment from the explicit download flow"
                     if failures or not successful:
                         record["failures"] = failures
                         raise RuntimeError("One or more source downloads failed; see manifest")
