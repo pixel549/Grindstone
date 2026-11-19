@@ -118,7 +118,7 @@ def get_download_links(page) -> list[tuple[str, str]]:
     ))
 
 
-def open_download_page(page, folder: Path) -> tuple[bool, bool]:
+def open_download_page(page, folder: Path, skip_browser_attachment: bool = False) -> tuple[bool, bool]:
     """Follow itch's explicit zero-cost route, then resolve or trigger the file download."""
     start_url = page.url
     download_now = re.compile(r"download(?: now)?", re.I)
@@ -171,8 +171,10 @@ def open_download_page(page, folder: Path) -> tuple[bool, bool]:
     browser_downloaded = False
 
     # Some itch download pages provide a Download button rather than a visible file URL.
-    if not links:
+    if not links and not skip_browser_attachment:
         exact_download = re.compile(r"^download(?: file)?$", re.I)
+    elif not links and skip_browser_attachment:
+        print("  [SKIP] Previous browser attachment duplicated a preview; checking only for newly exposed source links.")
         for frame in page.frames:
             for locator in (
                 frame.get_by_role("link", name=exact_download),
@@ -240,6 +242,12 @@ def pack_files(folder: Path) -> list[dict]:
     return result
 
 
+def record_has_duplicate_files(record: dict) -> bool:
+    """Detect cached browser attachments that are byte-for-byte copies of previews."""
+    hashes = [item.get("sha256") for item in record.get("files", []) if item.get("sha256")]
+    return len(hashes) != len(set(hashes))
+
+
 def pack_is_complete(record: dict, folder: Path) -> bool:
     if record.get("status") != "complete" or not record.get("files"):
         return False
@@ -296,10 +304,12 @@ def main() -> None:
                 continue
 
             print(f"\n[{index}/{len(eligible)}] {title}")
-            record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", [])}
+            skip_browser_attachment = record_has_duplicate_files(previous)
+            record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", []),
+                      "browser_attachment_preview_only": skip_browser_attachment}
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                reached_downloads, browser_downloaded = open_download_page(page, folder)
+                reached_downloads, browser_downloaded = open_download_page(page, folder, skip_browser_attachment)
                 links = get_download_links(page)
                 if not reached_downloads:
                     record.update(status="manual-check", note="Could not reach a download page with file links; no preview images counted as a complete pack.")
@@ -352,10 +362,8 @@ def main() -> None:
                 files = pack_files(folder)
                 # A preview-only set is not accepted as a completed original pack.
                 has_archive = any(Path(item["path"]).suffix.lower() in ARCHIVE_EXTS for item in files)
-                if successful and not failed and (has_archive or browser_downloaded or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
-                    if browser_downloaded:
-                        record["download_method"] = "itch.io browser attachment from the explicit download flow"
-                    record.update(status="complete", files=files, source_file_count=len(links) + (1 if browser_downloaded else 0))
+                if successful and not failed and (has_archive or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
+                    record.update(status="complete", files=files, source_file_count=len(links))
                 else:
                     record.update(status="incomplete", files=files, source_file_count=len(links), failed=failed,
                                   note="A pack is only complete when all listed downloads succeed and the page exposes an original archive or non-preview source files.")
