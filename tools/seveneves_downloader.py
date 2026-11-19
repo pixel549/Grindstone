@@ -118,7 +118,7 @@ def get_download_links(page) -> list[tuple[str, str]]:
     ))
 
 
-def open_download_page(page, folder: Path) -> tuple[bool, bool]:
+def open_download_page(page, folder: Path, skip_browser_attachment: bool = False) -> tuple[bool, bool]:
     """Follow itch's explicit zero-cost route, then resolve or trigger the file download."""
     start_url = page.url
     download_now = re.compile(r"download(?: now)?", re.I)
@@ -172,32 +172,35 @@ def open_download_page(page, folder: Path) -> tuple[bool, bool]:
 
     # Some itch download pages provide a Download button rather than a visible file URL.
     if not links:
-        exact_download = re.compile(r"^download(?: file)?$", re.I)
-        for frame in page.frames:
-            for locator in (
-                frame.get_by_role("link", name=exact_download),
-                frame.get_by_role("button", name=exact_download),
-            ):
-                try:
-                    if not locator.count():
-                        continue
-                    with page.expect_download(timeout=15000) as download_info:
-                        locator.first.click(timeout=8000, force=True)
-                    download = download_info.value
-                    filename = clean_name(download.suggested_filename)
-                    target = folder / filename
-                    download.save_as(target)
-                    if target.suffix.lower() == ".zip":
-                        extract_to = folder / (target.stem + "_extracted")
-                        safe_extract(target, extract_to)
-                        (extract_to / ".extracted.sha256").write_text(sha256(target), encoding="utf-8")
-                    browser_downloaded = True
-                    print(f"  Downloaded via browser: {target.name} ({target.stat().st_size} bytes)")
+        if skip_browser_attachment:
+            print("  [SKIP] Previous browser attachment duplicated a preview; checking only for newly exposed source links.")
+        else:
+            exact_download = re.compile(r"^download(?: file)?$", re.I)
+            for frame in page.frames:
+                for locator in (
+                    frame.get_by_role("link", name=exact_download),
+                    frame.get_by_role("button", name=exact_download),
+                ):
+                    try:
+                        if not locator.count():
+                            continue
+                        with page.expect_download(timeout=15000) as download_info:
+                            locator.first.click(timeout=8000, force=True)
+                        download = download_info.value
+                        filename = clean_name(download.suggested_filename)
+                        target = folder / filename
+                        download.save_as(target)
+                        if target.suffix.lower() == ".zip":
+                            extract_to = folder / (target.stem + "_extracted")
+                            safe_extract(target, extract_to)
+                            (extract_to / ".extracted.sha256").write_text(sha256(target), encoding="utf-8")
+                        browser_downloaded = True
+                        print(f"  Downloaded via browser: {target.name} ({target.stat().st_size} bytes)")
+                        break
+                    except Exception as exc:
+                        print(f"  [DEBUG] Browser download control: {exc}")
+                if browser_downloaded:
                     break
-                except Exception as exc:
-                    print(f"  [DEBUG] Browser download control: {exc}")
-            if browser_downloaded:
-                break
 
     links = get_download_links(page)
     print(f"  [DEBUG] Download flow: {start_url} -> {page.url}")
@@ -238,6 +241,17 @@ def pack_files(folder: Path) -> list[dict]:
                 "sha256": sha256(path),
             })
     return result
+
+
+def record_has_duplicate_files(record: dict) -> bool:
+    """Detect cached browser attachments that are byte-for-byte copies of previews."""
+    hashes = [item.get("sha256") for item in record.get("files", []) if item.get("sha256")]
+    return len(hashes) != len(set(hashes))
+
+
+def browser_attachment_is_original(browser_downloaded: bool, files: list[dict]) -> bool:
+    """Accept a browser attachment only when it is not a byte-identical preview duplicate."""
+    return browser_downloaded and not record_has_duplicate_files({"files": files})
 
 
 def pack_is_complete(record: dict, folder: Path) -> bool:
@@ -296,13 +310,18 @@ def main() -> None:
                 continue
 
             print(f"\n[{index}/{len(eligible)}] {title}")
-            record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", [])}
+            skip_browser_attachment = record_has_duplicate_files(previous)
+            record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", []),
+                      "browser_attachment_preview_only": skip_browser_attachment}
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                reached_downloads, browser_downloaded = open_download_page(page, folder)
+                reached_downloads, browser_downloaded = open_download_page(page, folder, skip_browser_attachment)
                 links = get_download_links(page)
                 if not reached_downloads:
-                    record.update(status="manual-check", note="Could not reach a download page with file links; no preview images counted as a complete pack.")
+                    note = ("The browser attachment matched an existing preview by SHA-256; no original archive or additional source links were exposed."
+                            if skip_browser_attachment else
+                            "Could not reach a download page with file links; no preview images counted as a complete pack.")
+                    record.update(status="manual-check", note=note)
                     records[url] = record
                     save_manifest(args.out, manifest)
                     print("  [MANUAL] No actual download-page files found.")
@@ -352,8 +371,11 @@ def main() -> None:
                 files = pack_files(folder)
                 # A preview-only set is not accepted as a completed original pack.
                 has_archive = any(Path(item["path"]).suffix.lower() in ARCHIVE_EXTS for item in files)
-                if successful and not failed and (has_archive or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
-                    record.update(status="complete", files=files, source_file_count=len(links))
+                unique_browser_source = browser_attachment_is_original(browser_downloaded, files)
+                if successful and not failed and (has_archive or unique_browser_source or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
+                    if unique_browser_source:
+                        record["download_method"] = "unique itch.io browser attachment"
+                    record.update(status="complete", files=files, source_file_count=len(links) + (1 if browser_downloaded else 0))
                 else:
                     record.update(status="incomplete", files=files, source_file_count=len(links), failed=failed,
                                   note="A pack is only complete when all listed downloads succeed and the page exposes an original archive or non-preview source files.")
