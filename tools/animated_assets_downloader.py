@@ -234,6 +234,8 @@ def main() -> None:
         complete = sum(1 for item in records.values() if item.get("status") == "complete")
         print(f"\nFinished: {complete}/{len(SOURCES)} animation packs complete.")
         browser.close()
+        if complete < len(SOURCES):
+            raise SystemExit(2)
 
 
 if __name__ == "__main__":
