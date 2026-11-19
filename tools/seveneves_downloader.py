@@ -171,35 +171,36 @@ def open_download_page(page, folder: Path, skip_browser_attachment: bool = False
     browser_downloaded = False
 
     # Some itch download pages provide a Download button rather than a visible file URL.
-    if not links and not skip_browser_attachment:
-        exact_download = re.compile(r"^download(?: file)?$", re.I)
-    elif not links and skip_browser_attachment:
-        print("  [SKIP] Previous browser attachment duplicated a preview; checking only for newly exposed source links.")
-        for frame in page.frames:
-            for locator in (
-                frame.get_by_role("link", name=exact_download),
-                frame.get_by_role("button", name=exact_download),
-            ):
-                try:
-                    if not locator.count():
-                        continue
-                    with page.expect_download(timeout=15000) as download_info:
-                        locator.first.click(timeout=8000, force=True)
-                    download = download_info.value
-                    filename = clean_name(download.suggested_filename)
-                    target = folder / filename
-                    download.save_as(target)
-                    if target.suffix.lower() == ".zip":
-                        extract_to = folder / (target.stem + "_extracted")
-                        safe_extract(target, extract_to)
-                        (extract_to / ".extracted.sha256").write_text(sha256(target), encoding="utf-8")
-                    browser_downloaded = True
-                    print(f"  Downloaded via browser: {target.name} ({target.stat().st_size} bytes)")
+    if not links:
+        if skip_browser_attachment:
+            print("  [SKIP] Previous browser attachment duplicated a preview; checking only for newly exposed source links.")
+        else:
+            exact_download = re.compile(r"^download(?: file)?$", re.I)
+            for frame in page.frames:
+                for locator in (
+                    frame.get_by_role("link", name=exact_download),
+                    frame.get_by_role("button", name=exact_download),
+                ):
+                    try:
+                        if not locator.count():
+                            continue
+                        with page.expect_download(timeout=15000) as download_info:
+                            locator.first.click(timeout=8000, force=True)
+                        download = download_info.value
+                        filename = clean_name(download.suggested_filename)
+                        target = folder / filename
+                        download.save_as(target)
+                        if target.suffix.lower() == ".zip":
+                            extract_to = folder / (target.stem + "_extracted")
+                            safe_extract(target, extract_to)
+                            (extract_to / ".extracted.sha256").write_text(sha256(target), encoding="utf-8")
+                        browser_downloaded = True
+                        print(f"  Downloaded via browser: {target.name} ({target.stat().st_size} bytes)")
+                        break
+                    except Exception as exc:
+                        print(f"  [DEBUG] Browser download control: {exc}")
+                if browser_downloaded:
                     break
-                except Exception as exc:
-                    print(f"  [DEBUG] Browser download control: {exc}")
-            if browser_downloaded:
-                break
 
     links = get_download_links(page)
     print(f"  [DEBUG] Download flow: {start_url} -> {page.url}")
