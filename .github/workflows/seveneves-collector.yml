@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   collect:
@@ -25,6 +26,15 @@ jobs:
       - name: Check out Grindstone
         uses: actions/checkout@v4
 
+      - name: Seed the first resumable run with the previous collection
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: seven-eves-asset-collection
+          run-id: 44496942942
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: previous-collection
+
       - name: Restore previous collection
         uses: actions/cache/restore@v4
         with:
@@ -32,6 +42,12 @@ jobs:
           key: seveneves-collection-v2-${{ github.run_id }}
           restore-keys: |
             seveneves-collection-v2-
+
+      - name: Unpack previous collection if available
+        run: |
+          if [ -f previous-collection/seven-eves-results.zip ]; then
+            unzip -oq previous-collection/seven-eves-results.zip -d .
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
