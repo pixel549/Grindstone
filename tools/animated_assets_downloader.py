@@ -14,6 +14,8 @@ from urllib.parse import unquote, urljoin, urlparse
 
 from playwright.sync_api import sync_playwright
 
+from seveneves_downloader import get_download_links, open_download_page
+
 SOURCES = [
     {
         "id": "pvfx-foundry",
@@ -224,7 +226,7 @@ def main() -> None:
                     if not response.ok:
                         raise RuntimeError(f"HTTP {response.status} from direct pack URL")
                     payload = response.body()
-                    filename = download_name(response, source["id"] + ".zip")
+                    filename = download_name(response, label or source["id"] + ".zip")
                     target = folder / filename
                     if not target.exists() or digest_file(target) != digest_bytes(payload):
                         target.write_bytes(payload)
@@ -240,12 +242,13 @@ def main() -> None:
                         raise RuntimeError("Archive contained no files")
                     record["source_file_count"] = 1
                 else:
-                    if not open_itch_download_page(page, source["url"]):
+                    reached_downloads, browser_downloaded = open_download_page(page, folder)
+                    if not reached_downloads:
                         raise RuntimeError("No real itch.io download-page file links found")
-                    links = itch_download_links(page)
-                    successful = 0
+                    links = get_download_links(page)
+                    successful = 1 if browser_downloaded else 0
                     failures = []
-                    for link in links:
+                    for link, label in links:
                         try:
                             response = context.request.get(link, timeout=180000)
                             if not response.ok:
