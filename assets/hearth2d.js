@@ -540,6 +540,7 @@
       this._arrive(H, Object.assign({ k: k, s: s }, extra || {}), settle);
     }
     _arrive(a, goal, settle) {
+      if (goal.onArrive) { a.goal = null; goal.onArrive(); return; }
       const s = goal.s, f = this._featOf(s), lv = f ? (this.o.state[f] || 0) : 0;
       a.goal = null;
       a.sleep = null; a.meal = null; a.dozing = false;
@@ -577,6 +578,18 @@
       for (let i = 0; i < 14; i++) { const x = this._choose(); if (x && this.spots[x.k].dir !== 'up' && !this.spots[x.k].mow) { c = x; break; } }
       const k = c ? c.k : this.spots.armchair ? 'armchair' : this._anySpot();
       this._place(k, true);
+    }
+    _approach(cx, cy, done) {
+      const H = this.hero, [sx, sy] = this._cellOf(H.x, H.y);
+      const around = [[cx, cy + 1, 'up'], [cx - 1, cy, 'right'], [cx + 1, cy, 'left'], [cx, cy - 1, 'down']];
+      const choices = around.filter(([x, y]) => this._ok(x, y)).map(([x, y, dir]) => ({ x, y, dir, path: this._path(sx, sy, x, y) })).filter((p) => p.path);
+      choices.sort((a, b) => a.path.length - b.path.length);
+      const target = choices[0];
+      if (!target) return false;
+      H.spot = null; H.seated = null; H.sleep = null; H.meal = null; H.dozing = false;
+      H.path = target.path; H.anim = 'walk'; H.goal = { k: null, s: { cell: [target.x, target.y], dir: target.dir, anim: 'idle' }, onArrive: () => { H.dir = target.dir; H.anim = 'idle'; H.next = 1; if (done) done(); } };
+      if (!H.path.length) this._arrive(H, H.goal);
+      return true;
     }
     walkTo(cx, cy) {
       const H = this.hero, [sx, sy] = this._cellOf(H.x, H.y);
@@ -1106,7 +1119,6 @@
       const dt = Math.min(0.1, (now - (this.last || now)) / 1000);
       if (dt < 1 / (this.o.fps || 62) && this.last) return;   // 2.9: up to 60 frames a second (was 30)
       this.last = now;
-      this._resize();
       this._update(dt);
       this._updateNpcs(dt);
       this._updateOracle(dt);
@@ -1590,6 +1602,9 @@
       let sbest = null, sd = 1e9;
       (this.starPts || []).forEach((q) => { const d = Math.hypot(wx - q.x, wy - q.y); if (d < 11 && d < sd) { sd = d; sbest = q; } });
       if (sbest) { this._emit(sbest.id); return; }
+      // The portal is a tall, tappable target; resolve it before the hero or visitors can occlude it.
+      const portal = this._hitObj(wx, wy);
+      if (portal && portal.oraclePortal) { this._approach(portal.cell[0], portal.cell[1], () => this._emit('oracle')); return; }
       // people and birds first
       const near = (x, y, w, h) => Math.abs(wx - x) < w && wy > y - h && wy < y + 4;
       const H = this.hero, hp = this._pos(H), hx = hp.x, hy = H.sleep ? hp.y + 10 : hp.y;
@@ -1598,7 +1613,6 @@
       for (const a of this.npcs) { const p = this._pos(a); if (a.sheets && near(p.x, a.sleep ? p.y + 10 : p.y, 12, a.sleep ? 22 : 48)) { this._say(a, [a.sleep ? '💤' : '👋'], 2); this._emit('npc:' + a.id); return; } }
       if (near(hx, hy, 13, H.sleep ? 22 : 50)) { this._emit('hero'); return; }
       const ob = this._hitObj(wx, wy);
-      if (ob && ob.oraclePortal) { this._approach(ob.cell[0], ob.cell[1], () => this._emit('oracle'), 1); return; }
       if (ob) { this._emit(ob.id); return; }
       if (this.isLawn && cx >= 0 && cy >= 0 && cx < WT && cy < HT && this.isLawn[cy * WT + cx]) { this._emit('lawn'); return; }
       if (!this.lotOpen && cx >= 25 && cx <= 32) { this._emit('garden'); return; }
