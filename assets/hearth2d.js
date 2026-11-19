@@ -66,6 +66,8 @@
       this.g = this.canvas.getContext('2d');
       this.season = SEASON(new Date());
       this._bind();
+      this._onVisibility = () => { if (document.hidden) { if (this._raf) cancelAnimationFrame(this._raf); this._raf = null; this.last = 0; } else if (this.active && this.alive && !this._raf) this._raf = requestAnimationFrame((t) => this._frame(t)); };
+      document.addEventListener('visibilitychange', this._onVisibility);
       this.ready = this._load().then(() => {
         this._layout();
         this._resize();
@@ -121,8 +123,8 @@
     setOracleBarks(lines) { this.o.oracleBarks = Array.isArray(lines) ? lines.slice() : []; }
     previewItem(k, t, fin) { this.preview = { key: k, tier: t, fin: fin }; this._layout(); this.focus(k); }
     endPreview() { this.preview = null; this._layout(); this.unfocus(); }
-    setActive(a) { this.active = !!a; if (a) this._resize(); }
-    dispose() { this.alive = false; cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); if (this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas); }
+    setActive(a) { this.active = !!a; if (a) { this._resize(); if (this.alive && !document.hidden && !this._raf) this._raf = requestAnimationFrame((t) => this._frame(t)); } else { if (this._raf) cancelAnimationFrame(this._raf); this._raf = null; this.last = 0; } }
+    dispose() { this.alive = false; if (this._raf) cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); document.removeEventListener('visibilitychange', this._onVisibility); if (this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas); }
 
     // ---------------------------------------------------------------- the map
     _house() { return this.o.house || (G() && G().houseDefault ? Object.assign(G().houseDefault(), { live: null }) : { rooms: [], doors: [], items: [] }); }
@@ -1114,8 +1116,9 @@
     }
     _frame(now) {
       if (!this.alive) return;
+      this._raf = null;
+      if (!this.active || document.hidden) { this.last = 0; return; }
       this._raf = requestAnimationFrame((t) => this._frame(t));
-      if (!this.active || document.hidden) { this.last = now; return; }
       const dt = Math.min(0.1, (now - (this.last || now)) / 1000);
       if (dt < 1 / (this.o.fps || 62) && this.last) return;   // 2.9: up to 60 frames a second (was 30)
       this.last = now;
