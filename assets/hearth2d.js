@@ -1195,12 +1195,12 @@
       if (vx1 > vx0 && vy1 > vy0) g.drawImage(this.stat, vx0, vy0, vx1 - vx0, vy1 - vy0, vx0, vy0, vx1 - vx0, vy1 - vy0);
       const seen = (ob) => ob.ax > vx0 - 120 && ob.ax < vx1 + 120 && ob.ay > vy0 - 40 && ob.ay < vy1 + 160;
       const flashOn = this.flash && Math.floor(this.t * 4) % 2 === 0;
-      // what hangs on the walls
-      this.wallItems.forEach((w) => { w.fire = w.f && w.f.fire; this._drawObj(g, w, flashOn); });
-      // everything that stands on the floor, back to front
+      // Wall-mounted objects share the same depth-sorted pass as floor objects. Drawing every
+      // wall item first let tall props on neighbouring cells paint over windows and wall fixtures.
       const H0 = this.hero, hy = this._pos(H0).sy;
       const list = this.objs.filter((ob) => (ob.s || ob.relic) && !ob.hidden && seen(ob));
       const items = list.map((ob) => ({ y: ob.flat ? ob.ay - 4000 : ob.ay + (ob.z || 0) * 0.01 + (ob.front ? 0.5 : 0), ob: ob }));
+      this.wallItems.forEach((w) => { if (seen(w)) items.push({ y: w.ay - 0.25, ob: w, wall: true }); });
       items.push({ y: hy + (H0.spot && H0.spot.s.swim ? -0.5 : 0) + 0.2, actor: H0 });
       this.npcs.forEach((a) => { if (a.sheets) items.push({ y: this._pos(a).sy + 0.15, actor: a }); });
       this.birds.forEach((b) => items.push({ y: b.fly ? 1e6 : b.sy, bird: b }));
@@ -1211,6 +1211,7 @@
         if (it.actor) { this._drawActor(g, it.actor); continue; }
         if (it.bird) { this._drawBird(g, it.bird); continue; }
         if (it.crit) { this._drawCritter(g, it.crit); continue; }
+        if (it.wall) it.ob.fire = it.ob.f && it.ob.f.fire;
         this._drawObj(g, it.ob, flashOn);
       }
       this._drawNightmare(g);   // 2.27
