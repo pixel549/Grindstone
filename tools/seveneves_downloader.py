@@ -14,7 +14,6 @@ import json
 import re
 import time
 import zipfile
-from email.message import Message
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -34,9 +33,9 @@ def slug_from_url(url: str) -> str:
 
 
 def clean_name(value: str) -> str:
-    value = re.sub(r"[\\/]+", "-", value)
-    value = re.sub(r"\\s+", " ", value).strip(" .")
-    return re.sub(r"[^\\w .()'_-]+", "", value)[:140] or "download"
+    value = re.sub(r"[\/]+", "-", value)
+    value = re.sub(r"\s+", " ", value).strip(" .")
+    return re.sub(r"[^\w .()'_-]+", "", value)[:140] or "download"
 
 
 def sha256(path: Path) -> str:
@@ -84,8 +83,8 @@ def is_free_or_pwyw(page) -> bool:
     body = page.locator("body").inner_text(timeout=15000).lower()
     return (
         "name your own price" in body
-        or re.search(r"\\bfree download\\b", body) is not None
-        or re.search(r"\\bdownload\\s+for\\s+free\\b", body) is not None
+        or re.search(r"\bfree download\b", body) is not None
+        or re.search(r"\bdownload\s+for\s+free\b", body) is not None
     )
 
 
@@ -152,7 +151,7 @@ def get_download_links(page) -> list[tuple[str, str]]:
 def filename_from_response(response, url: str, label: str) -> str:
     headers = response.headers
     disposition = headers.get("content-disposition", "")
-    match = re.search(r"filename\\*?=(?:UTF-8''|\")?([^;\"]+)", disposition, re.I)
+    match = re.search(r"filename\*?=(?:UTF-8''|\")?([^;\"]+)", disposition, re.I)
     if match:
         candidate = unquote(match.group(1).strip().strip('"'))
     else:
@@ -224,7 +223,7 @@ def main() -> None:
         if args.limit:
             eligible = eligible[:args.limit]
         if args.dry_run:
-            print(f"\\nFound {len(eligible)} eligible packs. No files downloaded.")
+            print(f"\nFound {len(eligible)} eligible packs. No files downloaded.")
             browser.close()
             return
 
@@ -237,7 +236,7 @@ def main() -> None:
                 print(f"[SKIP: already complete] {title}")
                 continue
 
-            print(f"\\n[{index}/{len(eligible)}] {title}")
+            print(f"\n[{index}/{len(eligible)}] {title}")
             record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", [])}
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=60000)
@@ -300,14 +299,14 @@ def main() -> None:
             time.sleep(1)
 
         (args.out / "README.txt").write_text(
-            "Seveneves.ai itch.io asset collection\\n"
-            "Collected from public free/name-your-price download pages only.\\n"
-            "The manifest records source URLs, completion state and SHA-256 hashes.\\n"
-            "Review each pack's licence before integrating it. Do not redistribute assets where prohibited.\\n",
+            "Seveneves.ai itch.io asset collection\n"
+            "Collected from public free/name-your-price download pages only.\n"
+            "The manifest records source URLs, completion state and SHA-256 hashes.\n"
+            "Review each pack's licence before integrating it. Do not redistribute assets where prohibited.\n",
             encoding="utf-8",
         )
         complete = sum(1 for item in records.values() if item.get("status") == "complete")
-        print(f"\\nFinished: {complete}/{len(eligible)} eligible packs marked complete.")
+        print(f"\nFinished: {complete}/{len(eligible)} eligible packs marked complete.")
         browser.close()
 
 
