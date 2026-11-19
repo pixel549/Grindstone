@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from animated_assets_downloader import download_name, record_is_complete
-from seveneves_downloader import pack_is_complete
+from seveneves_downloader import pack_is_complete, record_has_duplicate_files
 
 class AssetCollectorTests(unittest.TestCase):
     def test_direct_download_name_uses_fallback_without_content_disposition(self):
@@ -23,6 +23,12 @@ class AssetCollectorTests(unittest.TestCase):
             self.assertTrue(record_is_complete(record, folder))
             asset.write_bytes(b"changed")
             self.assertFalse(record_is_complete(record, folder))
+
+    def test_duplicate_browser_attachment_is_recognised_as_preview_only(self):
+        record = {"files": [{"path": "preview.png", "sha256": "same-hash"}, {"path": "download.png", "sha256": "same-hash"}]}
+        self.assertTrue(record_has_duplicate_files(record))
+        unique = {"files": [{"path": "source.zip", "sha256": "one"}, {"path": "sheet.png", "sha256": "two"}]}
+        self.assertFalse(record_has_duplicate_files(unique))
 
     def test_seveneves_manifest_requires_matching_file_hash(self):
         with tempfile.TemporaryDirectory() as tmp:
