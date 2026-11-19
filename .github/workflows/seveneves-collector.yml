@@ -103,6 +103,7 @@ jobs:
           python tools/seveneves_downloader.py "${ARGS[@]}"
 
       - name: Collect curated animated sprite packs (resume-safe)
+        if: always()
         run: |
           ARGS=(--out animated_assets_downloads)
           if [ "${{ inputs.dry_run }}" = "true" ]; then
