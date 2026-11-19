@@ -10,13 +10,11 @@ All three pages identify their assets as CC0. The collector saves source archive
 
 ## Run locally
 
-\`\`\`bash
-python -m pip install playwright
-python -m playwright install chromium
-python tools/animated_assets_downloader.py --out animated_assets_downloads
-\`\`\`
+1. Install Playwright with: python -m pip install playwright
+2. Install Chromium with: python -m playwright install chromium
+3. Run: python tools/animated_assets_downloader.py --out animated_assets_downloads
 
-Use \`--dry-run\` to list the curated sources without downloading.
+Use the --dry-run option to list the curated sources without downloading.
 
 ## Licence and repository handling
 
