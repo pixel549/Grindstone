@@ -35,8 +35,8 @@
    - Verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
 
 6. **Third-party asset integration** — awaiting a clean full-collection run
-   - The latest artifact contains 14/18 Seveneves packs marked complete; four additional packs were downloaded through itch.io's explicit browser attachment flow but were incorrectly classified because they are standalone source PNGs rather than ZIP archives.
-   - Recognise those verified browser attachments as original downloads and retry only incomplete records.
+   - The latest artifact contains 14/18 Seveneves packs marked complete; four remaining packs only yielded browser attachments that were byte-for-byte duplicates of their preview PNGs, not complete source packs.
+   - Keep those four marked incomplete, detect the duplicate hashes, and avoid repeatedly downloading the same preview attachment while still checking for newly exposed source links.
    - Review each pack's licence and keep raw third-party source packs out of the public repository where redistribution is prohibited.
    - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
    - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
