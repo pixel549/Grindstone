@@ -131,7 +131,7 @@ def itch_download_links(page) -> list[str]:
 def open_itch_download_page(page, source_url: str) -> bool:
     page.goto(source_url, wait_until="domcontentloaded", timeout=60000)
     body = page.locator("body").inner_text(timeout=15000).lower()
-    if not ("name your own price" in body or "free download" in body or "download for free" in body):
+    if not ("name your own price" in body or "free" in body) or "buy now" in body:
         print("  [SKIP] Page no longer clearly advertises a free download.")
         return False
 
@@ -256,13 +256,15 @@ def main() -> None:
                             target = folder / filename
                             if not target.exists() or digest_file(target) != digest_bytes(payload):
                                 target.write_bytes(payload)
-                            if target.suffix.lower() == ".zip" and zipfile.is_zipfile(io.BytesIO(payload)):
-                                extracted = folder / (target.stem + "_extracted")
-                                marker = extracted / ".archive.sha256"
-                                if not marker.exists() or marker.read_text(encoding="utf-8").strip() != digest_bytes(payload):
-                                    safe_extract(payload, extracted)
-                                    marker.parent.mkdir(parents=True, exist_ok=True)
-                                    marker.write_text(digest_bytes(payload), encoding="utf-8")
+                            if not zipfile.is_zipfile(io.BytesIO(payload)):
+                                failures.append(f"Not a valid ZIP archive: {link}")
+                                continue
+                            extracted = folder / (target.stem + "_extracted")
+                            marker = extracted / ".archive.sha256"
+                            if not marker.exists() or marker.read_text(encoding="utf-8").strip() != digest_bytes(payload):
+                                safe_extract(payload, extracted)
+                                marker.parent.mkdir(parents=True, exist_ok=True)
+                                marker.write_text(digest_bytes(payload), encoding="utf-8")
                             successful += 1
                         except Exception as exc:
                             failures.append(f"{link}: {exc}")
