@@ -10,7 +10,7 @@ import re
 import time
 import zipfile
 from pathlib import Path
-from urllib.parse import unquote, urljoin, urlparse
+from urllib.parse import unquote, urlparse
 
 from playwright.sync_api import sync_playwright
 
@@ -113,62 +113,6 @@ def download_name(response, fallback: str) -> str:
     if match:
         return clean_name(unquote(match.group(1).strip().strip('"')))
     return clean_name(Path(unquote(urlparse(response.url).path)).name or fallback)
-
-
-def itch_download_links(page) -> list[str]:
-    links = set()
-    for anchor in page.locator("a[href]").all():
-        href = anchor.get_attribute("href") or ""
-        full = urljoin(page.url, href)
-        parsed = urlparse(full)
-        host = parsed.netloc.lower()
-        path = parsed.path.lower()
-        if (host.endswith(".itch.zone") or host.endswith(".itch.io")) and (
-            "/file/" in path or Path(path).suffix.lower() in ARCHIVE_EXTS
-        ):
-            links.add(full)
-    return sorted(links)
-
-
-def open_itch_download_page(page, source_url: str) -> bool:
-    page.goto(source_url, wait_until="domcontentloaded", timeout=60000)
-    body = page.locator("body").inner_text(timeout=15000).lower()
-    if not ("name your own price" in body or "free" in body) or "buy now" in body:
-        print("  [SKIP] Page no longer clearly advertises a free download.")
-        return False
-
-    for locator in (
-        page.get_by_role("link", name=re.compile(r"download(?: now)?", re.I)),
-        page.get_by_role("button", name=re.compile(r"download(?: now)?", re.I)),
-        page.locator("a.button"),
-    ):
-        try:
-            for index in range(min(locator.count(), 5)):
-                item = locator.nth(index)
-                label = (item.inner_text() or "").strip().lower()
-                href = item.get_attribute("href") or ""
-                if "download" in label or "/download" in href:
-                    item.click(timeout=10000)
-                    try:
-                        page.wait_for_load_state("domcontentloaded", timeout=20000)
-                    except Exception:
-                        pass
-                    page.wait_for_timeout(800)
-                    break
-            else:
-                continue
-            break
-        except Exception:
-            continue
-
-    try:
-        no_thanks = page.get_by_text(re.compile(r"no thanks, just take me to the downloads", re.I))
-        if no_thanks.count():
-            no_thanks.first.click(timeout=8000)
-            page.wait_for_timeout(800)
-    except Exception:
-        pass
-    return bool(itch_download_links(page))
 
 
 def files_manifest(folder: Path) -> list[dict]:
