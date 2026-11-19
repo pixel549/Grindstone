@@ -66,6 +66,8 @@
       this.g = this.canvas.getContext('2d');
       this.season = SEASON(new Date());
       this._bind();
+      this._onVisibility = () => { if (document.hidden) { if (this._raf) cancelAnimationFrame(this._raf); this._raf = null; this.last = 0; } else if (this.active && this.alive && !this._raf) this._raf = requestAnimationFrame((t) => this._frame(t)); };
+      document.addEventListener('visibilitychange', this._onVisibility);
       this.ready = this._load().then(() => {
         this._layout();
         this._resize();
@@ -121,8 +123,8 @@
     setOracleBarks(lines) { this.o.oracleBarks = Array.isArray(lines) ? lines.slice() : []; }
     previewItem(k, t, fin) { this.preview = { key: k, tier: t, fin: fin }; this._layout(); this.focus(k); }
     endPreview() { this.preview = null; this._layout(); this.unfocus(); }
-    setActive(a) { this.active = !!a; if (a) this._resize(); }
-    dispose() { this.alive = false; cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); if (this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas); }
+    setActive(a) { this.active = !!a; if (a) { this._resize(); if (this.alive && !document.hidden && !this._raf) this._raf = requestAnimationFrame((t) => this._frame(t)); } else { if (this._raf) cancelAnimationFrame(this._raf); this._raf = null; this.last = 0; } }
+    dispose() { this.alive = false; if (this._raf) cancelAnimationFrame(this._raf); window.removeEventListener('resize', this._onResize); document.removeEventListener('visibilitychange', this._onVisibility); if (this.canvas.parentNode) this.canvas.parentNode.removeChild(this.canvas); }
 
     // ---------------------------------------------------------------- the map
     _house() { return this.o.house || (G() && G().houseDefault ? Object.assign(G().houseDefault(), { live: null }) : { rooms: [], doors: [], items: [] }); }
@@ -540,6 +542,7 @@
       this._arrive(H, Object.assign({ k: k, s: s }, extra || {}), settle);
     }
     _arrive(a, goal, settle) {
+      if (goal.onArrive) { a.goal = null; goal.onArrive(); return; }
       const s = goal.s, f = this._featOf(s), lv = f ? (this.o.state[f] || 0) : 0;
       a.goal = null;
       a.sleep = null; a.meal = null; a.dozing = false;
@@ -577,6 +580,18 @@
       for (let i = 0; i < 14; i++) { const x = this._choose(); if (x && this.spots[x.k].dir !== 'up' && !this.spots[x.k].mow) { c = x; break; } }
       const k = c ? c.k : this.spots.armchair ? 'armchair' : this._anySpot();
       this._place(k, true);
+    }
+    _approach(cx, cy, done) {
+      const H = this.hero, [sx, sy] = this._cellOf(H.x, H.y);
+      const around = [[cx, cy + 1, 'up'], [cx - 1, cy, 'right'], [cx + 1, cy, 'left'], [cx, cy - 1, 'down']];
+      const choices = around.filter(([x, y]) => this._ok(x, y)).map(([x, y, dir]) => ({ x, y, dir, path: this._path(sx, sy, x, y) })).filter((p) => p.path);
+      choices.sort((a, b) => a.path.length - b.path.length);
+      const target = choices[0];
+      if (!target) return false;
+      H.spot = null; H.seated = null; H.sleep = null; H.meal = null; H.dozing = false;
+      H.path = target.path; H.anim = 'walk'; H.goal = { k: null, s: { cell: [target.x, target.y], dir: target.dir, anim: 'idle' }, onArrive: () => { H.dir = target.dir; H.anim = 'idle'; H.next = 1; if (done) done(); } };
+      if (!H.path.length) this._arrive(H, H.goal);
+      return true;
     }
     walkTo(cx, cy) {
       const H = this.hero, [sx, sy] = this._cellOf(H.x, H.y);
@@ -1101,12 +1116,12 @@
     }
     _frame(now) {
       if (!this.alive) return;
+      this._raf = null;
+      if (!this.active || document.hidden) { this.last = 0; return; }
       this._raf = requestAnimationFrame((t) => this._frame(t));
-      if (!this.active || document.hidden) { this.last = now; return; }
       const dt = Math.min(0.1, (now - (this.last || now)) / 1000);
       if (dt < 1 / (this.o.fps || 62) && this.last) return;   // 2.9: up to 60 frames a second (was 30)
       this.last = now;
-      this._resize();
       this._update(dt);
       this._updateNpcs(dt);
       this._updateOracle(dt);
@@ -1180,12 +1195,12 @@
       if (vx1 > vx0 && vy1 > vy0) g.drawImage(this.stat, vx0, vy0, vx1 - vx0, vy1 - vy0, vx0, vy0, vx1 - vx0, vy1 - vy0);
       const seen = (ob) => ob.ax > vx0 - 120 && ob.ax < vx1 + 120 && ob.ay > vy0 - 40 && ob.ay < vy1 + 160;
       const flashOn = this.flash && Math.floor(this.t * 4) % 2 === 0;
-      // what hangs on the walls
-      this.wallItems.forEach((w) => { w.fire = w.f && w.f.fire; this._drawObj(g, w, flashOn); });
-      // everything that stands on the floor, back to front
+      // Wall-mounted objects share the same depth-sorted pass as floor objects. Drawing every
+      // wall item first let tall props on neighbouring cells paint over windows and wall fixtures.
       const H0 = this.hero, hy = this._pos(H0).sy;
       const list = this.objs.filter((ob) => (ob.s || ob.relic) && !ob.hidden && seen(ob));
       const items = list.map((ob) => ({ y: ob.flat ? ob.ay - 4000 : ob.ay + (ob.z || 0) * 0.01 + (ob.front ? 0.5 : 0), ob: ob }));
+      this.wallItems.forEach((w) => { if (seen(w)) items.push({ y: w.ay - 0.25, ob: w, wall: true }); });
       items.push({ y: hy + (H0.spot && H0.spot.s.swim ? -0.5 : 0) + 0.2, actor: H0 });
       this.npcs.forEach((a) => { if (a.sheets) items.push({ y: this._pos(a).sy + 0.15, actor: a }); });
       this.birds.forEach((b) => items.push({ y: b.fly ? 1e6 : b.sy, bird: b }));
@@ -1196,6 +1211,7 @@
         if (it.actor) { this._drawActor(g, it.actor); continue; }
         if (it.bird) { this._drawBird(g, it.bird); continue; }
         if (it.crit) { this._drawCritter(g, it.crit); continue; }
+        if (it.wall) it.ob.fire = it.ob.f && it.ob.f.fire;
         this._drawObj(g, it.ob, flashOn);
       }
       this._drawNightmare(g);   // 2.27
@@ -1590,6 +1606,9 @@
       let sbest = null, sd = 1e9;
       (this.starPts || []).forEach((q) => { const d = Math.hypot(wx - q.x, wy - q.y); if (d < 11 && d < sd) { sd = d; sbest = q; } });
       if (sbest) { this._emit(sbest.id); return; }
+      // The portal is a tall, tappable target; resolve it before the hero or visitors can occlude it.
+      const portal = this._hitObj(wx, wy);
+      if (portal && portal.oraclePortal) { this._approach(portal.cell[0], portal.cell[1], () => this._emit('oracle')); return; }
       // people and birds first
       const near = (x, y, w, h) => Math.abs(wx - x) < w && wy > y - h && wy < y + 4;
       const H = this.hero, hp = this._pos(H), hx = hp.x, hy = H.sleep ? hp.y + 10 : hp.y;
@@ -1598,7 +1617,6 @@
       for (const a of this.npcs) { const p = this._pos(a); if (a.sheets && near(p.x, a.sleep ? p.y + 10 : p.y, 12, a.sleep ? 22 : 48)) { this._say(a, [a.sleep ? '💤' : '👋'], 2); this._emit('npc:' + a.id); return; } }
       if (near(hx, hy, 13, H.sleep ? 22 : 50)) { this._emit('hero'); return; }
       const ob = this._hitObj(wx, wy);
-      if (ob && ob.oraclePortal) { this._approach(ob.cell[0], ob.cell[1], () => this._emit('oracle'), 1); return; }
       if (ob) { this._emit(ob.id); return; }
       if (this.isLawn && cx >= 0 && cy >= 0 && cx < WT && cy < HT && this.isLawn[cy * WT + cx]) { this._emit('lawn'); return; }
       if (!this.lotOpen && cx >= 25 && cx <= 32) { this._emit('garden'); return; }
