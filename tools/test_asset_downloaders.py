@@ -11,7 +11,7 @@ from seveneves_downloader import pack_is_complete, record_has_duplicate_files
 
 class AssetCollectorTests(unittest.TestCase):
     def test_direct_download_name_uses_fallback_without_content_disposition(self):
-        response = SimpleNamespace(headers={}, url="https://cdn.example.test/download")
+        response = SimpleNamespace(headers={}, url="https://cdn.example.test/")
         self.assertEqual(download_name(response, "spritepilot-environment.zip"), "spritepilot-environment.zip")
 
     def test_animated_manifest_requires_matching_file_hash(self):
