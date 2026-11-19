@@ -1,4 +1,4 @@
-name: Collect Seveneves free asset packs
+name: Collect Seveneves and animated pixel-art asset packs
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: boolean
         default: false
       limit:
-        description: "Maximum packs to process (0 = all eligible packs)"
+        description: "Maximum Seveneves packs to process (0 = all eligible packs)"
         required: true
         type: string
         default: "0"
@@ -35,19 +35,54 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: previous-collection
 
-      - name: Restore previous collection
-        uses: actions/cache/restore@v4
-        with:
-          path: seven_eves_downloads
-          key: seveneves-collection-v2-${{ github.run_id }}
-          restore-keys: |
-            seveneves-collection-v2-
-
       - name: Unpack previous collection if available
         run: |
-          if [ -f previous-collection/seven-eves-results.zip ]; then
-            unzip -oq previous-collection/seven-eves-results.zip -d .
-          fi
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          import zipfile
+
+          root = Path("previous-collection")
+          if root.exists():
+              # Older runs wrapped the actual collection ZIP inside the artifact.
+              for _ in range(3):
+                  archives = list(root.rglob("*.zip"))
+                  extracted_any = False
+                  for archive in archives:
+                      destination = archive.parent / (archive.stem + "_expanded")
+                      if destination.exists():
+                          continue
+                      try:
+                          with zipfile.ZipFile(archive) as zf:
+                              base = destination.resolve()
+                              for member in zf.infolist():
+                                  target = (destination / member.filename).resolve()
+                                  if target != base and base not in target.parents:
+                                      raise ValueError(f"Unsafe ZIP member: {member.filename}")
+                              destination.mkdir(parents=True, exist_ok=True)
+                              zf.extractall(destination)
+                          extracted_any = True
+                      except (zipfile.BadZipFile, OSError, ValueError):
+                          continue
+                  if not extracted_any:
+                      break
+
+              for candidate in root.rglob("seven_eves_downloads"):
+                  if candidate.is_dir():
+                      shutil.copytree(candidate, Path("seven_eves_downloads"), dirs_exist_ok=True)
+                      print(f"Restored previous Seveneves collection from {candidate}")
+                      break
+
+      - name: Restore verified collection cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            seven_eves_downloads
+            animated_assets_downloads
+          key: grindstone-assets-v3-${{ github.run_id }}
+          restore-keys: |
+            grindstone-assets-v3-
+            seveneves-collection-v2-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,7 +95,10 @@ jobs:
           python -m pip install playwright
           python -m playwright install --with-deps chromium
 
-      - name: Collect complete packs (resume-safe)
+      - name: Validate collector scripts
+        run: python -m py_compile tools/seveneves_downloader.py tools/animated_assets_downloader.py
+
+      - name: Collect complete Seveneves packs (resume-safe)
         run: |
           ARGS=(--out seven_eves_downloads --limit "${{ inputs.limit }}")
           if [ "${{ inputs.dry_run }}" = "true" ]; then
@@ -68,18 +106,32 @@ jobs:
           fi
           python tools/seveneves_downloader.py "${ARGS[@]}"
 
-      - name: Save collection for the next run
+      - name: Collect curated animated sprite packs (resume-safe)
+        if: always()
+        run: |
+          ARGS=(--out animated_assets_downloads)
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python tools/animated_assets_downloader.py "${ARGS[@]}"
+
+      - name: Save verified collections for the next run
         if: always() && inputs.dry_run != true
         uses: actions/cache/save@v4
         with:
-          path: seven_eves_downloads
-          key: seveneves-collection-v2-${{ github.run_id }}
+          path: |
+            seven_eves_downloads
+            animated_assets_downloads
+          key: grindstone-assets-v3-${{ github.run_id }}
 
       - name: Package results
         if: always()
         run: |
-          if [ -d seven_eves_downloads ]; then
-            zip -qr seven-eves-results.zip seven_eves_downloads
+          PATHS=()
+          [ -d seven_eves_downloads ] && PATHS+=(seven_eves_downloads)
+          [ -d animated_assets_downloads ] && PATHS+=(animated_assets_downloads)
+          if [ "${#PATHS[@]}" -gt 0 ]; then
+            zip -qr seven-eves-results.zip "${PATHS[@]}"
           fi
 
       - name: Upload downloadable results
