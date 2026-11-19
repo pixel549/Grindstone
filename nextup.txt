@@ -44,6 +44,12 @@
    - Keep source ZIPs and raw third-party sheets out of the public repository where licences prohibit redistribution. Stage downloads locally, then integrate only permitted assets after style/outline review.
    - Raven Fantasy Interiors is paid and is not approved for purchase.
 
+7. **Seveneves asset collection downloader** — tool added; run locally
+   - Use `tools/seveneves_downloader.py` to enumerate public free/name-your-price packs, download files, extract ZIPs and produce a manifest.
+   - Run instructions: `tools/README-seveneves-downloader.md`.
+   - Review the dry-run list and each downloaded pack's licence before integrating assets.
+   - The downloader does not pay for paid packs or attempt to bypass access controls.
+
 ## Notes
 
 - Character homes remain on the existing customisable house system.
