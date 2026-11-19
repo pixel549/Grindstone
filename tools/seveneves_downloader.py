@@ -89,7 +89,7 @@ def is_free_or_pwyw(page) -> bool:
 
 
 def get_download_links(page) -> list[tuple[str, str]]:
-    """Collect real file links from the main download page and any embedded frames."""
+    """Collect direct file links from the download page and embedded frames."""
     found: dict[str, str] = {}
     for frame in page.frames:
         try:
@@ -108,10 +108,7 @@ def get_download_links(page) -> list[tuple[str, str]]:
                 if not (host.endswith(".itch.zone") or host.endswith(".itch.io")):
                     continue
                 label = clean_name(anchor.inner_text() or "")
-                is_file_route = "/file/" in path
-                is_download_route = "/download/" in path.rstrip("/")
-                has_file_ext = Path(path).suffix.lower() in ARCHIVE_EXTS | IMAGE_EXTS
-                if is_file_route or is_download_route or has_file_ext:
+                if "/file/" in path or Path(path).suffix.lower() in ARCHIVE_EXTS | IMAGE_EXTS:
                     found.setdefault(full, label or Path(unquote(parsed.path)).name or "download")
             except Exception:
                 continue
@@ -121,8 +118,8 @@ def get_download_links(page) -> list[tuple[str, str]]:
     ))
 
 
-def open_download_page(page) -> bool:
-    """Follow itch's explicit free-download path and verify that file links appear."""
+def open_download_page(page, folder: Path) -> tuple[bool, bool]:
+    """Follow itch's explicit zero-cost route, then resolve or trigger the file download."""
     start_url = page.url
     download_now = re.compile(r"download(?: now)?", re.I)
     candidates = [
@@ -145,9 +142,7 @@ def open_download_page(page) -> bool:
             break
         except Exception as exc:
             print(f"  [DEBUG] Download Now control: {exc}")
-            continue
 
-    # itch.io's zero-cost route is an explicit "No thanks" action on /purchase.
     no_thanks = re.compile(r"no thanks, just take me to the downloads", re.I)
     clicked_no_thanks = False
     for locator in (
@@ -159,33 +154,49 @@ def open_download_page(page) -> bool:
             if locator.count():
                 locator.first.click(timeout=10000, force=True)
                 clicked_no_thanks = True
-                page.wait_for_timeout(1200)
+                page.wait_for_timeout(1400)
                 break
         except Exception as exc:
             print(f"  [DEBUG] No-thanks control: {exc}")
 
-    # Some itch download pages expose a second Download button after the free route.
-    if not get_download_links(page):
+    links = get_download_links(page)
+    browser_downloaded = False
+
+    # Some itch download pages provide a Download button rather than a visible file URL.
+    if not links:
         exact_download = re.compile(r"^download(?: file)?$", re.I)
-        for locator in (
-            page.get_by_role("link", name=exact_download),
-            page.get_by_role("button", name=exact_download),
-        ):
-            try:
-                if locator.count():
-                    locator.first.click(timeout=8000)
-                    page.wait_for_timeout(1200)
-                    if get_download_links(page):
-                        break
-            except Exception as exc:
-                print(f"  [DEBUG] Final Download control: {exc}")
+        for frame in page.frames:
+            for locator in (
+                frame.get_by_role("link", name=exact_download),
+                frame.get_by_role("button", name=exact_download),
+            ):
+                try:
+                    if not locator.count():
+                        continue
+                    with page.expect_download(timeout=15000) as download_info:
+                        locator.first.click(timeout=8000, force=True)
+                    download = download_info.value
+                    filename = clean_name(download.suggested_filename)
+                    target = folder / filename
+                    download.save_as(target)
+                    if target.suffix.lower() == ".zip":
+                        extract_to = folder / (target.stem + "_extracted")
+                        safe_extract(target, extract_to)
+                        (extract_to / ".extracted.sha256").write_text(sha256(target), encoding="utf-8")
+                    browser_downloaded = True
+                    print(f"  Downloaded via browser: {target.name} ({target.stat().st_size} bytes)")
+                    break
+                except Exception as exc:
+                    print(f"  [DEBUG] Browser download control: {exc}")
+            if browser_downloaded:
+                break
 
     links = get_download_links(page)
     print(f"  [DEBUG] Download flow: {start_url} -> {page.url}")
-    print(f"  [DEBUG] No-thanks action: {'clicked' if clicked_no_thanks else 'not found'}; file links: {len(links)}")
+    print(f"  [DEBUG] No-thanks action: {'clicked' if clicked_no_thanks else 'not found'}; file links: {len(links)}; browser download: {browser_downloaded}")
     for link, _ in links[:5]:
         print(f"  [DEBUG] File link: {link}")
-    return bool(links)
+    return bool(links) or browser_downloaded, browser_downloaded
 
 
 def filename_from_response(response, url: str, label: str) -> str:
@@ -280,16 +291,16 @@ def main() -> None:
             record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", [])}
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                reached_downloads = open_download_page(page)
+                reached_downloads, browser_downloaded = open_download_page(page, folder)
                 links = get_download_links(page)
-                if not reached_downloads or not links:
+                if not reached_downloads:
                     record.update(status="manual-check", note="Could not reach a download page with file links; no preview images counted as a complete pack.")
                     records[url] = record
                     save_manifest(args.out, manifest)
                     print("  [MANUAL] No actual download-page files found.")
                     continue
 
-                successful = 0
+                successful = 1 if browser_downloaded else 0
                 failed = []
                 for file_url, label in links:
                     try:
@@ -348,6 +359,8 @@ def main() -> None:
         complete = sum(1 for item in records.values() if item.get("status") == "complete")
         print(f"\nFinished: {complete}/{len(eligible)} eligible packs marked complete.")
         browser.close()
+        if complete < len(eligible):
+            raise SystemExit(2)
 
 
 if __name__ == "__main__":
