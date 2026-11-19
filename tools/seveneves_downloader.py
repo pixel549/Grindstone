@@ -308,9 +308,16 @@ def main() -> None:
                         if not response.ok:
                             failed.append(f"{label}: HTTP {response.status}")
                             continue
+                        content_type = response.headers.get("content-type", "").lower()
+                        if "text/html" in content_type:
+                            failed.append(f"{label}: itch.io returned a web page instead of an asset file")
+                            continue
                         filename = filename_from_response(response, file_url, label)
                         target = folder / filename
                         payload = response.body()
+                        if not payload:
+                            failed.append(f"{label}: empty download")
+                            continue
                         digest = hashlib.sha256(payload).hexdigest()
                         if target.exists() and target.stat().st_size == len(payload) and sha256(target) == digest:
                             print(f"  Already present: {target.name}")
