@@ -15,7 +15,7 @@ import re
 import time
 import zipfile
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 from playwright.sync_api import sync_playwright
 
@@ -88,15 +88,48 @@ def is_free_or_pwyw(page) -> bool:
     )
 
 
+def get_download_links(page) -> list[tuple[str, str]]:
+    """Collect real file links from the main download page and any embedded frames."""
+    found: dict[str, str] = {}
+    for frame in page.frames:
+        try:
+            anchors = frame.locator("a[href]").all()
+        except Exception:
+            continue
+        for anchor in anchors:
+            try:
+                href = anchor.get_attribute("href") or ""
+                if not href:
+                    continue
+                full = urljoin(frame.url, href)
+                parsed = urlparse(full)
+                host = parsed.netloc.lower()
+                path = parsed.path.lower()
+                if not (host.endswith(".itch.zone") or host.endswith(".itch.io")):
+                    continue
+                label = clean_name(anchor.inner_text() or "")
+                is_file_route = "/file/" in path
+                is_download_route = "/download/" in path.rstrip("/")
+                has_file_ext = Path(path).suffix.lower() in ARCHIVE_EXTS | IMAGE_EXTS
+                if is_file_route or is_download_route or has_file_ext:
+                    found.setdefault(full, label or Path(unquote(parsed.path)).name or "download")
+            except Exception:
+                continue
+    return sorted(found.items(), key=lambda item: (
+        Path(urlparse(item[0]).path).suffix.lower() not in ARCHIVE_EXTS,
+        item[0],
+    ))
+
+
 def open_download_page(page) -> bool:
-    """Follow itch's normal free-download flow; never submit payment."""
+    """Follow itch's explicit free-download path and verify that file links appear."""
     start_url = page.url
+    download_now = re.compile(r"download(?: now)?", re.I)
     candidates = [
-        page.get_by_role("link", name=re.compile(r"download(?: now)?", re.I)),
-        page.get_by_role("button", name=re.compile(r"download(?: now)?", re.I)),
+        page.get_by_role("link", name=download_now),
+        page.get_by_role("button", name=download_now),
         page.locator("a.button"),
     ]
-    clicked = False
     for locator in candidates:
         try:
             for index in range(min(locator.count(), 5)):
@@ -104,48 +137,55 @@ def open_download_page(page) -> bool:
                 label = (item.inner_text() or "").strip().lower()
                 href = item.get_attribute("href") or ""
                 if "download" in label or "/download" in href:
-                    item.click(timeout=8000)
-                    clicked = True
-                    page.wait_for_load_state("domcontentloaded", timeout=20000)
+                    item.click(timeout=10000)
+                    page.wait_for_timeout(900)
                     break
-        except Exception:
-            pass
-        if clicked:
+            else:
+                continue
             break
-
-    page.wait_for_timeout(700)
-    no_thanks = page.get_by_text(re.compile(r"no thanks, just take me to the downloads", re.I))
-    if no_thanks.count():
-        no_thanks.first.click()
-        page.wait_for_load_state("domcontentloaded", timeout=20000)
-        page.wait_for_timeout(700)
-
-    # A valid download page is distinct from the public game/preview page.
-    return clicked or "/download" in page.url or page.url != start_url
-
-
-def get_download_links(page) -> list[tuple[str, str]]:
-    """Collect every file link exposed by the download page, not preview images."""
-    found: dict[str, str] = {}
-    for anchor in page.locator("a[href]").all():
-        href = anchor.get_attribute("href") or ""
-        if not href:
+        except Exception as exc:
+            print(f"  [DEBUG] Download Now control: {exc}")
             continue
-        full = page.evaluate("(u) => new URL(u, location.href).href", href)
-        parsed = urlparse(full)
-        host = parsed.netloc.lower()
-        if not (host.endswith(".itch.zone") or host.endswith(".itch.io")):
-            continue
-        path = parsed.path.lower()
-        label = clean_name(anchor.inner_text() or "")
-        is_file_route = "/file/" in path
-        has_file_ext = Path(path).suffix.lower() in ARCHIVE_EXTS | IMAGE_EXTS
-        if is_file_route or has_file_ext:
-            found.setdefault(full, label or Path(unquote(parsed.path)).name or "download")
-    return sorted(found.items(), key=lambda item: (
-        Path(urlparse(item[0]).path).suffix.lower() not in ARCHIVE_EXTS,
-        item[0],
-    ))
+
+    # itch.io's zero-cost route is an explicit "No thanks" action on /purchase.
+    no_thanks = re.compile(r"no thanks, just take me to the downloads", re.I)
+    clicked_no_thanks = False
+    for locator in (
+        page.get_by_role("button", name=no_thanks),
+        page.get_by_role("link", name=no_thanks),
+        page.get_by_text(no_thanks),
+    ):
+        try:
+            if locator.count():
+                locator.first.click(timeout=10000, force=True)
+                clicked_no_thanks = True
+                page.wait_for_timeout(1200)
+                break
+        except Exception as exc:
+            print(f"  [DEBUG] No-thanks control: {exc}")
+
+    # Some itch download pages expose a second Download button after the free route.
+    if not get_download_links(page):
+        exact_download = re.compile(r"^download(?: file)?$", re.I)
+        for locator in (
+            page.get_by_role("link", name=exact_download),
+            page.get_by_role("button", name=exact_download),
+        ):
+            try:
+                if locator.count():
+                    locator.first.click(timeout=8000)
+                    page.wait_for_timeout(1200)
+                    if get_download_links(page):
+                        break
+            except Exception as exc:
+                print(f"  [DEBUG] Final Download control: {exc}")
+
+    links = get_download_links(page)
+    print(f"  [DEBUG] Download flow: {start_url} -> {page.url}")
+    print(f"  [DEBUG] No-thanks action: {'clicked' if clicked_no_thanks else 'not found'}; file links: {len(links)}")
+    for link, _ in links[:5]:
+        print(f"  [DEBUG] File link: {link}")
+    return bool(links)
 
 
 def filename_from_response(response, url: str, label: str) -> str:
