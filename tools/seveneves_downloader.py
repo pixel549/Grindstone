@@ -313,7 +313,10 @@ def main() -> None:
                 reached_downloads, browser_downloaded = open_download_page(page, folder, skip_browser_attachment)
                 links = get_download_links(page)
                 if not reached_downloads:
-                    record.update(status="manual-check", note="Could not reach a download page with file links; no preview images counted as a complete pack.")
+                    note = ("The browser attachment matched an existing preview by SHA-256; no original archive or additional source links were exposed."
+                            if skip_browser_attachment else
+                            "Could not reach a download page with file links; no preview images counted as a complete pack.")
+                    record.update(status="manual-check", note=note)
                     records[url] = record
                     save_manifest(args.out, manifest)
                     print("  [MANUAL] No actual download-page files found.")
