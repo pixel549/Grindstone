@@ -26,34 +26,29 @@
 
 4. **Generated location artwork** — waiting on supplied art
    - Add the supplied Oracle sanctum image as `assets/2d/locations/oracle.png`.
-   - Generate bespoke backgrounds for purchasable non-residential town interiors using the documented 11:9 brief. These are composed scenes, not explorable rooms or generic tileset maps.
+   - Generate bespoke backgrounds for purchasable non-residential town interiors using the documented 11:9 brief.
    - Keep NPCs, player sprites, movement, collision and interactions game-rendered.
-   - Commercial/service locations use an illustrated-scene presentation: bespoke background, independent NPC layer, bottom-third dialogue area, and a full-screen UI takeover for shops/services.
+   - Commercial/service locations use a bespoke illustrated background, independent NPC layer, bottom-third dialogue area, and full-screen UI takeover for shops/services.
    - Residential NPC houses remain explorable and editable on home-sized lots.
 
 5. **Ambient NPC polish** — code complete; device check pending
-   - Town and household barks now defer during active conversations and avoid overlapping each other.
-   - Added a global speaking gap so a busy household does not become a chorus.
-   - Still verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
+   - Verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
 
-6. **Third-party prop and dialogue asset evaluation** — source manifest added
-   - Free Frostbrook Town Interiors sample: assess individual shop/forge/hearth props and animated details.
-   - Free Frostbrook Snow Village sample: assess selected outdoor props and furnishings.
-   - Free Seveneves 500+ Portrait Expressions pack: assess dialogue portraits and reaction variants; do not substitute portraits for full-body NPCs.
-   - Free Clockwork Raven Green Forest pack: inspect for suitable standalone environmental props/effects only.
-   - Keep source ZIPs and raw third-party sheets out of the public repository where licences prohibit redistribution. Stage downloads locally, then integrate only permitted assets after style/outline review.
-   - Raven Fantasy Interiors is paid and is not approved for purchase.
+6. **Third-party asset integration** — blocked on complete source downloads
+   - Download complete original Seveneves packs before evaluating or integrating their contents.
+   - Review each pack's licence and keep raw third-party source packs out of the public repository where redistribution is prohibited.
+   - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
+   - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
 
-7. **Seveneves asset collection downloader** — tool added; run locally
-   - Use `tools/seveneves_downloader.py` to enumerate public free/name-your-price packs, download files, extract ZIPs and produce a manifest.
-   - Run instructions: `tools/README-seveneves-downloader.md`.
-   - Review the dry-run list and each downloaded pack's licence before integrating assets.
-   - The downloader does not pay for paid packs or attempt to bypass access controls.
+7. **Seveneves asset collector** — downloader fix in progress
+   - The collector must retrieve files from the actual itch.io download page, not mistake preview sheets for complete packs.
+   - Preserve completed downloads between GitHub Actions runs and skip verified files/packs on reruns.
+   - Retry incomplete packs and report unresolved/manual-check packs clearly.
+   - Run the workflow from the GitHub Actions tab; download the resulting 30-day artifact.
 
 ## Notes
 
 - Character homes remain on the existing customisable house system.
 - Missing generated room images must continue to fall back to the original tile-based interiors.
 - Third-party asset sources and licence notes are tracked in `docs/third-party-pixel-assets.md`.
-- Seveneves GitHub Actions collector is being added on `automation/seveneves-github-actions`; run it from the Actions tab and download its seven-day artifact.
 - Do not merge feature branches into `main` unless explicitly requested.

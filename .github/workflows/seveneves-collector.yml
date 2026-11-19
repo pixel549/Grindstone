@@ -16,14 +16,38 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   collect:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 180
     steps:
       - name: Check out Grindstone
         uses: actions/checkout@v4
+
+      - name: Seed the first resumable run with the previous collection
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: seven-eves-asset-collection
+          run-id: 44496942942
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: previous-collection
+
+      - name: Restore previous collection
+        uses: actions/cache/restore@v4
+        with:
+          path: seven_eves_downloads
+          key: seveneves-collection-v2-${{ github.run_id }}
+          restore-keys: |
+            seveneves-collection-v2-
+
+      - name: Unpack previous collection if available
+        run: |
+          if [ -f previous-collection/seven-eves-results.zip ]; then
+            unzip -oq previous-collection/seven-eves-results.zip -d .
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,13 +60,20 @@ jobs:
           python -m pip install playwright
           python -m playwright install --with-deps chromium
 
-      - name: Collect eligible packs
+      - name: Collect complete packs (resume-safe)
         run: |
           ARGS=(--out seven_eves_downloads --limit "${{ inputs.limit }}")
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS+=(--dry-run)
           fi
           python tools/seveneves_downloader.py "${ARGS[@]}"
+
+      - name: Save collection for the next run
+        if: always() && inputs.dry_run != true
+        uses: actions/cache/save@v4
+        with:
+          path: seven_eves_downloads
+          key: seveneves-collection-v2-${{ github.run_id }}
 
       - name: Package results
         if: always()
@@ -58,4 +89,4 @@ jobs:
           name: seven-eves-asset-collection
           path: seven-eves-results.zip
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 30

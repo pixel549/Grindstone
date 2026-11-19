@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
-"""Download public, free/zero-price Seveneves.ai itch.io asset packs.
+"""Resumable collector for public free/name-your-price Seveneves itch.io packs.
 
-Requires: pip install playwright
-          playwright install chromium
-
-The browser is intentionally visible so the user can handle any itch.io
-consent/challenge screen. The script never submits a payment or accesses
-paid-only files. It follows the creator's public profile and only proceeds
-when the pack page advertises "Name your own price" or a free download.
+Only public free/zero-minimum downloads are followed. The collector downloads
+all files listed on itch.io's actual download page, prefers original archives,
+extracts ZIPs safely, and records per-file hashes so completed files are not
+downloaded again on later workflow runs.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import time
 import zipfile
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import sync_playwright
 
 CREATOR_URL = "https://sevenevesai.itch.io/"
-OUT = Path("seven_eves_downloads")
 CREATOR_HOST = "sevenevesai.itch.io"
+OUT = Path("seven_eves_downloads")
+ARCHIVE_EXTS = {".zip", ".7z", ".rar", ".tar", ".gz", ".aseprite"}
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+MANIFEST_NAME = "manifest.json"
 
 
 def slug_from_url(url: str) -> str:
@@ -32,13 +33,41 @@ def slug_from_url(url: str) -> str:
 
 
 def clean_name(value: str) -> str:
-    value = re.sub(r"\s+", " ", value).strip()
-    return re.sub(r"[^\w .()'-]+", "", value)[:100] or "asset-pack"
+    value = re.sub(r"[\/]+", "-", value)
+    value = re.sub(r"\s+", " ", value).strip(" .")
+    return re.sub(r"[^\w .()'_-]+", "", value)[:140] or "download"
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_manifest(out: Path) -> dict:
+    path = out / MANIFEST_NAME
+    if not path.exists():
+        return {"packs": {}}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, list):  # migrate the original collector's manifest
+            return {"packs": {item.get("url", ""): item for item in data if item.get("url")}}
+        return data if isinstance(data.get("packs"), dict) else {"packs": {}}
+    except (OSError, json.JSONDecodeError):
+        return {"packs": {}}
+
+
+def save_manifest(out: Path, manifest: dict) -> None:
+    temp = out / (MANIFEST_NAME + ".tmp")
+    temp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    temp.replace(out / MANIFEST_NAME)
 
 
 def creator_games(page) -> list[str]:
-    page.goto(CREATOR_URL, wait_until="domcontentloaded")
-    page.wait_for_timeout(900)
+    page.goto(CREATOR_URL, wait_until="domcontentloaded", timeout=60000)
+    page.wait_for_timeout(1200)
     found = set()
     for anchor in page.locator("a[href]").all():
         href = anchor.get_attribute("href") or ""
@@ -51,50 +80,86 @@ def creator_games(page) -> list[str]:
 
 
 def is_free_or_pwyw(page) -> bool:
-    text = page.locator("body").inner_text(timeout=10000).lower()
-    # itch.io labels $0 minimum / pay-what-you-want packs as "Name your own price".
-    # A paid minimum (e.g. "$7") is deliberately excluded.
+    body = page.locator("body").inner_text(timeout=15000).lower()
     return (
-        "name your own price" in text
-        or re.search(r"\bfree download\b", text) is not None
-        or re.search(r"\bdownload\s+for\s+free\b", text) is not None
+        "name your own price" in body
+        or re.search(r"\bfree download\b", body) is not None
+        or re.search(r"\bdownload\s+for\s+free\b", body) is not None
     )
 
 
-def click_download_flow(page) -> None:
-    # Game page -> itch.io's optional contribution screen.
-    for pattern in (re.compile(r"^download now$", re.I), re.compile(r"^download$", re.I)):
-        locator = page.get_by_role("link", name=pattern)
-        if locator.count():
-            locator.first.click()
-            page.wait_for_load_state("domcontentloaded")
+def open_download_page(page) -> bool:
+    """Follow itch's normal free-download flow; never submit payment."""
+    start_url = page.url
+    candidates = [
+        page.get_by_role("link", name=re.compile(r"download(?: now)?", re.I)),
+        page.get_by_role("button", name=re.compile(r"download(?: now)?", re.I)),
+        page.locator("a.button"),
+    ]
+    clicked = False
+    for locator in candidates:
+        try:
+            for index in range(min(locator.count(), 5)):
+                item = locator.nth(index)
+                label = (item.inner_text() or "").strip().lower()
+                href = item.get_attribute("href") or ""
+                if "download" in label or "/download" in href:
+                    item.click(timeout=8000)
+                    clicked = True
+                    page.wait_for_load_state("domcontentloaded", timeout=20000)
+                    break
+        except Exception:
+            pass
+        if clicked:
             break
 
-    # Choose the explicitly free route; no payment fields are ever submitted.
+    page.wait_for_timeout(700)
     no_thanks = page.get_by_text(re.compile(r"no thanks, just take me to the downloads", re.I))
     if no_thanks.count():
         no_thanks.first.click()
-        page.wait_for_load_state("domcontentloaded")
+        page.wait_for_load_state("domcontentloaded", timeout=20000)
+        page.wait_for_timeout(700)
+
+    # A valid download page is distinct from the public game/preview page.
+    return clicked or "/download" in page.url or page.url != start_url
 
 
 def get_download_links(page) -> list[tuple[str, str]]:
-    links = []
-    for a in page.locator("a[href]").all():
-        href = a.get_attribute("href") or ""
-        label = clean_name(a.inner_text() or "")
+    """Collect every file link exposed by the download page, not preview images."""
+    found: dict[str, str] = {}
+    for anchor in page.locator("a[href]").all():
+        href = anchor.get_attribute("href") or ""
+        if not href:
+            continue
         full = page.evaluate("(u) => new URL(u, location.href).href", href)
         parsed = urlparse(full)
         host = parsed.netloc.lower()
-        is_itch_download_host = host.endswith(".itch.zone") or host.endswith(".itch.io")
-        looks_like_file = "/file/" in parsed.path or re.search(r"\.(zip|png|7z|rar|aseprite)(?:$|\?)", full, re.I) is not None
-        if is_itch_download_host and looks_like_file:
-            if full not in {item[0] for item in links}:
-                links.append((full, label or Path(parsed.path).name or "download"))
-    return links
+        if not (host.endswith(".itch.zone") or host.endswith(".itch.io")):
+            continue
+        path = parsed.path.lower()
+        label = clean_name(anchor.inner_text() or "")
+        is_file_route = "/file/" in path
+        has_file_ext = Path(path).suffix.lower() in ARCHIVE_EXTS | IMAGE_EXTS
+        if is_file_route or has_file_ext:
+            found.setdefault(full, label or Path(unquote(parsed.path)).name or "download")
+    return sorted(found.items(), key=lambda item: (
+        Path(urlparse(item[0]).path).suffix.lower() not in ARCHIVE_EXTS,
+        item[0],
+    ))
+
+
+def filename_from_response(response, url: str, label: str) -> str:
+    headers = response.headers
+    disposition = headers.get("content-disposition", "")
+    match = re.search(r"filename\*?=(?:UTF-8''|\")?([^;\"]+)", disposition, re.I)
+    if match:
+        candidate = unquote(match.group(1).strip().strip('"'))
+    else:
+        candidate = Path(unquote(urlparse(response.url or url).path)).name or label
+    return clean_name(candidate)
 
 
 def safe_extract(archive: Path, destination: Path) -> None:
-    """Extract a ZIP without allowing paths to escape the destination."""
     root = destination.resolve()
     with zipfile.ZipFile(archive) as zf:
         for member in zf.infolist():
@@ -104,24 +169,48 @@ def safe_extract(archive: Path, destination: Path) -> None:
         zf.extractall(destination)
 
 
+def pack_files(folder: Path) -> list[dict]:
+    result = []
+    for path in sorted(folder.rglob("*")):
+        if path.is_file() and path.name not in {MANIFEST_NAME, MANIFEST_NAME + ".tmp"}:
+            result.append({
+                "path": str(path.relative_to(folder)),
+                "size": path.stat().st_size,
+                "sha256": sha256(path),
+            })
+    return result
+
+
+def pack_is_complete(record: dict, folder: Path) -> bool:
+    if record.get("status") != "complete" or not record.get("files"):
+        return False
+    for item in record["files"]:
+        path = folder / item["path"]
+        if not path.is_file() or path.stat().st_size != item.get("size"):
+            return False
+        if item.get("sha256") and sha256(path) != item["sha256"]:
+            return False
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=OUT, help="download destination")
-    parser.add_argument("--limit", type=int, default=0, help="limit number of eligible packs (0 = all)")
-    parser.add_argument("--dry-run", action="store_true", help="list eligible packs without downloading")
-    parser.add_argument("--headed", action="store_true", help="show the browser (not suitable for GitHub Actions)")
+    parser.add_argument("--out", type=Path, default=OUT)
+    parser.add_argument("--limit", type=int, default=0, help="limit eligible packs (0 = all)")
+    parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+    manifest = load_manifest(args.out)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not args.headed)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
         urls = creator_games(page)
         eligible = []
         for url in urls:
             try:
-                page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                page.goto(url, wait_until="domcontentloaded", timeout=60000)
                 title = clean_name(page.title().replace(" by Seveneves.ai - itch.io", ""))
                 if is_free_or_pwyw(page):
                     eligible.append((url, title))
@@ -132,71 +221,92 @@ def main() -> None:
                 print(f"[WARN] Could not inspect {url}: {exc}")
 
         if args.limit:
-            eligible = eligible[: args.limit]
+            eligible = eligible[:args.limit]
         if args.dry_run:
-            (args.out / "manifest.json").write_text(json.dumps([
-                {"title": title, "url": url, "status": "eligible-not-downloaded"}
-                for url, title in eligible
-            ], indent=2), encoding="utf-8")
-            print(f"\nFound {len(eligible)} free/name-your-price packs. No files downloaded.")
+            print(f"\nFound {len(eligible)} eligible packs. No files downloaded.")
             browser.close()
             return
 
-        manifest = []
+        records = manifest.setdefault("packs", {})
         for index, (url, title) in enumerate(eligible, 1):
-            folder = args.out / f"{slug_from_url(url)}"
+            folder = args.out / slug_from_url(url)
             folder.mkdir(parents=True, exist_ok=True)
+            previous = records.get(url, {})
+            if pack_is_complete(previous, folder):
+                print(f"[SKIP: already complete] {title}")
+                continue
+
             print(f"\n[{index}/{len(eligible)}] {title}")
+            record = {"title": title, "url": url, "status": "incomplete", "files": previous.get("files", [])}
             try:
-                page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                click_download_flow(page)
+                page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                reached_downloads = open_download_page(page)
                 links = get_download_links(page)
-                if not links:
-                    print("  [MANUAL] No direct file links found; inspect this page in the open browser.")
-                    manifest.append({"title": title, "url": url, "status": "manual-check"})
+                if not reached_downloads or not links:
+                    record.update(status="manual-check", note="Could not reach a download page with file links; no preview images counted as a complete pack.")
+                    records[url] = record
+                    save_manifest(args.out, manifest)
+                    print("  [MANUAL] No actual download-page files found.")
                     continue
-                saved = []
+
+                successful = 0
+                failed = []
                 for file_url, label in links:
                     try:
-                        # Download through the authenticated browser context; never POST payment.
-                        response = context.request.get(file_url, timeout=120000)
+                        response = context.request.get(file_url, timeout=180000)
                         if not response.ok:
-                            print(f"  [WARN] HTTP {response.status}: {label}")
+                            failed.append(f"{label}: HTTP {response.status}")
                             continue
-                        filename = Path(urlparse(file_url).path).name or label
-                        filename = clean_name(filename)
+                        filename = filename_from_response(response, file_url, label)
                         target = folder / filename
-                        target.write_bytes(response.body())
-                        saved.append(str(target))
-                        print(f"  Saved {target.name}")
+                        payload = response.body()
+                        digest = hashlib.sha256(payload).hexdigest()
+                        if target.exists() and target.stat().st_size == len(payload) and sha256(target) == digest:
+                            print(f"  Already present: {target.name}")
+                        else:
+                            target.write_bytes(payload)
+                            print(f"  Downloaded: {target.name} ({len(payload)} bytes)")
+                        successful += 1
                         if target.suffix.lower() == ".zip":
-                            extract_to = folder / target.stem
-                            extract_to.mkdir(exist_ok=True)
-                            try:
-                                safe_extract(target, extract_to)
-                                print(f"  Extracted to {extract_to}")
-                            except zipfile.BadZipFile:
-                                print(f"  [WARN] {target.name} was not a valid ZIP")
+                            extract_to = folder / (target.stem + "_extracted")
+                            marker = extract_to / ".extracted.sha256"
+                            if not marker.exists() or marker.read_text(encoding="utf-8").strip() != digest:
+                                extract_to.mkdir(exist_ok=True)
+                                try:
+                                    safe_extract(target, extract_to)
+                                    marker.write_text(digest, encoding="utf-8")
+                                    print(f"  Extracted: {extract_to.name}")
+                                except zipfile.BadZipFile:
+                                    failed.append(f"{target.name}: invalid ZIP archive")
                     except Exception as exc:
-                        print(f"  [WARN] Download failed for {label}: {exc}")
-                manifest.append({
-                    "title": title, "url": url, "status": "downloaded" if saved else "no-files",
-                    "files": saved,
-                })
+                        failed.append(f"{label}: {exc}")
+
+                files = pack_files(folder)
+                # A preview-only set is not accepted as a completed original pack.
+                has_archive = any(Path(item["path"]).suffix.lower() in ARCHIVE_EXTS for item in files)
+                if successful and not failed and (has_archive or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
+                    record.update(status="complete", files=files, source_file_count=len(links))
+                else:
+                    record.update(status="incomplete", files=files, source_file_count=len(links), failed=failed,
+                                  note="A pack is only complete when all listed downloads succeed and the page exposes an original archive or non-preview source files.")
+                records[url] = record
+                save_manifest(args.out, manifest)
             except Exception as exc:
-                print(f"  [WARN] Could not download {title}: {exc}")
-                manifest.append({"title": title, "url": url, "status": "error", "error": str(exc)})
+                record.update(status="error", error=str(exc))
+                records[url] = record
+                save_manifest(args.out, manifest)
+                print(f"  [WARN] {exc}")
             time.sleep(1)
 
-        (args.out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         (args.out / "README.txt").write_text(
             "Seveneves.ai itch.io asset collection\n"
-            "Downloaded from public free/name-your-price pages.\n"
-            "Review each pack's included licence before integrating it.\n"
-            "Do not redistribute the original packs or standalone assets.\n",
+            "Collected from public free/name-your-price download pages only.\n"
+            "The manifest records source URLs, completion state and SHA-256 hashes.\n"
+            "Review each pack's licence before integrating it. Do not redistribute assets where prohibited.\n",
             encoding="utf-8",
         )
-        print(f"\nFinished. Review {args.out / 'manifest.json'} and each pack's licence.")
+        complete = sum(1 for item in records.values() if item.get("status") == "complete")
+        print(f"\nFinished: {complete}/{len(eligible)} eligible packs marked complete.")
         browser.close()
 
 
