@@ -82,6 +82,7 @@ jobs:
           key: grindstone-assets-v3-${{ github.run_id }}
           restore-keys: |
             grindstone-assets-v3-
+            seveneves-collection-v2-
 
       - name: Set up Python
         uses: actions/setup-python@v5
