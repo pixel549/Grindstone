@@ -96,7 +96,10 @@ jobs:
           python -m playwright install --with-deps chromium
 
       - name: Validate collector scripts
-        run: python -m py_compile tools/seveneves_downloader.py tools/animated_assets_downloader.py
+        run: python -m py_compile tools/seveneves_downloader.py tools/animated_assets_downloader.py tools/test_asset_downloaders.py
+
+      - name: Run collector regression tests
+        run: python -m unittest discover -s tools -p 'test_*.py' -v
 
       - name: Collect complete Seveneves packs (resume-safe)
         run: |
