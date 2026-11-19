@@ -312,12 +312,14 @@ def main() -> None:
                         if "text/html" in content_type:
                             failed.append(f"{label}: itch.io returned a web page instead of an asset file")
                             continue
-                        filename = filename_from_response(response, file_url, label)
-                        target = folder / filename
                         payload = response.body()
                         if not payload:
                             failed.append(f"{label}: empty download")
                             continue
+                        filename = filename_from_response(response, file_url, label)
+                        if not Path(filename).suffix and zipfile.is_zipfile(io.BytesIO(payload)):
+                            filename += ".zip"
+                        target = folder / filename
                         digest = hashlib.sha256(payload).hexdigest()
                         if target.exists() and target.stat().st_size == len(payload) and sha256(target) == digest:
                             print(f"  Already present: {target.name}")
