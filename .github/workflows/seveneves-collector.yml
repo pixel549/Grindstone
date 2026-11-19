@@ -94,6 +94,9 @@ jobs:
           python -m pip install playwright
           python -m playwright install --with-deps chromium
 
+      - name: Validate collector scripts
+        run: python -m py_compile tools/seveneves_downloader.py tools/animated_assets_downloader.py
+
       - name: Collect complete Seveneves packs (resume-safe)
         run: |
           ARGS=(--out seven_eves_downloads --limit "${{ inputs.limit }}")
