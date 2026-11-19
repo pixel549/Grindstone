@@ -352,8 +352,10 @@ def main() -> None:
                 files = pack_files(folder)
                 # A preview-only set is not accepted as a completed original pack.
                 has_archive = any(Path(item["path"]).suffix.lower() in ARCHIVE_EXTS for item in files)
-                if successful and not failed and (has_archive or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
-                    record.update(status="complete", files=files, source_file_count=len(links))
+                if successful and not failed and (has_archive or browser_downloaded or any(Path(urlparse(link).path).suffix.lower() not in IMAGE_EXTS for link, _ in links)):
+                    if browser_downloaded:
+                        record["download_method"] = "itch.io browser attachment from the explicit download flow"
+                    record.update(status="complete", files=files, source_file_count=len(links) + (1 if browser_downloaded else 0))
                 else:
                     record.update(status="incomplete", files=files, source_file_count=len(links), failed=failed,
                                   note="A pack is only complete when all listed downloads succeed and the page exposes an original archive or non-preview source files.")
