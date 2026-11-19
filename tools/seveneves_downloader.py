@@ -135,6 +135,10 @@ def open_download_page(page, folder: Path) -> tuple[bool, bool]:
                 href = item.get_attribute("href") or ""
                 if "download" in label or "/download" in href:
                     item.click(timeout=10000)
+                    try:
+                        page.wait_for_load_state("domcontentloaded", timeout=15000)
+                    except Exception:
+                        pass
                     page.wait_for_timeout(900)
                     break
             else:
@@ -154,6 +158,10 @@ def open_download_page(page, folder: Path) -> tuple[bool, bool]:
             if locator.count():
                 locator.first.click(timeout=10000, force=True)
                 clicked_no_thanks = True
+                try:
+                    page.wait_for_load_state("domcontentloaded", timeout=15000)
+                except Exception:
+                    pass
                 page.wait_for_timeout(1400)
                 break
         except Exception as exc:
