@@ -67,7 +67,7 @@ Use the matching `manifest.json` for every packed sheet:
 - A null `visible_bounds` means that frame is transparent; preserve its duration but draw nothing.
 - Do not assume every frame has the same dimensions.
 
-Do not use packed sheets until the renderer has a manifest-aware frame path and tests for pivot alignment. Never try to infer packed frame rectangles from the PNG alone.
+The shared helper now has a manifest-aware packed-frame path and a unit test for trimmed-pivot alignment. Never try to infer packed frame rectangles from the PNG alone.
 
 ### PVFX tiers, variants and timing
 
@@ -79,57 +79,51 @@ Do not use packed sheets until the renderer has a manifest-aware frame path and 
 - Projectile flight effects point right (+x), stay on their pivot and loop. Move/rotate the effect in world space; play its matching impact effect at the collision point with the same orientation.
 - Rain, snowfall, cloud drift, falling leaves and sandstorm are seamless two-axis tiling layers. Fog bank, dark mist and fire wall are horizontal ground bands. Use repeat wrapping only for these documented effects; clamp all others.
 
-## Runtime implementation plan
+## Runtime implementation
 
-### 1. Add a small shared animation helper
+### 1. Shared animation helper — implemented
 
-Create a reusable helper (suggested file: `assets/animated2d.js`) rather than implementing separate frame clocks in `hearth2d.js` and `town2d.js`.
+`assets/animated2d.js` is loaded before the scene renderers. It exposes:
+- `Animated2D.init(manifestUrl)` to asynchronously load the curated manifest once.
+- `Animated2D.draw(ctx, id, anchorX, anchorY, elapsedSeconds, options)` to draw a frame at a stable pivot using the renderer's clock.
+- `Animated2D.clear()` for explicit cache reset in tests or future scene teardown.
 
-It should:
-- Load images asynchronously and cache by URL; avoid duplicate loads.
-- Accept a declarative animation definition: image, frame rectangles, frame durations, pivot, loop/one-shot behaviour, optional tile mode.
-- Advance from elapsed time supplied by the existing renderer's animation loop. Do not create one timer per sprite.
-- Use an elapsed-time accumulator so slow frames do not permanently desynchronise animation; clamp very large elapsed deltas after tab/app suspension.
-- Support play, pause, reset, finished state and optional deterministic start offset for ambient loops.
-- Draw using the existing canvas context with `imageSmoothingEnabled = false`, integer-aligned source/destination rectangles and the correct pivot.
-- Keep animation state separate from save data unless a gameplay interaction genuinely needs persistence.
-- Stop advancing when its scene is inactive or the app is backgrounded. Reuse the existing requestAnimationFrame lifecycle.
-- Fail gracefully: a missing sheet must leave the existing static prop/fallback visible and must not break scene loading.
+The helper:
+- Caches one image per sheet URL and loads sheets lazily, so unused assets are not downloaded.
+- Supports horizontal strips, eight-column grid sheets and packed sheets with separately loaded per-effect metadata.
+- Reads exact rational frame durations from PVFX manifests, respects looping and one-shot clips, and preserves transparent terminal frames.
+- Uses packed-frame `sheet.scale` for pivot alignment without incorrectly scaling the already-scaled source crop.
+- Draws with nearest-neighbour sampling and integer-aligned destination coordinates.
+- Owns no timers or animation loop. Hearth and Delve supply elapsed time from their existing update loops; a one-shot is removed by its owning scene after its duration.
+- Returns a safe fallback signal while a manifest/sheet is unavailable, leaving the original static sprite in place.
 
-Keep the helper renderer-agnostic. Hearth and Town should decide where and when an effect exists; the helper should only load, time and draw frames.
+The helper is deliberately stateless per draw. Playback position, pause/resume and deterministic ambient phase belong to the owning scene/object, not to the shared sheet cache. Decorative animation remains presentation-only and is not written to save data.
 
-### 2. Add a curated runtime manifest
+### 2. Curated runtime manifest — implemented
 
-Create a small first-party manifest (suggested: `assets/2d/animated/manifest.json`) that lists only assets selected for Grindstone. Each entry should include:
-- stable ID and source pack;
-- relative sheet and metadata paths;
-- frame layout/type and dimensions;
-- frame count and per-frame timing or FPS;
-- loop/one-shot behaviour and tile flags;
-- pivot/anchor and intended render layer;
-- intended scene/use and whether it is decorative or gameplay-triggered.
+`assets/2d/animated/manifest.json` currently includes four reviewed runtime entries:
+- `tall-grass`, `water` and `wall-torch` from the SpritePilot 32px strips.
+- `hit-spark` from the PVFX Foundry 1.2.0 strict/grid export, with its matching frame manifest retained beside it.
 
-Do not point runtime code at the Actions ZIP or at the untracked staging directory. The final APK must contain only the selected runtime sheets and metadata.
+The manifest records each sheet's source pack, relative path, frame layout, dimensions, timing, loop behaviour and pivot. Source URLs and licence scope are retained in the accompanying README and licence files. Runtime paths never point into the Actions artifact or local staging directory.
 
-### 3. First integration pass — SpritePilot environment
+### 3. First integration pass — partially implemented
 
-Start with the visually obvious, low-risk environmental assets:
-1. Tall grass: optional gentle wind animation for existing outdoor grass patches. Preserve the current growth/condition logic; animation must not change gameplay state.
-2. Water: animated pool/pond surface where the existing art has water. Confirm seamless tiling and keep shore edges/static borders separate.
-3. Waterfall: use only where a waterfall prop/feature exists; don't invent a new location just to use the asset.
-4. Wall torch: replace or layer over an appropriate existing torch/lantern flame, preserving the prop's current collision and interaction footprint.
-5. Banner: use for existing town/yard banners or signs only where the dimensions and style fit.
-6. Lava: reserve for Delve/environment hazards, not ordinary Hearth/Town scenes.
-7. Door, spike trap and crumbling block: integrate only as explicit scene/gameplay states. Doors need open/closed state semantics; traps need armed/triggered/reset states; crumbling blocks need intact/crumbling/gone states. One-shot animation completion must not itself invent or mutate game rules.
+- **Tall grass:** selected outdoor Hearth tufts can use the 32px wind loop. Only a small deterministic subset is animated, and existing growth/condition logic is unchanged.
+- **Water:** animated water is clipped inside existing Delve Vault puddles only, where its blue/teal palette fits. Other themes retain their original static puddles.
+- **Wall torch:** the animated 32px torch replaces the static torch drawing in Hearth and Delve. Existing torch positions, lighting and collision/interaction footprints remain unchanged.
+- **PVFX hit spark:** the strict/grid one-shot is attached to enemy hit events in Delve. It uses the authored 64px pivot and eight 80ms frames; it does not decide damage or hit timing.
 
-For each asset, inspect it at native scale against the current scene before adopting it. A visually mismatched animation should be rejected rather than recoloured or scaled carelessly.
+Waterfall, banner, lava, door, spike trap and crumbling block remain unintegrated. Add them only when an existing scene or explicit gameplay state provides a suitable use. One-shot completion must never invent or mutate game rules.
 
-### 4. Second integration pass — PVFX Foundry effects
+Review the selected assets on an actual phone at native scale before increasing their frequency or adding more scenes.
+
+### 4. Second integration pass — remaining PVFX Foundry effects
 
 Build a curated shortlist by category, then review candidate sheets at native scale:
 - Hearth/Town ambience: candle flame, small fire, drifting leaves, rain/snow only when season/location logic calls for it, water ripples, small dust/spark effects.
 - Interactions: subtle coin/loot glint, completion sparkle, repair/build puff, door/portal activation.
-- Delve combat: melee impact, hit spark, slash, projectile flight/impact, fire/ice/lightning effects, smoke/dust, explosion and status effects.
+- Delve combat: hit spark is integrated; next candidates are slash, projectile flight/impact, fire/ice/lightning effects, smoke/dust, explosion and status effects.
 - Oracle: restrained magical glow, rune/sigil or portal activation effects; keep the Oracle's existing authored aesthetic in charge.
 
 Do not add an effect just because it exists. Prefer one readable effect per event, short durations and restrained scale. Avoid stacking multiple full-screen overlays.
@@ -154,16 +148,12 @@ Do not add an effect just because it exists. Prefer one readable effect per even
 - Do not persist frame counters in the save. Decorative animation is presentation state.
 - Respect Android WebView memory limits; load only sheets needed by the current scene, and release references when a scene is destroyed if practical.
 
-## Suggested first test/demo scene
+## Runtime test coverage and device check
 
-Use a single controlled test scene before enabling animations across the game:
-- one water tile (loop/tile);
-- one tall-grass patch (loop);
-- one wall torch (loop);
-- one one-shot impact effect from PVFX;
-- one missing-image case to prove fallback behaviour.
+The new Node-only `test/animated2d.js` suite exercises strip, grid and packed slicing, lazy image loading, sheet caching, exact frame timing, one-shot completion, transparent terminal frames and packed trimmed-pivot alignment. It is included in the default `test/run.sh` suite list.
 
-Check at phone resolution:
+The in-game first pass supplies the real scene coverage: Hearth grass/torches and Delve puddles/torches/enemy hit sparks. A phone/device check is still required for:
+
 - correct frame order and timing;
 - correct tile seams;
 - stable pivots (no jitter);
@@ -174,13 +164,13 @@ Check at phone resolution:
 
 ## Acceptance checklist
 
-- [ ] SpritePilot strips are sliced using their manifest dimensions and frame counts.
-- [ ] PVFX grid frames use eight-column row-major slicing and declared canvas/pivot.
-- [ ] PVFX packed frames use per-frame manifest rectangles and trimmed pivots; no grid assumptions.
-- [ ] Exact timing, loops, one-shots and impact/release timing are honoured.
+- [x] SpritePilot strips are sliced using their manifest dimensions and frame counts.
+- [x] PVFX grid frames use eight-column row-major slicing and declared canvas/pivot.
+- [x] PVFX packed frames use per-frame manifest rectangles and trimmed pivots; no grid assumptions.
+- [x] Exact frame timing, loops and one-shot completion are covered by helper tests.
 - [ ] Tiling is enabled only for explicitly tileable assets.
-- [ ] Pixel filtering stays nearest-neighbour and drawing remains aligned to the world grid.
-- [ ] Missing assets fall back safely.
+- [x] Pixel filtering stays nearest-neighbour and drawing uses integer-aligned pivots.
+- [x] Missing assets fall back safely without blocking scene loading.
 - [ ] Inactive scenes pause animation work.
 - [ ] No decorative animation changes game rules or save data.
 - [ ] The app packages only the curated runtime subset, not the source ZIPs or complete collector output.
