@@ -12,7 +12,8 @@ const manifest = {
   assets: {
     strip: { sheet: 'strip.png', layout: 'strip', frameWidth: 32, frameHeight: 32, frames: 8, fps: 8, loop: true, pivot: [16, 32] },
     grid: { sheet: 'grid.png', layout: 'grid', frameWidth: 64, frameHeight: 64, columns: 8, frames: 8, frameDurationsMs: [80,80,80,80,80,80,80,80], loop: false, pivot: [32,32] },
-    packed: { sheet: 'packed.png', metadata: 'packed.json', layout: 'packed', loop: false, pivot: [10,10] }
+    packed: { sheet: 'packed.png', metadata: 'packed.json', layout: 'packed', loop: false, pivot: [10,10] },
+  missing: { sheet: 'missing.png', layout: 'strip', frameWidth: 32, frameHeight: 32, frames: 2, fps: 4, loop: true, pivot: [16,16] }
   }
 };
 const packedMetadata = {
@@ -61,6 +62,8 @@ const ctx = {
   const beforeEmpty = calls.length;
   assert.strictEqual(A.draw(ctx, 'packed', 100, 100, 0.15, { manifest: 'fixture/manifest.json' }), true, 'transparent packed frame retains its timing');
   assert.strictEqual(calls.length, beforeEmpty, 'transparent packed frame draws nothing');
-  assert.strictEqual(A.draw(ctx, 'missing', 0, 0, 0, { manifest: 'fixture/manifest.json' }), false, 'unknown asset safely falls back');
-  console.log('PASS animated2d manifest, strip/grid/packed slicing, timing, caching, pivots and one-shots');
+  assert.strictEqual(A.draw(ctx, 'missing', 0, 0, 0, { manifest: 'fixture/manifest.json' }), false, 'missing sheet begins loading lazily');
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.strictEqual(A.draw(ctx, 'missing', 0, 0, 0, { manifest: 'fixture/manifest.json' }), false, 'failed sheet safely falls back');
+  console.log('PASS animated2d manifest, strip/grid/packed slicing, timing, caching, pivots, one-shots and fallback');
 })().catch((e) => { console.error(e); process.exitCode = 1; });
