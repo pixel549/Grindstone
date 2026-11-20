@@ -130,11 +130,11 @@
     if (options.alpha != null) ctx.globalAlpha *= Math.max(0, Math.min(1, options.alpha));
     ctx.imageSmoothingEnabled = false;
     if (options.flipX) {
-      ctx.translate(dx * 2 + sw * drawScale, 0);
+      ctx.translate(dx * 2 + sw * scale, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * scale, sh * scale);
     } else {
-      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * drawScale, sh * drawScale);
+      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * scale, sh * scale);
     }
     ctx.restore();
     return true;
