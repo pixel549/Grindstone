@@ -56,7 +56,7 @@
    - Added a curated CC0 runtime subset: SpritePilot water, tall grass and wall torch; PVFX Foundry strict/grid hit spark with its exact 80ms frame timing and pivot metadata.
    - Wired tall grass and torches into the Hearth, and animated puddles, wall torches and enemy hit sparks into the Delve.
    - Missing sheets fall back to the existing static art; decorative animation does not change collision, interaction or save data.
-   - Verify at phone resolution: sprite fit/style, torch alignment, puddle clipping, hit-spark size/timing, background pause/resume, memory and frame rate.
+   - The new animation-helper unit test passes (strip/grid/packed slicing, frame timing, pivots, looping, one-shots and missing-sheet fallback); full game-suite and phone/device checks remain pending.
    - Keep the full packs in Actions artifacts/local staging; only the reviewed subset and licence/provenance files belong in the APK.
 
 ## Notes
