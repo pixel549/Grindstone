@@ -13,12 +13,18 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    if: ${{ secrets.KEYSTORE_B64 != '' }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check signing secret is set
+        id: secret
+        env:
+          HAS_KEYSTORE: ${{ secrets.KEYSTORE_B64 != '' }}
+        run: echo "present=$HAS_KEYSTORE" >> "$GITHUB_OUTPUT"
+
       - name: Read version
         id: ver
+        if: steps.secret.outputs.present == 'true'
         run: |
           V=$(sed -n 's/.*android:versionName="\([^"]*\)".*/\1/p' AndroidManifest.xml | head -1)
           echo "version=$V" >> "$GITHUB_OUTPUT"
@@ -26,6 +32,7 @@ jobs:
 
       - name: Skip if already released
         id: check
+        if: steps.secret.outputs.present == 'true'
         run: |
           if gh release view "v${{ steps.ver.outputs.version }}" >/dev/null 2>&1; then
             echo "exists=yes" >> "$GITHUB_OUTPUT"
@@ -36,13 +43,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Install build tools
-        if: steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y aapt apksigner zipalign dalvik-exchange android-framework-res openjdk-17-jdk-headless
 
       - name: Fetch android.jar
-        if: steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
         run: |
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Reginer/aosp-android-jar.git /tmp/aj
           git -C /tmp/aj sparse-checkout set android-34
@@ -50,13 +57,13 @@ jobs:
           cp /tmp/aj/android-34/android.jar "$RUNNER_TEMP/sdk/android-34.jar"
 
       - name: Decode signing key
-        if: steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
         run: |
           mkdir -p "$RUNNER_TEMP/keys"
           echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/keys/grindstone.jks"
 
       - name: Build and sign
-        if: steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
         env:
           KS_PASS: ${{ secrets.KEYSTORE_PASS }}
         run: |
@@ -68,7 +75,7 @@ jobs:
           apksigner verify --print-certs "Grindstone-${{ steps.ver.outputs.version }}.apk" | grep -q 47d9ce55e01ccea09489d9a5dd76b8016b06a78f5e93f2a4178db671c042ea51
 
       - name: Publish release
-        if: steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
