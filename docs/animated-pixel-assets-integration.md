@@ -172,9 +172,9 @@ The in-game first pass supplies the real scene coverage: Hearth grass/torches an
 - [x] Pixel filtering stays nearest-neighbour and drawing uses integer-aligned pivots.
 - [x] Missing assets fall back safely without blocking scene loading.
 - [ ] Inactive scenes pause animation work.
-- [ ] No decorative animation changes game rules or save data.
-- [ ] The app packages only the curated runtime subset, not the source ZIPs or complete collector output.
-- [ ] Licence/provenance is recorded for every selected asset.
+- [x] No decorative animation changes game rules or save data.
+- [x] The app packages only the curated runtime subset, not the source ZIPs or complete collector output.
+- [x] Licence/provenance is recorded for every selected asset.
 - [ ] Existing Hearth, Town, Delve, NPC and interaction tests still pass.
 
 ## Source/licence handling
