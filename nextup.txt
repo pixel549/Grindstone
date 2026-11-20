@@ -1,6 +1,6 @@
 # Grindstone — next up
 
-## Current branch: Oracle portal, voice and ambient polish
+## Current branch: Animated sprite runtime — first integration pass
 
 - [x] Replace ambient emoji-only idle bubbles in town with spoken character barks.
 - [x] Give each town keeper their own authored lines; townsfolk use the town small-talk pool.
@@ -49,6 +49,15 @@
    - Navigate to each curated itch.io source before attempting its download flow; the previous animation collector tried to inspect about:blank.
    - Fix the SpritePilot direct-download filename fallback and reject HTML/empty responses before accepting an archive.
    - Keep collected source archives in GitHub Actions artifacts, not in the public repository.
+
+
+8. **Animated sprite runtime** — first implementation committed; phone/device check pending
+   - Added a shared canvas animation helper with cached image loading, strip/grid/packed frame layouts, per-frame timing, looping and one-shot playback; renderers own the clock and no per-sprite timers are created.
+   - Added a curated CC0 runtime subset: SpritePilot water, tall grass and wall torch; PVFX Foundry strict/grid hit spark with its exact 80ms frame timing and pivot metadata.
+   - Wired tall grass and torches into the Hearth, and animated puddles, wall torches and enemy hit sparks into the Delve.
+   - Missing sheets fall back to the existing static art; decorative animation does not change collision, interaction or save data.
+   - Verify at phone resolution: sprite fit/style, torch alignment, puddle clipping, hit-spark size/timing, background pause/resume, memory and frame rate.
+   - Keep the full packs in Actions artifacts/local staging; only the reviewed subset and licence/provenance files belong in the APK.
 
 ## Notes
 
