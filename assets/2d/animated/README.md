@@ -16,3 +16,12 @@ Only the four reviewed runtime sheets in this folder are shipped. The complete t
 - The final frame is intentionally transparent. Keep its duration.
 
 Do not copy the full source packs or unreviewed variants into this runtime folder. Preserve these source links and licence files if the selected assets are moved or renamed.
+
+## Selected sheet checksums (SHA-256)
+
+- `water-32px_strip8.png`: `c0a6205197bb5ac702066f98ffdaced859f66cf9f33ee42d182f234fba1135d5`
+- `tall-grass-32px_strip12.png`: `5c6eba998a6f4ff566d51e53e31328f764a149169049a3471b33d663cd499235`
+- `wall-torch-32px_strip8.png`: `d95666604d1a4fa865e8ff70203bf903becf70f408dc28dd0f10fe48550797d9`
+- `hit-spark-strict-grid.png`: `be7e52a9529af3160b81dc0c5dee9bc03d48a1258102045fd4c74606957f16e0`
+
+The PVFX checksum matches the source pack's `pack.json` entry for the strict/grid sheet.
