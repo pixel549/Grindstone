@@ -4,7 +4,7 @@ const path = require('path');
 let imageCount = 0;
 class FakeImage {
   constructor() { imageCount++; this.onload = null; this.onerror = null; }
-  set src(value) { this._src = value; queueMicrotask(() => { this.width = 512; this.height = 64; if (this.onload) this.onload(); }); }
+  set src(value) { this._src = value; queueMicrotask(() => { if (value.includes('missing.png')) { if (this.onerror) this.onerror(); return; } this.width = 512; this.height = 64; if (this.onload) this.onload(); }); }
   get src() { return this._src; }
 }
 global.Image = FakeImage;
