@@ -951,7 +951,7 @@
         const animated = root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ax, ay, this.t);
         if (!animated) { const tr = this.spr.torch; if (tr) g.drawImage(this.atlas, tr[0], tr[1], tr[2], tr[3], p[2], p[3], tr[2], tr[3]); }
       });
-      if (root.Animated2D) this.puddles.forEach((p) => {
+      if (root.Animated2D && this.D.theme === 'vault') this.puddles.forEach((p) => {
         g.save(); g.beginPath(); g.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); g.clip();
         root.Animated2D.draw(g, 'water', p.x, p.y, this.t, { phase: p.phase });
         g.restore();
