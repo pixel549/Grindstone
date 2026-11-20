@@ -34,14 +34,20 @@
 5. **Ambient NPC polish** — code complete; device check pending
    - Verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
 
-6. **Third-party asset integration** — awaiting a clean full-collection run
+6. **Third-party asset integration** — animation packs audited; Seveneves collection still incomplete
    - The latest artifact contains 14/18 Seveneves packs marked complete; four remaining packs only yielded browser attachments that were byte-for-byte duplicates of their preview PNGs, not complete source packs.
    - Keep those four marked incomplete, detect the duplicate hashes, and avoid repeatedly downloading the same preview attachment while still checking for newly exposed source links.
    - Review each pack's licence and keep raw third-party source packs out of the public repository where redistribution is prohibited.
    - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
    - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
 
-7. **Asset collector** — browser-download classification and animation source navigation fixes in progress
+7. **Animation integration** — guide written; runtime implementation pending
+   - Follow `docs/hearth-animation-integration.md` for the SpritePilot strip and PVFX manifest formats, frame timing, pivots, layering and licensing/staging rules.
+   - Integrate through the existing `House2D` Canvas render loop; do not add separate timers or alter gameplay/collision.
+   - Start with SpritePilot wall torch, water, waterfall and tall grass; then add a small PVFX one-shot effect set.
+   - Add an on-device preview/gallery and performance checks before enabling effects broadly.
+
+8. **Asset collector** — browser-download classification and animation source navigation fixes in progress
    - Retrieve files from actual itch.io download pages, not preview sheets.
    - Preserve completed downloads between GitHub Actions runs and skip verified files/packs on reruns.
    - Retry incomplete packs and report unresolved/manual-check packs clearly.
