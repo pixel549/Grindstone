@@ -1,0 +1,119 @@
+/* Grindstone shared 2D sprite-sheet animation helper.
+ * One renderer-owned clock drives every animation; this module owns no timers.
+ */
+(function (root) {
+  'use strict';
+
+  const imageCache = Object.create(null);
+  const manifests = Object.create(null);
+  const failed = Object.create(null);
+
+  function image(src) {
+    if (imageCache[src]) return imageCache[src];
+    const entry = { image: null, ready: false, failed: false };
+    imageCache[src] = entry;
+    const im = new Image();
+    im.onload = () => { entry.image = im; entry.ready = true; };
+    im.onerror = () => { entry.failed = true; };
+    im.src = src;
+    return entry;
+  }
+
+  function init(url) {
+    url = url || '2d/animated/manifest.json';
+    if (manifests[url]) return manifests[url];
+    if (failed[url]) return Promise.resolve(null);
+    manifests[url] = fetch(url).then((r) => {
+      if (!r.ok) throw new Error('Animated asset manifest: ' + url);
+      return r.json();
+    }).then((manifest) => {
+      const slash = url.lastIndexOf('/');
+      manifest.__base = slash >= 0 ? url.slice(0, slash + 1) : '';
+      manifest.__assets = manifest.assets || {};
+      return manifest;
+    }).catch((e) => {
+      failed[url] = true;
+      delete manifests[url];
+      return null;
+    });
+    return manifests[url];
+  }
+
+  function frameAt(asset, elapsed) {
+    const durations = asset.frameDurationsMs;
+    if (durations && durations.length) {
+      const total = durations.reduce((sum, n) => sum + Math.max(1, n), 0);
+      let t = Math.max(0, elapsed * 1000);
+      if (asset.loop !== false) t = total ? t % total : 0;
+      else t = Math.min(t, Math.max(0, total - 0.001));
+      let i = 0;
+      while (i < durations.length - 1 && t >= durations[i]) { t -= durations[i]; i++; }
+      return i;
+    }
+    const count = Math.max(1, asset.frames | 0);
+    const fps = Math.max(0.01, Number(asset.fps) || 1);
+    const raw = Math.floor(Math.max(0, elapsed) * fps);
+    return asset.loop === false ? Math.min(count - 1, raw) : raw % count;
+  }
+
+  function draw(ctx, id, anchorX, anchorY, elapsed, options) {
+    options = options || {};
+    const manifestUrl = options.manifest || '2d/animated/manifest.json';
+    const manifest = manifests[manifestUrl];
+    if (!manifest) {
+      init(manifestUrl);
+      return false;
+    }
+    const asset = manifest.__assets[id];
+    if (!asset) return false;
+    const src = manifest.__base + asset.sheet;
+    const loaded = image(src);
+    if (!loaded.ready) return false;
+
+    const phase = Number(options.phase) || 0;
+    const time = Math.max(0, Number(elapsed) || 0) + phase;
+    const index = frameAt(asset, time);
+    const scale = Math.max(0.125, Number(options.scale) || 1);
+    const pivot = asset.pivot || [0, asset.frameHeight || 0];
+    let sx, sy, sw, sh, px = pivot[0], py = pivot[1], trimScale = 1;
+
+    if (asset.layout === 'packed') {
+      const frame = asset.frameData && asset.frameData[index];
+      if (!frame) return true;
+      if (frame.visibleBounds === null || frame.visible_bounds === null) return true;
+      const rect = frame.sheet || frame.rect || {};
+      sx = rect.x; sy = rect.y; sw = rect.width; sh = rect.height;
+      const tp = frame.trimmedPivot || frame.trimmed_pivot || pivot;
+      px = tp[0]; py = tp[1]; trimScale = Number(rect.scale) || 1;
+    } else if (asset.layout === 'grid') {
+      const fw = asset.frameWidth, fh = asset.frameHeight, cols = Math.max(1, asset.columns || 8);
+      sx = (index % cols) * fw; sy = Math.floor(index / cols) * fh; sw = fw; sh = fh;
+    } else {
+      const fw = asset.frameWidth, fh = asset.frameHeight;
+      sx = index * fw; sy = 0; sw = fw; sh = fh;
+    }
+
+    if (![sx, sy, sw, sh].every(Number.isFinite) || sw <= 0 || sh <= 0) return false;
+    const drawScale = scale * trimScale;
+    const dx = Math.round(anchorX - px * drawScale + (Number(options.offsetX) || 0));
+    const dy = Math.round(anchorY - py * drawScale + (Number(options.offsetY) || 0));
+    ctx.save();
+    if (options.alpha != null) ctx.globalAlpha *= Math.max(0, Math.min(1, options.alpha));
+    ctx.imageSmoothingEnabled = false;
+    if (options.flipX) {
+      ctx.translate(dx * 2 + sw * drawScale, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * drawScale, sh * drawScale);
+    } else {
+      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * drawScale, sh * drawScale);
+    }
+    ctx.restore();
+    return true;
+  }
+
+  root.Animated2D = { init: init, draw: draw, clear: function () {
+    Object.keys(imageCache).forEach((k) => delete imageCache[k]);
+    Object.keys(manifests).forEach((k) => delete manifests[k]);
+    Object.keys(failed).forEach((k) => delete failed[k]);
+  } };
+})(typeof window !== 'undefined' ? window : globalThis);
