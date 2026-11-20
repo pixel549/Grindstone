@@ -1,6 +1,5 @@
 // Shared animated sprite helper: timing, sheet slicing, caching and one-shot completion.
 const assert = require('assert');
-const path = require('path');
 let imageCount = 0;
 class FakeImage {
   constructor() { imageCount++; this.onload = null; this.onerror = null; }
