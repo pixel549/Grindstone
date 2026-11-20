@@ -1,6 +1,6 @@
 # Grindstone — next up
 
-## Current branch: Oracle portal, voice and ambient polish
+## Current branch: animated sprite integration guide
 
 - [x] Replace ambient emoji-only idle bubbles in town with spoken character barks.
 - [x] Give each town keeper their own authored lines; townsfolk use the town small-talk pool.
@@ -34,14 +34,14 @@
 5. **Ambient NPC polish** — code complete; device check pending
    - Verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
 
-6. **Third-party asset integration** — awaiting a clean full-collection run
+6. **Third-party asset integration** — partial collection available; review and integration pending
    - The latest artifact contains 14/18 Seveneves packs marked complete; four remaining packs only yielded browser attachments that were byte-for-byte duplicates of their preview PNGs, not complete source packs.
    - Keep those four marked incomplete, detect the duplicate hashes, and avoid repeatedly downloading the same preview attachment while still checking for newly exposed source links.
    - Review each pack's licence and keep raw third-party source packs out of the public repository where redistribution is prohibited.
    - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
    - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
 
-7. **Asset collector** — browser-download classification and animation source navigation fixes in progress
+7. **Asset collector** — Seveneves recovery still in progress; animation collection partly successful
    - Retrieve files from actual itch.io download pages, not preview sheets.
    - Preserve completed downloads between GitHub Actions runs and skip verified files/packs on reruns.
    - Retry incomplete packs and report unresolved/manual-check packs clearly.
@@ -49,6 +49,14 @@
    - Navigate to each curated itch.io source before attempting its download flow; the previous animation collector tried to inspect about:blank.
    - Fix the SpritePilot direct-download filename fallback and reject HTML/empty responses before accepting an archive.
    - Keep collected source archives in GitHub Actions artifacts, not in the public repository.
+   - Latest animation result: PVFX Foundry 1.2.0 and SpritePilot Environment Pack are verified complete; Mini Meadow remains incomplete (only two image links were found and a source download failed).
+
+8. **Animated sprite integration** — guide added; implementation not started
+   - Follow `docs/animated-pixel-assets-integration.md` when wiring animations into Hearth, Town and Delve.
+   - The verified collection includes 253 PVFX effect IDs, 81 colour variants, 1,336 current-release sheets plus 136 legacy sheets, and nine SpritePilot environmental animations in 16 px and 32 px strips.
+   - Start with a shared canvas animation helper and a curated runtime manifest; do not copy full source packs into the APK or public repository.
+   - First prototype: water, tall grass and wall torch loops, plus one PVFX one-shot; test frame timing, pivots, tile seams, pixel crispness and fallback behaviour on a phone.
+   - Mini Meadow is excluded until its actual source archive is downloaded and verified.
 
 ## Notes
 
