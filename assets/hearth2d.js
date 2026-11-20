@@ -81,7 +81,8 @@
 
     // ---------------------------------------------------------------- loading
     _load() {
-      if (root.Animated2D) root.Animated2D.init((this.o.base || '2d/') + 'animated/manifest.json');
+      this.animManifest = (this.o.base || '2d/') + 'animated/manifest.json';
+      if (root.Animated2D) root.Animated2D.init(this.animManifest);
       return Promise.all([House2D.assets(this.o.base), this._buildHero()]).then(([a]) => { this.atlas = a.atlas; this.spr = a.spr; });
     }
     _buildHero() {
@@ -1134,8 +1135,8 @@
     }
     _drawObj(g, ob, flashOn) {
       if (ob.relic) { this._relic(g, ob); return; }
-      if (ob.animation && root.Animated2D && root.Animated2D.draw(g, ob.animation, ob.ax, ob.ay, this.t, { phase: ob.animPhase || 0 })) return;
-      if (ob.s === 'torch' && root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ob.ax, ob.ay, this.t)) return;
+      if (ob.animation && root.Animated2D && root.Animated2D.draw(g, ob.animation, ob.ax, ob.ay, this.t, { phase: ob.animPhase || 0, manifest: this.animManifest })) return;
+      if (ob.s === 'torch' && root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ob.ax, ob.ay, this.t, { manifest: this.animManifest })) return;
       if (ob.oraclePortal) {
         const pulse = 0.5 + 0.5 * Math.sin(this.t * 2.1);
         g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(132,91,220,' + (0.08 + pulse * 0.12) + ')';
