@@ -1,0 +1,67 @@
+{
+  "schema": "grindstone.animated2d/1",
+  "sources": {
+    "spritepilot": {
+      "name": "SpritePilot Environment Pack",
+      "url": "https://spritepilot.com/free-game-assets",
+      "license": "CC0-1.0"
+    },
+    "pvfx": {
+      "name": "PVFX Foundry 1.2.0",
+      "url": "https://nerijs.itch.io/pvfx-foundry",
+      "license": "CC0-1.0"
+    }
+  },
+  "assets": {
+    "water": {
+      "source": "spritepilot",
+      "sheet": "water-32px_strip8.png",
+      "layout": "strip",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 8,
+      "fps": 8,
+      "loop": true,
+      "tile": true,
+      "pivot": [16, 16]
+    },
+    "tall-grass": {
+      "source": "spritepilot",
+      "sheet": "tall-grass-32px_strip12.png",
+      "layout": "strip",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 12,
+      "fps": 10,
+      "loop": true,
+      "tile": false,
+      "pivot": [16, 32]
+    },
+    "wall-torch": {
+      "source": "spritepilot",
+      "sheet": "wall-torch-32px_strip8.png",
+      "layout": "strip",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 8,
+      "fps": 10,
+      "loop": true,
+      "tile": false,
+      "pivot": [16, 32]
+    },
+    "hit-spark": {
+      "source": "pvfx",
+      "sheet": "hit-spark-strict-grid.png",
+      "metadata": "hit-spark-strict-grid-manifest.json",
+      "layout": "grid",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "frames": 8,
+      "frameDurationsMs": [80, 80, 80, 80, 80, 80, 80, 80],
+      "loop": false,
+      "tile": false,
+      "pivot": [32, 32]
+    }
+  }
+}
