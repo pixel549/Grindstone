@@ -1,0 +1,10 @@
+PVFX Foundry 1.2.0 — selected asset licence scope
+
+Source: https://nerijs.itch.io/pvfx-foundry
+Licence: CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The publisher's release licence states that CC0 applies to effects/**/sprite-sheet.png and effects/**/manifest.json, plus the other listed release metadata. The selected hit-spark sprite sheet and its matching strict/grid manifest are within that stated scope. It does not apply to the Pixel VFX Studio software, effect program source, toolkit, style documents, repository content, product names or marks.
+
+The full legal code is at:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
