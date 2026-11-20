@@ -58,7 +58,7 @@
         if (!asset.frameDurationsMs && asset.frameData.length) {
           asset.frameDurationsMs = asset.frameData.map((frame) => {
             const d = frame.duration || {};
-            return 1000 * (Number(d.numerator_ms) || 0) / Math.max(1, Number(d.denominator) || 1);
+            return (Number(d.numerator_ms) || 0) / Math.max(1, Number(d.denominator) || 1);
           });
         }
         if (asset.loop == null) asset.loop = meta.loop_mode !== 'none';
