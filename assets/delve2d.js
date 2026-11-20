@@ -116,6 +116,7 @@
     // ------------------------------------------------------------ loading
     _load() {
       const base = this.o.base || '2d/';
+      if (root.Animated2D) root.Animated2D.init(base + 'animated/manifest.json');
       const img = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
       const mobs = Promise.all([img(base + 'delve.png'), fetch(base + 'delve.json').then((r) => r.json())]).then(([a, m]) => { this.mob = a; this.mobm = m; });
       const world = root.House2D.assets(base).then((a) => { this.atlas = a.atlas; this.spr = a.spr; });
@@ -317,6 +318,7 @@
       g.fillStyle = '#1c181f';
       strips.forEach((q) => g.fillRect((q[0] - 1) * T, (q[1] - 1) * T, (q[2] - q[0] + 2) * T, (q[3] - q[1] + 2) * T));
       this.torches = [];
+      this.puddles = [];
       this.rooms.forEach((r) => {
         const x0 = r.x0, y0 = r.y0, w = r.w, d = r.d;
         g.fillStyle = '#1c181f'; g.fillRect((x0 - 1) * T, (y0 + 2) * T, (w + 2) * T, (d + 1) * T);
@@ -335,9 +337,13 @@
       };
       this.rooms.forEach((r, i) => {
         const x0 = r.x0 * T, x1 = (r.x1 + 1) * T, top = r.y0 * T;
-        for (let x = x0 + 1.5 * T; x < x1 - T; x += 4 * T) { const tr = this.spr.torch; if (tr) { g.drawImage(this.atlas, tr[0], tr[1], tr[2], tr[3], Math.round(x), top + 26, tr[2], tr[3]); this.torches.push([x + tr[2] / 2, top + 34]); } }
+        for (let x = x0 + 1.5 * T; x < x1 - T; x += 4 * T) { const tr = this.spr.torch; if (tr) this.torches.push([x + tr[2] / 2, top + 34, Math.round(x), top + 26]); }
         const fx = () => x0 + (1 + R() * (r.w - 2)) * T, fyy = () => top + (3 + R() * (r.d - 1)) * T;
-        if (th.puddle) for (let k = 0; k < 2; k++) { g.fillStyle = th.puddle; g.globalAlpha = 0.55; g.beginPath(); g.ellipse(fx(), fyy(), 14 + R() * 18, 5 + R() * 4, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1; }
+        if (th.puddle) for (let k = 0; k < 2; k++) {
+          const px = fx(), py = fyy(), rx = 14 + R() * 18, ry = 5 + R() * 4;
+          this.puddles.push({ x: px, y: py, rx: rx, ry: ry, phase: R() * 1.5 });
+          g.fillStyle = th.puddle; g.globalAlpha = 0.55; g.beginPath(); g.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+        }
         if (th.lava) for (let k = 0; k < 2; k++) { const lx = fx(), ly = fyy(); g.strokeStyle = '#ff6a20'; g.lineWidth = 2; g.beginPath(); g.moveTo(lx, ly); g.lineTo(lx + 10, ly + 4); g.lineTo(lx + 18, ly + 2); g.lineTo(lx + 26, ly + 8); g.stroke(); }
         if (i && r.kind !== 'boss' && R() < 0.8) deco(th.deco[Math.floor(R() * th.deco.length)], x0 + (R() < 0.5 ? 1.0 : r.w - 1.4) * T, top + (R() < 0.5 ? 3.1 : r.d + 1.6) * T);
         if (r.kind === 'enter') deco('stairs', x0 + 1.2 * T, top + 4.2 * T);
@@ -658,7 +664,7 @@
       this._tr(at, { k: 'num', who: who, v: e.d, to: e.to });
       if (s.boss) this._tr(at, { k: 'boss', v: left, of: s.max });
       this._at(at, () => {
-        s.cur = left; s.flash = 0.18; s.hit = 0.22;
+        s.cur = left; s.flash = 0.18; s.hit = 0.22; s.hitFx = { t: 0 };
         if (who === 'h') this.fx.push({ kind: 'slashfx', x: s.x - 4, y: s.y - 26 * s.scale, t: 0, life: 0.22 });
         this._num(s.x + (who === 'c' ? 12 : -4), s.y - (s.boss ? 118 : 50) - (who === 'c' ? 8 : 0), e.d, col, s.boss);
         if (s.boss) this.bossHp = left / s.max;
@@ -871,6 +877,7 @@
         f.ft += dt;
         if (f.flash > 0) f.flash -= dt;
         if (f.hit > 0) f.hit -= dt;
+        if (f.hitFx) { f.hitFx.t += dt; if (f.hitFx.t >= 0.64) f.hitFx = null; }
         if (f.rising) { f.rising += dt / 1.1; f.alpha = Math.min(1, f.rising); if (f.rising >= 1) { f.rising = 0; f.alpha = 1; } }
         if (f.die) { f.die += dt; if (f.die > 1.6) f.alpha = Math.max(0, 1 - (f.die - 1.6) / 0.6); }
         if (f.until && this.t >= f.until && f.alive) { f.anim = 'idle'; f.until = 0; }
@@ -927,6 +934,7 @@
       }
       g.drawImage(S.img, sx, sy, sw, sh, dx, dy, dw, dh);
       if (glow) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = glow * f.alpha; g.drawImage(S.img, sx, sy, sw, sh, dx, dy, dw, dh); g.globalCompositeOperation = 'source-over'; }
+      if (f.hitFx && root.Animated2D) root.Animated2D.draw(g, 'hit-spark', f.x, f.y - 28 * sc, f.hitFx.t, { scale: sc > 1 ? 0.9 : 0.78 });
       g.globalAlpha = 1;
     }
     _render() {
@@ -938,6 +946,16 @@
       g.imageSmoothingEnabled = false;
       g.setTransform(k, 0, 0, k, ox, oy);
       { const sx = Math.max(0, Math.floor(this.cam) - 1), sy = Math.max(0, Math.floor(this.camY) - 1), sw = Math.min(this.W - sx, Math.ceil(this._vw()) + 3), sh = Math.min(this.Hw - sy, Math.ceil(this._vh()) + 3); if (sw > 0 && sh > 0) g.drawImage(this.stat, sx, sy, sw, sh, sx, sy, sw, sh); }
+      this.torches.forEach((p) => {
+        const ax = p[0], ay = p[1] + 27;
+        const animated = root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ax, ay, this.t);
+        if (!animated) { const tr = this.spr.torch; if (tr) g.drawImage(this.atlas, tr[0], tr[1], tr[2], tr[3], p[2], p[3], tr[2], tr[3]); }
+      });
+      if (root.Animated2D) this.puddles.forEach((p) => {
+        g.save(); g.beginPath(); g.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); g.clip();
+        root.Animated2D.draw(g, 'water', p.x, p.y, this.t, { phase: p.phase });
+        g.restore();
+      });
       this.chests.forEach((c) => {
         const r = this.spr.chest;
         if (!r) return;
