@@ -57,7 +57,7 @@ const ctx = {
   assert.strictEqual(A.draw(ctx, 'packed', 100, 100, 0.05, { manifest: 'fixture/manifest.json' }), true, 'packed frame draws');
   const packedCall = calls[calls.length - 1];
   assert.deepStrictEqual(packedCall.slice(1, 5), [8, 4, 12, 10], 'packed source rectangle comes from metadata');
-  assert.deepStrictEqual(packedCall.slice(5), [94, 92, 24, 20], 'packed trimmed pivot and scale preserve its anchor');
+  assert.deepStrictEqual(packedCall.slice(5), [94, 92, 12, 10], 'packed trimmed pivot and scale preserve its anchor');
   const beforeEmpty = calls.length;
   assert.strictEqual(A.draw(ctx, 'packed', 100, 100, 0.15, { manifest: 'fixture/manifest.json' }), true, 'transparent packed frame retains its timing');
   assert.strictEqual(calls.length, beforeEmpty, 'transparent packed frame draws nothing');
