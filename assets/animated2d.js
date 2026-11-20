@@ -7,6 +7,7 @@
   const imageCache = Object.create(null);
   const manifests = Object.create(null);
   const manifestPromises = Object.create(null);
+  const metadataPromises = Object.create(null);
   const failed = Object.create(null);
 
   function image(src) {
@@ -40,6 +41,31 @@
       return null;
     });
     return manifestPromises[url];
+  }
+
+  function loadPackedMetadata(manifest, asset) {
+    if (asset.frameData) return true;
+    if (!asset.metadata) return false;
+    const url = manifest.__base + asset.metadata;
+    if (!metadataPromises[url]) {
+      metadataPromises[url] = fetch(url).then((r) => {
+        if (!r.ok) throw new Error('Animated frame metadata: ' + url);
+        return r.json();
+      }).then((meta) => {
+        asset.frameData = meta.frames || [];
+        asset.frames = asset.frameData.length;
+        asset.pivot = meta.pivot || asset.pivot;
+        if (!asset.frameDurationsMs && asset.frameData.length) {
+          asset.frameDurationsMs = asset.frameData.map((frame) => {
+            const d = frame.duration || {};
+            return 1000 * (Number(d.numerator_ms) || 0) / Math.max(1, Number(d.denominator) || 1);
+          });
+        }
+        if (asset.loop == null) asset.loop = meta.loop_mode !== 'none';
+        return true;
+      }).catch(() => false);
+    }
+    return false;
   }
 
   function frameAt(asset, elapsed) {
@@ -81,6 +107,7 @@
     let sx, sy, sw, sh, px = pivot[0], py = pivot[1], trimScale = 1;
 
     if (asset.layout === 'packed') {
+      if (!asset.frameData && !loadPackedMetadata(manifest, asset)) return false;
       const frame = asset.frameData && asset.frameData[index];
       if (!frame) return true;
       if (frame.visibleBounds === null || frame.visible_bounds === null) return true;
@@ -118,6 +145,7 @@
     Object.keys(imageCache).forEach((k) => delete imageCache[k]);
     Object.keys(manifests).forEach((k) => delete manifests[k]);
     Object.keys(manifestPromises).forEach((k) => delete manifestPromises[k]);
+    Object.keys(metadataPromises).forEach((k) => delete metadataPromises[k]);
     Object.keys(failed).forEach((k) => delete failed[k]);
   } };
 })(typeof window !== 'undefined' ? window : globalThis);
