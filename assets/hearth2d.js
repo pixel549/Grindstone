@@ -81,6 +81,7 @@
 
     // ---------------------------------------------------------------- loading
     _load() {
+      if (root.Animated2D) root.Animated2D.init((this.o.base || '2d/') + 'animated/manifest.json');
       return Promise.all([House2D.assets(this.o.base), this._buildHero()]).then(([a]) => { this.atlas = a.atlas; this.spr = a.spr; });
     }
     _buildHero() {
@@ -261,7 +262,7 @@
         const c = lawnCells[Math.floor(R() * lawnCells.length)];
         const big = lv >= 1 ? (R() < 0.5 ? 3 : 2) : lv >= 0.7 ? (R() < 0.4 ? 2 : 1) : lv >= 0.45 ? (R() < 0.3 ? 1 : 0) : 0;
         const fern = lv >= 1 && R() < 0.12;
-        add({ id: 'lawn', s: fern ? 'fern.' + this.season : 'tuft.' + this.season + '.' + big, ax: c[0] * T + 4 + Math.floor(R() * 24), ay: c[1] * T + 8 + Math.floor(R() * 22), sway: R() * 6 });
+        add({ id: 'lawn', s: fern ? 'fern.' + this.season : 'tuft.' + this.season + '.' + big, ax: c[0] * T + 4 + Math.floor(R() * 24), ay: c[1] * T + 8 + Math.floor(R() * 22), sway: R() * 6, animation: !fern && lv >= 0.7 && R() < 0.14 ? 'tall-grass' : null, animPhase: R() * 1.8 });
       }
       if (lv >= 0.7) for (let i = 0; i < 8 && lawnCells.length; i++) { const c = lawnCells[Math.floor(R() * lawnCells.length)]; add({ id: 'lawn', s: 'flower.' + this.season + '.' + (i % 2), ax: c[0] * T + 8 + Math.floor(R() * 16), ay: c[1] * T + 16 }); }
       // the side lot, until it's bought
@@ -1133,6 +1134,8 @@
     }
     _drawObj(g, ob, flashOn) {
       if (ob.relic) { this._relic(g, ob); return; }
+      if (ob.animation && root.Animated2D && root.Animated2D.draw(g, ob.animation, ob.ax, ob.ay, this.t, { phase: ob.animPhase || 0 })) return;
+      if (ob.s === 'torch' && root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ob.ax, ob.ay, this.t)) return;
       if (ob.oraclePortal) {
         const pulse = 0.5 + 0.5 * Math.sin(this.t * 2.1);
         g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(132,91,220,' + (0.08 + pulse * 0.12) + ')';
