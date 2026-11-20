@@ -116,7 +116,8 @@
     // ------------------------------------------------------------ loading
     _load() {
       const base = this.o.base || '2d/';
-      if (root.Animated2D) root.Animated2D.init(base + 'animated/manifest.json');
+      this.animManifest = base + 'animated/manifest.json';
+      if (root.Animated2D) root.Animated2D.init(this.animManifest);
       const img = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
       const mobs = Promise.all([img(base + 'delve.png'), fetch(base + 'delve.json').then((r) => r.json())]).then(([a, m]) => { this.mob = a; this.mobm = m; });
       const world = root.House2D.assets(base).then((a) => { this.atlas = a.atlas; this.spr = a.spr; });
@@ -934,7 +935,7 @@
       }
       g.drawImage(S.img, sx, sy, sw, sh, dx, dy, dw, dh);
       if (glow) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = glow * f.alpha; g.drawImage(S.img, sx, sy, sw, sh, dx, dy, dw, dh); g.globalCompositeOperation = 'source-over'; }
-      if (f.hitFx && root.Animated2D) root.Animated2D.draw(g, 'hit-spark', f.x, f.y - 28 * sc, f.hitFx.t, { scale: sc > 1 ? 0.9 : 0.78 });
+      if (f.hitFx && root.Animated2D) root.Animated2D.draw(g, 'hit-spark', f.x, f.y - 28 * sc, f.hitFx.t, { scale: sc > 1 ? 0.9 : 0.78, manifest: this.animManifest });
       g.globalAlpha = 1;
     }
     _render() {
@@ -948,12 +949,12 @@
       { const sx = Math.max(0, Math.floor(this.cam) - 1), sy = Math.max(0, Math.floor(this.camY) - 1), sw = Math.min(this.W - sx, Math.ceil(this._vw()) + 3), sh = Math.min(this.Hw - sy, Math.ceil(this._vh()) + 3); if (sw > 0 && sh > 0) g.drawImage(this.stat, sx, sy, sw, sh, sx, sy, sw, sh); }
       this.torches.forEach((p) => {
         const ax = p[0], ay = p[1] + 27;
-        const animated = root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ax, ay, this.t);
+        const animated = root.Animated2D && root.Animated2D.draw(g, 'wall-torch', ax, ay, this.t, { manifest: this.animManifest });
         if (!animated) { const tr = this.spr.torch; if (tr) g.drawImage(this.atlas, tr[0], tr[1], tr[2], tr[3], p[2], p[3], tr[2], tr[3]); }
       });
       if (root.Animated2D && this.D.theme === 'vault') this.puddles.forEach((p) => {
         g.save(); g.beginPath(); g.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); g.clip();
-        root.Animated2D.draw(g, 'water', p.x, p.y, this.t, { phase: p.phase });
+        root.Animated2D.draw(g, 'water', p.x, p.y, this.t, { phase: p.phase, manifest: this.animManifest });
         g.restore();
       });
       this.chests.forEach((c) => {
