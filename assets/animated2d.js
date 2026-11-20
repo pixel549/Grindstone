@@ -6,6 +6,7 @@
 
   const imageCache = Object.create(null);
   const manifests = Object.create(null);
+  const manifestPromises = Object.create(null);
   const failed = Object.create(null);
 
   function image(src) {
@@ -21,22 +22,24 @@
 
   function init(url) {
     url = url || '2d/animated/manifest.json';
-    if (manifests[url]) return manifests[url];
+    if (manifests[url]) return Promise.resolve(manifests[url]);
+    if (manifestPromises[url]) return manifestPromises[url];
     if (failed[url]) return Promise.resolve(null);
-    manifests[url] = fetch(url).then((r) => {
+    manifestPromises[url] = fetch(url).then((r) => {
       if (!r.ok) throw new Error('Animated asset manifest: ' + url);
       return r.json();
     }).then((manifest) => {
       const slash = url.lastIndexOf('/');
       manifest.__base = slash >= 0 ? url.slice(0, slash + 1) : '';
       manifest.__assets = manifest.assets || {};
+      manifests[url] = manifest;
       return manifest;
     }).catch((e) => {
       failed[url] = true;
-      delete manifests[url];
+      delete manifestPromises[url];
       return null;
     });
-    return manifests[url];
+    return manifestPromises[url];
   }
 
   function frameAt(asset, elapsed) {
@@ -114,6 +117,7 @@
   root.Animated2D = { init: init, draw: draw, clear: function () {
     Object.keys(imageCache).forEach((k) => delete imageCache[k]);
     Object.keys(manifests).forEach((k) => delete manifests[k]);
+    Object.keys(manifestPromises).forEach((k) => delete manifestPromises[k]);
     Object.keys(failed).forEach((k) => delete failed[k]);
   } };
 })(typeof window !== 'undefined' ? window : globalThis);
