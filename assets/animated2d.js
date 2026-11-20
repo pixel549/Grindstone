@@ -124,16 +124,15 @@
     }
 
     if (![sx, sy, sw, sh].every(Number.isFinite) || sw <= 0 || sh <= 0) return false;
-    const drawScale = scale * trimScale;
-    const dx = Math.round(anchorX - px * drawScale + (Number(options.offsetX) || 0));
-    const dy = Math.round(anchorY - py * drawScale + (Number(options.offsetY) || 0));
+    const dx = Math.round(anchorX - px * trimScale * scale + (Number(options.offsetX) || 0));
+    const dy = Math.round(anchorY - py * trimScale * scale + (Number(options.offsetY) || 0));
     ctx.save();
     if (options.alpha != null) ctx.globalAlpha *= Math.max(0, Math.min(1, options.alpha));
     ctx.imageSmoothingEnabled = false;
     if (options.flipX) {
       ctx.translate(dx * 2 + sw * drawScale, 0);
       ctx.scale(-1, 1);
-      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * drawScale, sh * drawScale);
+      ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * scale, sh * scale);
     } else {
       ctx.drawImage(loaded.image, sx, sy, sw, sh, dx, dy, sw * drawScale, sh * drawScale);
     }
