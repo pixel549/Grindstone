@@ -10,9 +10,10 @@
 
 ## Next priorities
 
-1. **Oracle entrance** — complete
-   - Removed the floating Oracle shortcut from the Today strip.
-   - Added a physical, outlined magical portal in the player's Hearth yard; it reserves its tile, can be approached, and opens the sanctum.
+1. **Oracle entrance** — interaction fix implemented; phone verification pending
+   - The portal tap was calling an undefined `_approach()` method, so the interaction could fail before the player reached it.
+   - Added pathfinding to a reachable adjacent cell, then invoke the sanctum callback on arrival.
+   - Portal hit detection now takes priority over the hero and visitors, preventing their sprites from intercepting taps on the tall portal.
    - The sanctum uses `assets/2d/locations/oracle.png` automatically when supplied, with a styled fallback until then.
 
 2. **Oracle voice** — complete
@@ -31,17 +32,23 @@
    - Commercial/service locations use a bespoke illustrated background, independent NPC layer, bottom-third dialogue area, and full-screen UI takeover for shops/services.
    - Residential NPC houses remain explorable and editable on home-sized lots.
 
-5. **Ambient NPC polish** — code complete; device check pending
+5. **Hearth performance and layering** — first pass implemented; device profiling pending
+   - Stop measuring and resizing the canvas on every animation frame; resize on activation and window resize instead.
+   - Suspend the animation loop while the Hearth is inactive or the document is backgrounded, and resume it when visible again.
+   - Draw wall-mounted fixtures in the same depth-sorted pass as floor props, rather than always behind every floor object. Verify window and adjacent-tile overlaps on a phone.
+   - Profile initial atlas loading and layout generation on-device before attempting more invasive caching.
+
+6. **Ambient NPC polish** — code complete; device check pending
    - Verify bark frequency and speech-bubble readability on a phone-sized viewport, then add more individual lines where repetition is noticeable.
 
-6. **Third-party asset integration** — awaiting a clean full-collection run
+7. **Third-party asset integration** — awaiting a clean full-collection run
    - The latest artifact contains 14/18 Seveneves packs marked complete; four remaining packs only yielded browser attachments that were byte-for-byte duplicates of their preview PNGs, not complete source packs.
    - Keep those four marked incomplete, detect the duplicate hashes, and avoid repeatedly downloading the same preview attachment while still checking for newly exposed source links.
    - Review each pack's licence and keep raw third-party source packs out of the public repository where redistribution is prohibited.
    - After the full collection is available, audit actual contents and prioritise portraits, shop props, furnishings and environmental props.
    - Do not start bespoke shop-scene implementation until the downloaded resources have been reviewed.
 
-7. **Asset collector** — browser-download classification and animation source navigation fixes in progress
+8. **Asset collector** — browser-download classification and animation source navigation fixes in progress
    - Retrieve files from actual itch.io download pages, not preview sheets.
    - Preserve completed downloads between GitHub Actions runs and skip verified files/packs on reruns.
    - Retry incomplete packs and report unresolved/manual-check packs clearly.
@@ -56,3 +63,30 @@
 - Missing generated room images must continue to fall back to the original tile-based interiors.
 - Third-party asset sources and licence notes are tracked in `docs/third-party-pixel-assets.md`.
 - Do not merge feature branches into `main` unless explicitly requested.
+
+## Batch from Jake, 21 Nov 2026
+
+Working rule: if a feature is only partly implemented because artwork or flavour text is missing, ship PLACEHOLDER content so it can be demonstrated.
+Make placeholders bright pink (#ff2dac) so they are easy to spot and replace. Do not block a feature on missing art or copy.
+Claude takes the tricky items; ChatGPT takes the grunt work below, a few at a time. Tick items off as they land.
+
+### Done by Claude on branch impl/07-hearth-batch (unmerged; needs phone check)
+- [x] Oracle portal tap fix, wall/prop depth sorting, frame overhead (from PR #11).
+- [x] Static picket fence removed. Fence segments ('fencebit') are now optional player items; the Hide/Show fence control is gone.
+- [x] Made-up companions/vendors no longer appear in the player's house (birds and calendar visitors stay).
+- [x] Hearth character bubbles are text only; emoji bubbles removed from NPC idle/event/sleep.
+
+### Claude (tricky) - still to do
+- [ ] Place fence segments one square at a time OR drag out a vertical/horizontal run in build mode.
+- [ ] Props still overlapping walls: props on cells beside walls/windows (Jake's screenshots; check footprint vs wall face rows in core.js houseView/placement checks and hearth2d depth sort).
+- [ ] Hearth load slowdown: profile startup (atlas load, 400KB app.js parse, per-frame layout) and lazy-load what is not needed first.
+- [ ] Dual-wield: weapons in each hand. Rework the single-weapon plan so shields/off-hand items are main-hand-only where required; off hand takes a weapon.
+- [ ] Task management: player can put a task on hold, change frequency, set cooldowns, alerts, and a "max time not done" before it is bumped/prioritised. Remove the Oracle's offer to put tasks on hold.
+- [ ] Mentor NPC: reciprocating journal, second API (separate key/endpoint from the Oracle's groq call).
+- [ ] New-to-town NPC visits and occasional stop-ins for a request or reminder (replace residents-in-house; housemates are a later idea).
+
+### ChatGPT (grunt work) - do a few at a time
+- [ ] Task list: add collapsible category headings (Jake has ~90 tasks tagged as available to him; group by tag/category, sticky headers, count per heading).
+- [ ] Add more emoji next to tasks (extend the task-to-emoji keyword map; keep a sensible default).
+- [ ] Add placeholder (bright pink) art/text for anything partly implemented and not demonstrable.
+- [ ] Note in BUGREPORT.md that the Hearth emoji bubbles and fixed fence were removed in 2.28, and add a regression check for text-only bubbles.

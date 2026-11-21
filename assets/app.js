@@ -2569,7 +2569,8 @@
   const hEstate = () => (UI.visit ? G.homeEstate3D() : G.estateFor3D(S));
   // 2.26: plus whoever's visiting from the calendar (or lives here), kids and little ones included
   const hGuests = () => G.visitorsNow(S, G.today()).map((v) => ({ id: v.p.id, kind: 'human', guest: true, lives: !!v.lives, name: v.p.name, look: v.p.look, garb: v.p.garb, hat: v.p.hat, status: 'resident', home: null, ev: v.ev ? { k: v.ev.kind, icon: G.EV_ICON[v.ev.kind] || '📅' } : null }));
-  const hNpcs = () => { if (!UI.visit) return S.npcs.concat(hGuests()); const n = npcById(UI.visit); return n ? [Object.assign({}, n, { home: null, status: 'resident' })] : []; };
+  // 2.28: made-up companions/vendors no longer loiter in the player's house (only birds stay; calendar people still visit). Housemates may return later.
+  const hNpcs = () => { if (!UI.visit) return S.npcs.filter((n) => n.kind === 'bird').concat(hGuests()); const n = npcById(UI.visit); return n ? [Object.assign({}, n, { home: null, status: 'resident' })] : []; };
   function houseSig() { return JSON.stringify([UI.visit || '', hState(), G.houseView(HS()), hNpcs(), S.look, gearItems(), hEstate()]); }
   function mountHouse() {
     const slot = $('#h3slot');
@@ -2936,7 +2937,7 @@
     const it = B.sel != null ? HS().house.items.find((x) => x.id === B.sel) : null, f = it && G.furnOf(it);
     const live = it ? G.houseLive(HS())[it.id] : true;
     const sel = it ? `<div class="bld-sel"><span class="bn">${f.i} ${esc(f.n)}${live ? '' : ' <small>(not yours yet)</small>'}</span>
-      ${f.at !== 'wall' && f.w > 0 ? '<button data-act="b-flip" aria-label="Flip">⇋</button>' : ''}<button data-act="b-store">Store</button><button data-act="b-desel" aria-label="Put down">✕</button></div>` : '';
+      ${f.at !== 'wall' && f.w > 0 ? '<button data-act="b-flip" aria-label="Flip">⇋</button>' : ''}${it.k === 'fencebit' ? '<button data-act="b-rotate" aria-label="Rotate">↻</button>' : ''}<button data-act="b-store">Store</button><button data-act="b-desel" aria-label="Put down">✕</button></div>` : '';
     const tool = (k, n) => `<button class="${B.tool === k && !B.place ? 'on' : ''}" data-act="b-tool" data-v="${k}">${n}</button>`;
     return `<div class="bld-msg">${esc(B.msg || '')}</div>${sel}
       <div class="bld-tools">${tool('move', 'Move')}${tool('room', 'Rooms')}${tool('door', 'Doors')}<button class="${B.place ? 'on' : ''}" data-act="b-add">＋Item</button><button class="${B.newRoom && B.newRoom.go ? 'on' : ''}" data-act="b-room">＋Room</button>
@@ -2948,7 +2949,7 @@
     const B = UI.build, h = HOUSE.inst;
     if (h) h.setEdit(B ? { tool: B.place ? 'place' : B.moving ? 'rmove' : B.tool, sel: B.sel, draft: B.draft, room: B.room, mark: B.mark } : null);
   }
-  const snap = () => JSON.stringify({ rooms: HS().house.rooms, doors: HS().house.doors, items: HS().house.items, seq: HS().house.seq, gold: HS().gold, bought: HS().house.bought });
+  const snap = () => JSON.stringify({ rooms: HS().house.rooms, doors: HS().house.doors, items: HS().house.items, seq: HS().house.seq, gold: HS().gold, bought: HS().house.bought, fenceOff: HS().house.fenceOff });
   function buildDid(before, msg, cells) {
     const B = UI.build;
     B.undo.push(before); if (B.undo.length > 30) B.undo.shift();
@@ -4031,6 +4032,7 @@
       case 'b-done': endBuild(); break;
       case 'b-desel': if (UI.build) { UI.build.sel = null; UI.build.msg = BUILD_TIPS.move + '.'; refreshBuild(); } break;
       case 'b-flip': if (UI.build && UI.build.sel != null) { const before = snap(); G.houseFlip(HS(), UI.build.sel); buildDid(before, 'Flipped.'); } break;
+      case 'b-rotate': if (UI.build && UI.build.sel != null) { const before = snap(), it = HS().house.items.find((x) => x.id === UI.build.sel); if (it && it.k === 'fencebit') { it.turn = it.turn ? 0 : 1; buildDid(before, 'Fence segment rotated.'); } } break;
       case 'b-store': if (UI.build && UI.build.sel != null) { const it = HS().house.items.find((x) => x.id === UI.build.sel), before = snap(), nm = it ? itemName(it) : ''; G.houseStore(HS(), UI.build.sel); UI.build.sel = null; buildDid(before, `${nm} stored. Get it back with ＋ Add.`); } break;
       case 'b-undo': if (UI.build && UI.build.undo.length) { const o = JSON.parse(UI.build.undo.pop()); if (o.gold != null) { HS().gold = o.gold; delete o.gold; } Object.assign(HS().house, o); G.houseNorm(HS()); UI.build.sel = null; UI.build.draft = null; UI.build.msg = 'Undone.'; save(); syncHouse(); refreshBuild(); } break;
       case 'npc': openNpc(el.dataset.k); break;
