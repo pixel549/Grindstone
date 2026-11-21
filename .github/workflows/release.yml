@@ -1,14 +1,23 @@
 name: Release APK
 
-# Every push to main: if the version in AndroidManifest.xml has no release yet, build the signed APK and publish it.
-# Needs one repo secret, set once: KEYSTORE_B64 (base64 of grindstone.jks) and KEYSTORE_PASS (the keystore password).
+# Every push to any branch builds a signed APK and publishes it as a GitHub release, so the phone app can offer it.
+#   main            -> normal release
+#   any other branch -> pre-release (the app still offers it; the newest build wins)
+# Version is "<AndroidManifest versionName>.<run number>"; versionCode is 100000 + run number so every build installs over the last.
+# Needs two repo secrets, set once: KEYSTORE_B64 (base64 of grindstone.jks) and KEYSTORE_PASS (the keystore password).
 on:
   push:
-    branches: [main]
+    branches: ['**']
+    paths-ignore: ['**.md', 'docs/**', 'nextup.txt']
   workflow_dispatch:
 
 permissions:
   contents: write
+
+# A burst of pushes only builds the last one (cancelled runs aren't failures, so no alert emails).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
@@ -20,36 +29,29 @@ jobs:
         id: secret
         env:
           HAS_KEYSTORE: ${{ secrets.KEYSTORE_B64 != '' }}
-        run: echo "present=$HAS_KEYSTORE" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "present=$HAS_KEYSTORE" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_KEYSTORE" != "true" ]; then echo "::warning::KEYSTORE_B64 / KEYSTORE_PASS repo secrets are not set, so no APK was built."; fi
 
-      - name: Read version
+      - name: Work out the version
         id: ver
         if: steps.secret.outputs.present == 'true'
         run: |
-          V=$(sed -n 's/.*android:versionName="\([^"]*\)".*/\1/p' AndroidManifest.xml | head -1)
-          echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "tag=v$V" >> "$GITHUB_OUTPUT"
-
-      - name: Skip if already released
-        id: check
-        if: steps.secret.outputs.present == 'true'
-        run: |
-          if gh release view "v${{ steps.ver.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=yes" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=no" >> "$GITHUB_OUTPUT"
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
+          BASE=$(sed -n 's/.*android:versionName="\([^"]*\)".*/\1/p' AndroidManifest.xml | head -1)
+          VER="$BASE.${{ github.run_number }}"
+          CODE=$((100000 + ${{ github.run_number }}))
+          sed -i "s/android:versionName=\"[^\"]*\"/android:versionName=\"$VER\"/; s/android:versionCode=\"[0-9]*\"/android:versionCode=\"$CODE\"/" AndroidManifest.xml
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
 
       - name: Install build tools
-        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y aapt apksigner zipalign dalvik-exchange android-framework-res openjdk-17-jdk-headless
 
       - name: Fetch android.jar
-        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true'
         run: |
           git clone --depth 1 --filter=blob:none --sparse https://github.com/Reginer/aosp-android-jar.git /tmp/aj
           git -C /tmp/aj sparse-checkout set android-34
@@ -57,13 +59,15 @@ jobs:
           cp /tmp/aj/android-34/android.jar "$RUNNER_TEMP/sdk/android-34.jar"
 
       - name: Decode signing key
-        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
         run: |
           mkdir -p "$RUNNER_TEMP/keys"
-          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/keys/grindstone.jks"
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/keys/grindstone.jks"
 
       - name: Build and sign
-        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true'
         env:
           KS_PASS: ${{ secrets.KEYSTORE_PASS }}
         run: |
@@ -75,10 +79,21 @@ jobs:
           apksigner verify --print-certs "Grindstone-${{ steps.ver.outputs.version }}.apk" | grep -q 47d9ce55e01ccea09489d9a5dd76b8016b06a78f5e93f2a4178db671c042ea51
 
       - name: Publish release
-        if: steps.secret.outputs.present == 'true' && steps.check.outputs.exists == 'no'
+        if: steps.secret.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          PRE=""; [ "$BRANCH" != "main" ] && PRE="--prerelease"
+          gh release create "${{ steps.ver.outputs.tag }}" "Grindstone-${{ steps.ver.outputs.version }}.apk" \
+            --target "$GITHUB_SHA" $PRE --title "Grindstone ${{ steps.ver.outputs.version }} ($BRANCH)" \
+            --notes "Built and signed from \`$BRANCH\` at $GITHUB_SHA. Installs over the current app."
+
+      - name: Prune old pre-releases (keep the newest 8)
+        if: steps.secret.outputs.present == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.ver.outputs.tag }}" "Grindstone-${{ steps.ver.outputs.version }}.apk" \
-            --target "$GITHUB_SHA" --title "Grindstone ${{ steps.ver.outputs.version }}" \
-            --notes "Built and signed by the release workflow from main. Installs over the current app."
+          gh release list --limit 100 --json tagName,isPrerelease,createdAt \
+            | jq -r '[.[] | select(.isPrerelease)] | sort_by(.createdAt) | reverse | .[8:] | .[].tagName' \
+            | while read -r t; do gh release delete "$t" --cleanup-tag --yes; done

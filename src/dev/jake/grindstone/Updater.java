@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 /** 2.27.2: checks GitHub's latest release and installs a newer APK the user confirms. Sideloaded apps can't update themselves otherwise. */
 final class Updater {
-    static final String RELEASES = "https://api.github.com/repos/pixel549/Grindstone/releases/latest";
+    static final String RELEASES = "https://api.github.com/repos/pixel549/Grindstone/releases?per_page=20";
     static final String AUTHORITY = "dev.jake.grindstone.update";
     static final String FILE = "update.apk";
 
@@ -27,16 +27,25 @@ final class Updater {
             c.setConnectTimeout(10000); c.setReadTimeout(10000);
             c.setRequestProperty("Accept", "application/vnd.github+json");
             if (c.getResponseCode() != 200) throw new Exception("GitHub said " + c.getResponseCode());
-            JSONObject rel = new JSONObject(read(c.getInputStream()));
-            String tag = rel.optString("tag_name", "").replaceFirst("^v", "");
-            String url = "";
-            JSONArray assets = rel.optJSONArray("assets");
-            for (int i = 0; assets != null && i < assets.length(); i++) {
-                JSONObject a = assets.getJSONObject(i);
-                if (a.optString("name", "").endsWith(".apk")) { url = a.optString("browser_download_url", ""); break; }
+            // 2.28: every push to any branch is published as a release (branch builds as pre-releases), so take the highest version of the recent ones.
+            JSONArray all = new JSONArray(read(c.getInputStream()));
+            String tag = "", url = "", from = "";
+            for (int r = 0; r < all.length(); r++) {
+                JSONObject rel = all.getJSONObject(r);
+                if (rel.optBoolean("draft", false)) continue;
+                String t = rel.optString("tag_name", "").replaceFirst("^v", "");
+                String u = "";
+                JSONArray assets = rel.optJSONArray("assets");
+                for (int i = 0; assets != null && i < assets.length(); i++) {
+                    JSONObject a = assets.getJSONObject(i);
+                    if (a.optString("name", "").endsWith(".apk")) { u = a.optString("browser_download_url", ""); break; }
+                }
+                if (t.isEmpty() || u.isEmpty()) continue;
+                if (tag.isEmpty() || compare(t, tag) > 0) { tag = t; url = u; from = rel.optString("target_commitish", ""); }
             }
             boolean newer = !tag.isEmpty() && !url.isEmpty() && compare(tag, current) > 0;
             out.put("latest", tag).put("url", url).put("newer", newer)
+               .put("branch", from)
                .put("msg", newer ? "Downloads from GitHub, then Android asks you to confirm." : "You have the latest.");
         } catch (Exception e) {
             return result("", "", false, "Couldn't check: " + e.getMessage());

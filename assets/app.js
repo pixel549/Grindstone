@@ -714,9 +714,16 @@
   }
   window.onUpdate = function (raw) {
     let r = null; try { r = JSON.parse(raw); } catch (e) { return; }
-    S.upd = { at: Date.now(), latest: r.latest || '', url: r.url || '', msg: r.msg || '', note: '' };
+    const asked = S.upd && S.upd.asked;
+    S.upd = { at: Date.now(), latest: r.latest || '', url: r.url || '', msg: r.msg || '', note: '', branch: r.branch || '', asked: asked || '' };
     save();
-    if (r.newer) toast('Grindstone ' + r.latest + ' is out. See Settings → Updates.');
+    // 2.28: ask outright, once per version (Settings → Updates still has the button if it's dismissed).
+    if (r.newer && S.upd.asked !== r.latest) {
+      S.upd.asked = r.latest; save();
+      confirmBox('Update available', `Grindstone ${esc(r.latest)} is ready${r.branch && r.branch !== 'main' ? ' (build from ' + esc(r.branch) + ')' : ''}. Download it now? Android will ask you to confirm the install.`, 'Update', () => {
+        if (N && N.updateInstall && S.upd && S.upd.url) { S.upd.note = 'Downloading…'; N.updateInstall(S.upd.url); toast('Downloading the update…'); }
+      });
+    }
   };
   window.onUpdateNote = function (text) { S.upd = Object.assign({}, S.upd || {}, { note: text }); save(); toast(text); };
 
