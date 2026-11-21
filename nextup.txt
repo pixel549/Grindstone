@@ -63,3 +63,30 @@
 - Missing generated room images must continue to fall back to the original tile-based interiors.
 - Third-party asset sources and licence notes are tracked in `docs/third-party-pixel-assets.md`.
 - Do not merge feature branches into `main` unless explicitly requested.
+
+## Batch from Jake, 21 Nov 2026
+
+Working rule: if a feature is only partly implemented because artwork or flavour text is missing, ship PLACEHOLDER content so it can be demonstrated.
+Make placeholders bright pink (#ff2dac) so they are easy to spot and replace. Do not block a feature on missing art or copy.
+Claude takes the tricky items; ChatGPT takes the grunt work below, a few at a time. Tick items off as they land.
+
+### Done by Claude on branch impl/07-hearth-batch (unmerged; needs phone check)
+- [x] Oracle portal tap fix, wall/prop depth sorting, frame overhead (from PR #11).
+- [x] Static picket fence removed. Fence segments ('fencebit') are now optional player items; the Hide/Show fence control is gone.
+- [x] Made-up companions/vendors no longer appear in the player's house (birds and calendar visitors stay).
+- [x] Hearth character bubbles are text only; emoji bubbles removed from NPC idle/event/sleep.
+
+### Claude (tricky) - still to do
+- [ ] Place fence segments one square at a time OR drag out a vertical/horizontal run in build mode.
+- [ ] Props still overlapping walls: props on cells beside walls/windows (Jake's screenshots; check footprint vs wall face rows in core.js houseView/placement checks and hearth2d depth sort).
+- [ ] Hearth load slowdown: profile startup (atlas load, 400KB app.js parse, per-frame layout) and lazy-load what is not needed first.
+- [ ] Dual-wield: weapons in each hand. Rework the single-weapon plan so shields/off-hand items are main-hand-only where required; off hand takes a weapon.
+- [ ] Task management: player can put a task on hold, change frequency, set cooldowns, alerts, and a "max time not done" before it is bumped/prioritised. Remove the Oracle's offer to put tasks on hold.
+- [ ] Mentor NPC: reciprocating journal, second API (separate key/endpoint from the Oracle's groq call).
+- [ ] New-to-town NPC visits and occasional stop-ins for a request or reminder (replace residents-in-house; housemates are a later idea).
+
+### ChatGPT (grunt work) - do a few at a time
+- [ ] Task list: add collapsible category headings (Jake has ~90 tasks tagged as available to him; group by tag/category, sticky headers, count per heading).
+- [ ] Add more emoji next to tasks (extend the task-to-emoji keyword map; keep a sensible default).
+- [ ] Add placeholder (bright pink) art/text for anything partly implemented and not demonstrable.
+- [ ] Note in BUGREPORT.md that the Hearth emoji bubbles and fixed fence were removed in 2.28, and add a regression check for text-only bubbles.
