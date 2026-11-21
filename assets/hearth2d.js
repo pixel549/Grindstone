@@ -814,7 +814,7 @@
         }
         if (a.npc && a.npc.ev && !a.bub && !a.sleep && !a.chat && !this.capturing) {
           a.evT = (a.evT == null ? 3 + Math.random() * 8 : a.evT) - dt;
-          if (a.evT <= 0) { this._say(a, [a.npc.ev.icon], 2.6); a.evT = 14 + Math.random() * 14; }
+          if (a.evT <= 0) { this._sayText(a, 'Got a moment? About ' + (a.npc.ev.k || 'today') + '…', 4.5); a.evT = 14 + Math.random() * 14; }
         }
         if (a.path && a.path.length) {
           this._walk(a, dt, a.kid === 'baby' ? 17 : a.kid ? 30 : 40);
@@ -843,20 +843,16 @@
               a.think = 22 + Math.random() * 20;
             }
           } else {
-            let ic;
-            if (a.sleep || a.dozing) ic = ['💤'];
-            else if (a.meal) ic = [Math.random() < 0.6 ? a.meal : '😋'];
-            else if (chore) ic = [chore.icon || '🧹', Math.random() < 0.5 ? '😬' : '🤢'];
-            else if (a.birdsT) ic = ['🦜', '❤️'];
-            else ic = [a.spot && a.spot.s.icon && Math.random() < 0.55 ? a.spot.s.icon : NPC_IDLE[Math.floor(Math.random() * NPC_IDLE.length)]];
-            this._say(a, ic, 3, chore ? 'bad' : '');
+            // text only: emoji bubbles were removed (2.28). Context lines instead of icons.
+            const ctx = a.meal ? ['Smells good in here.', 'Dinner’s the best part of the day.'] : chore ? ['Someone ought to deal with that.', 'That’s not going to do itself.'] : a.birdsT ? ['Who’s a clever bird, then?'] : null;
+            if (ctx && !(this.hero && this.hero.bub)) this._sayText(a, ctx[Math.floor(Math.random() * ctx.length)], 3.5);
             a.think = a.sleep ? 6 + Math.random() * 6 : 10 + Math.random() * 10;
           }
         }
         if (a.next > 0) return;
         if ((a.sleep || a.dozing) && bedtime(hr)) { a.next = 60; return; }
         if (a.meal && mealNow(hr) && Math.random() < 0.7) { a.next = 12; return; }
-        if (a.sleep) this._say(a, ['🥱'], 2.4);
+        
         a.birdsT = false;
         const c = this._npcPlan(a);
         a.next = 6 + Math.random() * 6;

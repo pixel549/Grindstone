@@ -2569,7 +2569,8 @@
   const hEstate = () => (UI.visit ? G.homeEstate3D() : G.estateFor3D(S));
   // 2.26: plus whoever's visiting from the calendar (or lives here), kids and little ones included
   const hGuests = () => G.visitorsNow(S, G.today()).map((v) => ({ id: v.p.id, kind: 'human', guest: true, lives: !!v.lives, name: v.p.name, look: v.p.look, garb: v.p.garb, hat: v.p.hat, status: 'resident', home: null, ev: v.ev ? { k: v.ev.kind, icon: G.EV_ICON[v.ev.kind] || '📅' } : null }));
-  const hNpcs = () => { if (!UI.visit) return S.npcs.concat(hGuests()); const n = npcById(UI.visit); return n ? [Object.assign({}, n, { home: null, status: 'resident' })] : []; };
+  // 2.28: made-up companions/vendors no longer loiter in the player's house (only birds stay; calendar people still visit). Housemates may return later.
+  const hNpcs = () => { if (!UI.visit) return S.npcs.filter((n) => n.kind === 'bird').concat(hGuests()); const n = npcById(UI.visit); return n ? [Object.assign({}, n, { home: null, status: 'resident' })] : []; };
   function houseSig() { return JSON.stringify([UI.visit || '', hState(), G.houseView(HS()), hNpcs(), S.look, gearItems(), hEstate()]); }
   function mountHouse() {
     const slot = $('#h3slot');
